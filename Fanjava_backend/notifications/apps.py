@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class TsenaConfig(AppConfig):
+class NotificationsConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'tsena'
+    name = 'notifications'
