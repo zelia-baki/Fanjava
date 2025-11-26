@@ -38,7 +38,8 @@ class EntrepriseAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
-    readonly_fields = ['verified_at', 'note_moyenne', 'nombre_ventes']
+    readonly_fields = ['note_moyenne', 'nombre_ventes']
+
 
 @admin.register(Client)
 class ClientAdmin(admin.ModelAdmin):
