@@ -56,4 +56,7 @@ class ProduitAdmin(admin.ModelAdmin):
 @admin.register(Avis)
 class AvisAdmin(admin.ModelAdmin):
     list_display = ['produit', 'client', 'note', 'approuve', 'created_at']
-    list_filter = ['note', 'approuve']
+    list_filter = ['note', 'approuve', 'created_at']
+    search_fields = ['produit__nom', 'client__user__username', 'commentaire']
+    readonly_fields = ['created_at', 'updated_at']
+    list_editable = ['approuve']

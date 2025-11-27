@@ -233,6 +233,15 @@ class Produit(models.Model):
     def en_rupture(self):
         """Vérifie si le produit est en rupture de stock"""
         return self.stock == 0
+    def get_note_moyenne(self):
+        """Calcule la note moyenne du produit"""
+        from django.db.models import Avg
+        result = self.avis.filter(approuve=True).aggregate(Avg('note'))
+        return round(result['note__avg'], 1) if result['note__avg'] else 0
+    
+    def get_nombre_avis(self):
+        """Retourne le nombre d'avis approuvés"""
+        return self.avis.filter(approuve=True).count()
 
 
 class ImageProduit(models.Model):
@@ -345,3 +354,60 @@ class Avis(models.Model):
     
     def __str__(self):
         return f"Avis de {self.client.user.username} sur {self.produit.nom} ({self.note}/5)"
+    
+class Avis(models.Model):
+    """
+    Avis clients sur les produits
+    """
+    
+    # Relations
+    produit = models.ForeignKey(
+        Produit,
+        on_delete=models.CASCADE,
+        related_name='avis',
+        verbose_name=_("Produit")
+    )
+    client = models.ForeignKey(
+        'users.Client',
+        on_delete=models.CASCADE,
+        related_name='avis',
+        verbose_name=_("Client")
+    )
+    
+    # Contenu de l'avis
+    note = models.IntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        verbose_name=_("Note (1-5)")
+    )
+    commentaire = models.TextField(
+        verbose_name=_("Commentaire")
+    )
+    
+    # Statut
+    approuve = models.BooleanField(
+        default=True,
+        verbose_name=_("Approuvé")
+    )
+    
+    # Dates
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name=_("Date de création")
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name=_("Date de modification")
+    )
+    
+    class Meta:
+        verbose_name = _("Avis")
+        verbose_name_plural = _("Avis")
+        ordering = ['-created_at']
+        unique_together = ['produit', 'client']  # Un client ne peut laisser qu'un seul avis par produit
+        indexes = [
+            models.Index(fields=['produit', 'approuve']),
+            models.Index(fields=['client']),
+        ]
+    
+    def __str__(self):
+        return f"Avis de {self.client.user.username} sur {self.produit.nom} - {self.note}/5"
