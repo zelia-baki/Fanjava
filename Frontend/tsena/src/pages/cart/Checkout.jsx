@@ -4,351 +4,355 @@ import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { orderService } from '@/services/orderService';
 import MainLayout from '@/layouts/MainLayout';
-import { MapPin, CreditCard, Package } from 'lucide-react';
+import { ArrowLeft, CreditCard, MapPin, Phone, User, Loader2 } from 'lucide-react';
 
 export default function Checkout() {
+  const navigate = useNavigate();
   const { cart, getTotal, clearCart } = useCart();
   const { user } = useAuth();
-  const navigate = useNavigate();
 
-  const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(null);
 
-  const [adresseData, setAdresseData] = useState({
-    adresse_livraison: user?.client?.adresse_livraison || '',
-    ville: user?.client?.ville || '',
-    code_postal: user?.client?.code_postal || '',
-    pays: user?.client?.pays || 'Madagascar',
-    telephone: user?.phone || '',
+  const [formData, setFormData] = useState({
+    adresse_livraison: '',
+    ville_livraison: '',
+    code_postal_livraison: '',
+    pays_livraison: 'Madagascar',
+    telephone_livraison: '',
+    note_client: '',
+    frais_livraison: '5000.00', // 5000 Ar par défaut
   });
 
-  const handleSubmitOrder = async () => {
+  const [errors, setErrors] = useState({});
+
+  // Rediriger si panier vide
+  if (cart.length === 0) {
+    navigate('/cart');
+    return null;
+  }
+
+  // Rediriger si pas client
+  if (user?.user_type !== 'client') {
+    navigate('/login');
+    return null;
+  }
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+    // Effacer l'erreur du champ modifié
+    if (errors[name]) {
+      setErrors((prev) => ({
+        ...prev,
+        [name]: '',
+      }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.adresse_livraison.trim()) {
+      newErrors.adresse_livraison = "L'adresse de livraison est requise";
+    }
+
+    if (!formData.ville_livraison.trim()) {
+      newErrors.ville_livraison = 'La ville est requise';
+    }
+
+    if (!formData.code_postal_livraison.trim()) {
+      newErrors.code_postal_livraison = 'Le code postal est requis';
+    }
+
+    if (!formData.telephone_livraison.trim()) {
+      newErrors.telephone_livraison = 'Le téléphone est requis';
+    } else if (!/^[0-9\s+()-]+$/.test(formData.telephone_livraison)) {
+      newErrors.telephone_livraison = 'Format de téléphone invalide';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
     setLoading(true);
-    setError('');
+    setError(null);
 
     try {
-      const orderData = {
-        adresse_livraison: adresseData.adresse_livraison,
-        ville: adresseData.ville,
-        code_postal: adresseData.code_postal,
-        pays: adresseData.pays,
-        telephone: adresseData.telephone,
-        items: cart.map((item) => ({
-          produit: item.id,
-          quantite: item.quantity,
-          prix_unitaire: item.prix_final || item.prix,
-        })),
-      };
+      // Créer la commande via l'API
+      const response = await orderService.createOrderFromCart(formData);
 
-      const response = await orderService.createOrder(orderData);
-      clearCart();
-      navigate(`/order-confirmation/${response.id}`);
+      // Vider le panier local
+      await clearCart();
+
+      // Rediriger vers la page de confirmation
+      navigate('/order-confirmation', {
+        state: { orders: response.commandes, message: response.message },
+      });
     } catch (err) {
-      setError('Erreur lors de la création de la commande');
-      console.error(err);
+      console.error('Erreur création commande:', err);
+      setError(
+        err.response?.data?.error ||
+          'Une erreur est survenue lors de la création de la commande'
+      );
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
       setLoading(false);
     }
   };
 
+  const fraisLivraison = parseFloat(formData.frais_livraison);
+  const sousTotal = getTotal();
+  const total = sousTotal + fraisLivraison;
+
   return (
     <MainLayout>
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <button
+          onClick={() => navigate('/cart')}
+          className="flex items-center text-blue-600 hover:text-blue-700 mb-6"
+        >
+          <ArrowLeft className="w-5 h-5 mr-2" />
+          Retour au panier
+        </button>
+
         <h1 className="text-3xl font-bold mb-8">Finaliser la commande</h1>
 
-        {/* Steps */}
-        <div className="flex items-center justify-center mb-8">
-          <div className="flex items-center space-x-4">
-            <div
-              className={`flex items-center ${
-                step >= 1 ? 'text-blue-600' : 'text-gray-400'
-              }`}
-            >
-              <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
-                  step >= 1 ? 'border-blue-600 bg-blue-600 text-white' : 'border-gray-300'
-                }`}
-              >
-                1
-              </div>
-              <span className="ml-2 font-medium">Adresse</span>
-            </div>
-
-            <div className="w-16 h-0.5 bg-gray-300"></div>
-
-            <div
-              className={`flex items-center ${
-                step >= 2 ? 'text-blue-600' : 'text-gray-400'
-              }`}
-            >
-              <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
-                  step >= 2 ? 'border-blue-600 bg-blue-600 text-white' : 'border-gray-300'
-                }`}
-              >
-                2
-              </div>
-              <span className="ml-2 font-medium">Récapitulatif</span>
-            </div>
-
-            <div className="w-16 h-0.5 bg-gray-300"></div>
-
-            <div
-              className={`flex items-center ${
-                step >= 3 ? 'text-blue-600' : 'text-gray-400'
-              }`}
-            >
-              <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
-                  step >= 3 ? 'border-blue-600 bg-blue-600 text-white' : 'border-gray-300'
-                }`}
-              >
-                3
-              </div>
-              <span className="ml-2 font-medium">Paiement</span>
-            </div>
-          </div>
-        </div>
-
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
-            {error}
+          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            <p className="font-semibold">Erreur</p>
+            <p>{error}</p>
           </div>
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Formulaire */}
+          {/* Formulaire d'adresse */}
           <div className="lg:col-span-2">
-            {step === 1 && (
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <div className="flex items-center mb-6">
-                  <MapPin className="w-6 h-6 text-blue-600 mr-2" />
-                  <h2 className="text-xl font-bold">Adresse de livraison</h2>
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <h2 className="text-xl font-bold mb-6 flex items-center">
+                <MapPin className="w-6 h-6 mr-2 text-blue-600" />
+                Adresse de livraison
+              </h2>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Adresse */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Adresse complète *
+                  </label>
+                  <input
+                    type="text"
+                    name="adresse_livraison"
+                    value={formData.adresse_livraison}
+                    onChange={handleChange}
+                    placeholder="123 Rue Exemple, Quartier"
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                      errors.adresse_livraison ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  />
+                  {errors.adresse_livraison && (
+                    <p className="mt-1 text-sm text-red-600">{errors.adresse_livraison}</p>
+                  )}
                 </div>
 
-                <div className="space-y-4">
+                {/* Ville et Code postal */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Adresse complète
+                      Ville *
                     </label>
-                    <textarea
-                      required
-                      value={adresseData.adresse_livraison}
-                      onChange={(e) =>
-                        setAdresseData({ ...adresseData, adresse_livraison: e.target.value })
-                      }
-                      rows="3"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Ville
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={adresseData.ville}
-                        onChange={(e) =>
-                          setAdresseData({ ...adresseData, ville: e.target.value })
-                        }
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Code postal
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={adresseData.code_postal}
-                        onChange={(e) =>
-                          setAdresseData({ ...adresseData, code_postal: e.target.value })
-                        }
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Téléphone
-                    </label>
-                    <input
-                      type="tel"
-                      required
-                      value={adresseData.telephone}
-                      onChange={(e) =>
-                        setAdresseData({ ...adresseData, telephone: e.target.value })
-                      }
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Pays</label>
                     <input
                       type="text"
-                      required
-                      value={adresseData.pays}
-                      onChange={(e) => setAdresseData({ ...adresseData, pays: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      name="ville_livraison"
+                      value={formData.ville_livraison}
+                      onChange={handleChange}
+                      placeholder="Antananarivo"
+                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                        errors.ville_livraison ? 'border-red-500' : 'border-gray-300'
+                      }`}
                     />
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setStep(2)}
-                  className="mt-6 w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 font-semibold"
-                >
-                  Continuer
-                </button>
-              </div>
-            )}
-
-            {step === 2 && (
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <div className="flex items-center mb-6">
-                  <Package className="w-6 h-6 text-blue-600 mr-2" />
-                  <h2 className="text-xl font-bold">Vérification de la commande</h2>
-                </div>
-
-                <div className="space-y-4 mb-6">
-                  <div className="border-b pb-4">
-                    <h3 className="font-semibold mb-2">Adresse de livraison</h3>
-                    <p className="text-gray-600">{adresseData.adresse_livraison}</p>
-                    <p className="text-gray-600">
-                      {adresseData.ville}, {adresseData.code_postal}
-                    </p>
-                    <p className="text-gray-600">{adresseData.pays}</p>
-                    <p className="text-gray-600">Tél: {adresseData.telephone}</p>
-                    <button
-                      onClick={() => setStep(1)}
-                      className="text-blue-600 hover:text-blue-700 text-sm mt-2"
-                    >
-                      Modifier
-                    </button>
+                    {errors.ville_livraison && (
+                      <p className="mt-1 text-sm text-red-600">{errors.ville_livraison}</p>
+                    )}
                   </div>
 
                   <div>
-                    <h3 className="font-semibold mb-2">Articles commandés</h3>
-                    <div className="space-y-2">
-                      {cart.map((item) => (
-                        <div key={item.id} className="flex justify-between text-sm">
-                          <span className="text-gray-600">
-                            {item.nom} x {item.quantity}
-                          </span>
-                          <span className="font-medium">
-                            {((item.prix_final || item.prix) * item.quantity).toFixed(2)} Ar
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex space-x-4">
-                  <button
-                    onClick={() => setStep(1)}
-                    className="flex-1 bg-gray-100 text-gray-800 py-3 rounded-lg hover:bg-gray-200 font-semibold"
-                  >
-                    Retour
-                  </button>
-                  <button
-                    onClick={() => setStep(3)}
-                    className="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 font-semibold"
-                  >
-                    Continuer vers le paiement
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {step === 3 && (
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <div className="flex items-center mb-6">
-                  <CreditCard className="w-6 h-6 text-blue-600 mr-2" />
-                  <h2 className="text-xl font-bold">Paiement</h2>
-                </div>
-
-                <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded mb-6">
-                  <p className="text-sm">
-                    Le paiement en ligne sera disponible prochainement. Pour le moment, le
-                    paiement se fait à la livraison.
-                  </p>
-                </div>
-
-                <div className="space-y-4 mb-6">
-                  <div className="flex items-center p-4 border-2 border-blue-600 rounded-lg bg-blue-50">
-                    <input
-                      type="radio"
-                      name="payment"
-                      checked
-                      readOnly
-                      className="w-5 h-5 text-blue-600"
-                    />
-                    <label className="ml-3 flex-1">
-                      <span className="font-semibold block">Paiement à la livraison</span>
-                      <span className="text-sm text-gray-600">
-                        Vous payez en espèces lors de la réception de votre commande
-                      </span>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Code postal *
                     </label>
+                    <input
+                      type="text"
+                      name="code_postal_livraison"
+                      value={formData.code_postal_livraison}
+                      onChange={handleChange}
+                      placeholder="101"
+                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                        errors.code_postal_livraison ? 'border-red-500' : 'border-gray-300'
+                      }`}
+                    />
+                    {errors.code_postal_livraison && (
+                      <p className="mt-1 text-sm text-red-600">{errors.code_postal_livraison}</p>
+                    )}
                   </div>
                 </div>
 
-                <div className="flex space-x-4">
-                  <button
-                    onClick={() => setStep(2)}
-                    className="flex-1 bg-gray-100 text-gray-800 py-3 rounded-lg hover:bg-gray-200 font-semibold"
+                {/* Pays */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Pays *
+                  </label>
+                  <select
+                    name="pays_livraison"
+                    value={formData.pays_livraison}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
-                    Retour
-                  </button>
-                  <button
-                    onClick={handleSubmitOrder}
-                    disabled={loading}
-                    className="flex-1 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 font-semibold disabled:opacity-50"
-                  >
-                    {loading ? 'Traitement...' : 'Confirmer la commande'}
-                  </button>
+                    <option value="Madagascar">Madagascar</option>
+                    <option value="France">France</option>
+                    <option value="Maurice">Maurice</option>
+                    <option value="Réunion">Réunion</option>
+                  </select>
                 </div>
-              </div>
-            )}
+
+                {/* Téléphone */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Phone className="inline w-4 h-4 mr-1" />
+                    Téléphone *
+                  </label>
+                  <input
+                    type="tel"
+                    name="telephone_livraison"
+                    value={formData.telephone_livraison}
+                    onChange={handleChange}
+                    placeholder="+261 34 12 345 67"
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                      errors.telephone_livraison ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  />
+                  {errors.telephone_livraison && (
+                    <p className="mt-1 text-sm text-red-600">{errors.telephone_livraison}</p>
+                  )}
+                </div>
+
+                {/* Frais de livraison */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Frais de livraison
+                  </label>
+                  <select
+                    name="frais_livraison"
+                    value={formData.frais_livraison}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="5000.00">Livraison standard - 5 000 Ar</option>
+                    <option value="10000.00">Livraison express - 10 000 Ar</option>
+                    <option value="0.00">Retrait en magasin - Gratuit</option>
+                  </select>
+                </div>
+
+                {/* Note */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Note (optionnelle)
+                  </label>
+                  <textarea
+                    name="note_client"
+                    value={formData.note_client}
+                    onChange={handleChange}
+                    rows={3}
+                    placeholder="Instructions spéciales pour la livraison..."
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+
+                {/* Bouton de soumission */}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center font-semibold text-lg"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                      Création en cours...
+                    </>
+                  ) : (
+                    <>
+                      <CreditCard className="w-5 h-5 mr-2" />
+                      Confirmer la commande
+                    </>
+                  )}
+                </button>
+              </form>
+            </div>
           </div>
 
-          {/* Récapitulatif */}
+          {/* Récapitulatif de la commande */}
           <div className="lg:col-span-1">
-            <div className="bg-white p-6 rounded-lg shadow-sm sticky top-24">
-              <h2 className="text-xl font-bold mb-4">Résumé</h2>
+            <div className="bg-white rounded-lg shadow-sm p-6 sticky top-24">
+              <h2 className="text-xl font-bold mb-4">Récapitulatif</h2>
 
-              <div className="space-y-2 mb-4">
-                {cart.map((item) => (
-                  <div key={item.id} className="flex justify-between text-sm">
-                    <span className="text-gray-600">
-                      {item.nom} x {item.quantity}
-                    </span>
-                    <span>{((item.prix_final || item.prix) * item.quantity).toFixed(2)} Ar</span>
-                  </div>
-                ))}
+              {/* Liste des articles */}
+              <div className="space-y-3 mb-6 max-h-64 overflow-y-auto">
+                {cart.map((item) => {
+                  const product = item.produit || item;
+                  const quantity = item.quantite || item.quantity;
+                  const price = product.prix_final || product.prix;
+
+                  return (
+                    <div key={item.id} className="flex items-center space-x-3 text-sm">
+                      <div className="w-12 h-12 bg-gray-200 rounded flex-shrink-0">
+                        {product.image_principale && (
+                          <img
+                            src={product.image_principale}
+                            alt={product.nom}
+                            className="w-full h-full object-cover rounded"
+                          />
+                        )}
+                      </div>
+                      <div className="flex-grow">
+                        <p className="font-medium text-gray-900">{product.nom}</p>
+                        <p className="text-gray-500">Qté: {quantity}</p>
+                      </div>
+                      <p className="font-semibold">{(price * quantity).toFixed(2)} Ar</p>
+                    </div>
+                  );
+                })}
               </div>
 
-              <div className="border-t pt-4 space-y-2">
+              {/* Totaux */}
+              <div className="space-y-3 border-t pt-4">
                 <div className="flex justify-between text-gray-600">
                   <span>Sous-total</span>
-                  <span>{getTotal().toFixed(2)} Ar</span>
+                  <span>{sousTotal.toFixed(2)} Ar</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
-                  <span>Livraison</span>
-                  <span>Gratuite</span>
+                  <span>Frais de livraison</span>
+                  <span>{fraisLivraison.toFixed(2)} Ar</span>
                 </div>
-                <div className="flex justify-between text-lg font-bold pt-2 border-t">
+                <div className="border-t pt-3 flex justify-between text-xl font-bold">
                   <span>Total</span>
-                  <span className="text-blue-600">{getTotal().toFixed(2)} Ar</span>
+                  <span className="text-blue-600">{total.toFixed(2)} Ar</span>
                 </div>
+              </div>
+
+              {/* Info sécurité */}
+              <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+                <p className="text-xs text-gray-600 text-center">
+                  🔒 Vos informations sont sécurisées
+                </p>
               </div>
             </div>
           </div>

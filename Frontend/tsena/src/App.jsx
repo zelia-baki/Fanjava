@@ -24,6 +24,8 @@ import Dashboard from '@/pages/entreprise/Dashboard';
 import ProductListEntreprise from '@/pages/entreprise/ProductListEntreprise';
 import ProductCreate from '@/pages/entreprise/ProductCreate';
 import ProductEdit from '@/pages/entreprise/ProductEdit';
+import ClientDashboard from '@/pages/client/ClientDashboard';
+import MyOrders from '@/pages/client/MyOrders';
 
 function App() {
   return (
@@ -42,7 +44,8 @@ function App() {
             
             {/* Routes panier */}
             <Route path="/cart" element={<Cart />} />
-            
+            <Route path="/dashboard/client" element={<ClientDashboard />} />
+            <Route path="/profile/orders" element={<MyOrders />} />
             {/* Routes client protégées */}
             <Route
               path="/checkout"
@@ -109,7 +112,9 @@ function App() {
                     <p className="text-gray-600">Page non trouvée</p>
                   </div>
                 </div>
+                
               }
+              
             />
           </Routes>
         </CartProvider>

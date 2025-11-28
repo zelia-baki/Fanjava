@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from django.db import transaction
+from collections import defaultdict
 
 from .models import Panier, PanierItem, Commande, LigneCommande
 from .serializers import (
@@ -137,7 +138,7 @@ class CommandeViewSet(viewsets.ReadOnlyModelViewSet):
     
     @action(detail=False, methods=['post'])
     def create_from_cart(self, request):
-        """Créer une commande depuis le panier"""
+        """Créer une ou plusieurs commandes depuis le panier (une par entreprise)"""
         client = request.user.client
         panier = get_object_or_404(Panier, client=client)
         
@@ -158,47 +159,72 @@ class CommandeViewSet(viewsets.ReadOnlyModelViewSet):
         
         validated_data = create_serializer.validated_data
         
-        # Transaction atomique pour créer la commande
+        # Regrouper les items du panier par entreprise
+        items_par_entreprise = defaultdict(list)
+        
+        for item in panier.items.all():
+            entreprise = item.produit.entreprise
+            items_par_entreprise[entreprise].append(item)
+        
+        # Transaction atomique pour créer toutes les commandes
         try:
             with transaction.atomic():
-                montant_total = panier.get_total()
-                entreprise = panier.items.first().produit.entreprise
+                commandes_creees = []
                 
-                commande = Commande.objects.create(
-                    client=client,
-                    entreprise=entreprise,
-                    montant_total=montant_total,
-                    frais_livraison=validated_data['frais_livraison'],
-                    adresse_livraison=validated_data['adresse_livraison'],
-                    ville_livraison=validated_data['ville_livraison'],
-                    code_postal_livraison=validated_data['code_postal_livraison'],
-                    pays_livraison=validated_data['pays_livraison'],
-                    telephone_livraison=validated_data['telephone_livraison'],
-                    note_client=validated_data.get('note_client', ''),
-                )
-                
-                for item in panier.items.all():
-                    if item.produit.stock < item.quantite:
-                        raise Exception(
-                            f"Stock insuffisant pour {item.produit.nom}. "
-                            f"Stock disponible: {item.produit.stock}"
-                        )
+                # Créer une commande pour chaque entreprise
+                for entreprise, items in items_par_entreprise.items():
+                    # Calculer le montant total pour cette entreprise
+                    montant_total = sum(item.get_prix_total() for item in items)
                     
-                    LigneCommande.objects.create(
-                        commande=commande,
-                        produit=item.produit,
-                        nom_produit=item.produit.nom,
-                        prix_unitaire=item.produit.get_prix_final(),
-                        quantite=item.quantite
+                    # Créer la commande
+                    commande = Commande.objects.create(
+                        client=client,
+                        entreprise=entreprise,
+                        montant_total=montant_total,
+                        frais_livraison=validated_data['frais_livraison'],
+                        adresse_livraison=validated_data['adresse_livraison'],
+                        ville_livraison=validated_data['ville_livraison'],
+                        code_postal_livraison=validated_data['code_postal_livraison'],
+                        pays_livraison=validated_data['pays_livraison'],
+                        telephone_livraison=validated_data['telephone_livraison'],
+                        note_client=validated_data.get('note_client', ''),
                     )
                     
-                    item.produit.stock -= item.quantite
-                    item.produit.save()
+                    # Créer les lignes de commande et décrémenter le stock
+                    for item in items:
+                        # Vérifier le stock disponible
+                        if item.produit.stock < item.quantite:
+                            raise Exception(
+                                f"Stock insuffisant pour {item.produit.nom}. "
+                                f"Stock disponible: {item.produit.stock}"
+                            )
+                        
+                        # Créer la ligne de commande
+                        LigneCommande.objects.create(
+                            commande=commande,
+                            produit=item.produit,
+                            nom_produit=item.produit.nom,
+                            prix_unitaire=item.produit.get_prix_final(),
+                            quantite=item.quantite
+                        )
+                        
+                        # Décrémenter le stock
+                        item.produit.stock -= item.quantite
+                        item.produit.nombre_ventes += item.quantite
+                        item.produit.save()
+                    
+                    commandes_creees.append(commande)
                 
+                # Vider le panier après création des commandes
                 panier.items.all().delete()
                 
-                serializer = CommandeSerializer(commande)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                # Sérialiser toutes les commandes créées
+                serializer = CommandeSerializer(commandes_creees, many=True)
+                
+                return Response({
+                    'message': f'{len(commandes_creees)} commande(s) créée(s) avec succès',
+                    'commandes': serializer.data
+                }, status=status.HTTP_201_CREATED)
                 
         except Exception as e:
             return Response(

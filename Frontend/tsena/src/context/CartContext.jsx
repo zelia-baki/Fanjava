@@ -1,79 +1,287 @@
 import { createContext, useState, useContext, useEffect } from 'react';
+import { orderService } from '@/services/orderService';
+import { useAuth } from './AuthContext';
 
 const CartContext = createContext(null);
 
 export const CartProvider = ({ children }) => {
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState({ items: [], total: '0.00', nombre_items: 0 });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const { user, isAuthenticated } = useAuth();
 
+  // Charger le panier depuis l'API au montage du composant
   useEffect(() => {
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
-      setCart(JSON.parse(savedCart));
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cart));
-  }, [cart]);
-
-  const addToCart = (product, quantity = 1) => {
-    setCart((prevCart) => {
-      const existingItem = prevCart.find((item) => item.id === product.id);
-      
-      if (existingItem) {
-        return prevCart.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + quantity }
-            : item
-        );
+    if (isAuthenticated) {
+      fetchCart();
+    } else {
+      // Si non connecté, utiliser le localStorage
+      const savedCart = localStorage.getItem('cart');
+      if (savedCart) {
+        try {
+          const parsed = JSON.parse(savedCart);
+          setCart({
+            items: parsed.items || [],
+            total: parsed.total || '0.00',
+            nombre_items: parsed.nombre_items || 0,
+          });
+        } catch (err) {
+          console.error('Erreur parsing localStorage cart:', err);
+        }
       }
-      
-      return [...prevCart, { ...product, quantity }];
-    });
+    }
+  }, [isAuthenticated]);
+
+  /**
+   * Récupérer le panier depuis l'API
+   */
+  const fetchCart = async () => {
+    if (!isAuthenticated) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await orderService.getCart();
+      setCart(data);
+    } catch (err) {
+      console.error('Erreur chargement panier:', err);
+      setError(err.response?.data?.error || 'Erreur lors du chargement du panier');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const removeFromCart = (productId) => {
-    setCart((prevCart) => prevCart.filter((item) => item.id !== productId));
-  };
+  /**
+   * Ajouter un produit au panier
+   */
+  const addToCart = async (product, quantity = 1) => {
+    if (!isAuthenticated) {
+      // Mode déconnecté : utiliser localStorage
+      setCart((prevCart) => {
+        const existingItem = prevCart.items.find((item) => item.produit.id === product.id);
+        
+        let newItems;
+        if (existingItem) {
+          newItems = prevCart.items.map((item) =>
+            item.produit.id === product.id
+              ? { ...item, quantite: item.quantite + quantity }
+              : item
+          );
+        } else {
+          newItems = [
+            ...prevCart.items,
+            {
+              id: Date.now(), // ID temporaire
+              produit: product,
+              quantite: quantity,
+              prix_total: (product.prix_final || product.prix) * quantity,
+            },
+          ];
+        }
 
-  const updateQuantity = (productId, quantity) => {
-    if (quantity <= 0) {
-      removeFromCart(productId);
+        const newTotal = newItems.reduce(
+          (sum, item) => sum + parseFloat(item.prix_total),
+          0
+        ).toFixed(2);
+
+        const newCart = {
+          items: newItems,
+          total: newTotal,
+          nombre_items: newItems.reduce((sum, item) => sum + item.quantite, 0),
+        };
+
+        localStorage.setItem('cart', JSON.stringify(newCart));
+        return newCart;
+      });
       return;
     }
-    
-    setCart((prevCart) =>
-      prevCart.map((item) =>
-        item.id === productId ? { ...item, quantity } : item
-      )
-    );
+
+    // Mode connecté : utiliser l'API
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await orderService.addToCart(product.id, quantity);
+      setCart(data);
+      return data;
+    } catch (err) {
+      console.error('Erreur ajout au panier:', err);
+      const errorMsg = err.response?.data?.error || 'Erreur lors de l\'ajout au panier';
+      setError(errorMsg);
+      throw new Error(errorMsg);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const clearCart = () => {
-    setCart([]);
+  /**
+   * Supprimer un produit du panier
+   */
+  const removeFromCart = async (itemId) => {
+    if (!isAuthenticated) {
+      // Mode déconnecté
+      setCart((prevCart) => {
+        const newItems = prevCart.items.filter((item) => item.id !== itemId);
+        const newTotal = newItems.reduce(
+          (sum, item) => sum + parseFloat(item.prix_total),
+          0
+        ).toFixed(2);
+
+        const newCart = {
+          items: newItems,
+          total: newTotal,
+          nombre_items: newItems.reduce((sum, item) => sum + item.quantite, 0),
+        };
+
+        localStorage.setItem('cart', JSON.stringify(newCart));
+        return newCart;
+      });
+      return;
+    }
+
+    // Mode connecté
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await orderService.removeFromCart(itemId);
+      setCart(data);
+    } catch (err) {
+      console.error('Erreur suppression du panier:', err);
+      setError(err.response?.data?.error || 'Erreur lors de la suppression');
+    } finally {
+      setLoading(false);
+    }
   };
 
+  /**
+   * Mettre à jour la quantité d'un produit
+   */
+  const updateQuantity = async (itemId, quantity) => {
+    if (quantity <= 0) {
+      return removeFromCart(itemId);
+    }
+
+    if (!isAuthenticated) {
+      // Mode déconnecté
+      setCart((prevCart) => {
+        const newItems = prevCart.items.map((item) =>
+          item.id === itemId
+            ? {
+                ...item,
+                quantite: quantity,
+                prix_total: (item.produit.prix_final || item.produit.prix) * quantity,
+              }
+            : item
+        );
+
+        const newTotal = newItems.reduce(
+          (sum, item) => sum + parseFloat(item.prix_total),
+          0
+        ).toFixed(2);
+
+        const newCart = {
+          items: newItems,
+          total: newTotal,
+          nombre_items: newItems.reduce((sum, item) => sum + item.quantite, 0),
+        };
+
+        localStorage.setItem('cart', JSON.stringify(newCart));
+        return newCart;
+      });
+      return;
+    }
+
+    // Mode connecté
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await orderService.updateCartItem(itemId, quantity);
+      setCart(data);
+    } catch (err) {
+      console.error('Erreur mise à jour quantité:', err);
+      setError(err.response?.data?.error || 'Erreur lors de la mise à jour');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /**
+   * Vider le panier
+   */
+  const clearCart = async () => {
+    if (!isAuthenticated) {
+      setCart({ items: [], total: '0.00', nombre_items: 0 });
+      localStorage.removeItem('cart');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await orderService.clearCart();
+      setCart(data);
+    } catch (err) {
+      console.error('Erreur vidage panier:', err);
+      setError(err.response?.data?.error || 'Erreur lors du vidage du panier');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /**
+   * Obtenir le montant total
+   */
   const getTotal = () => {
-    return cart.reduce((total, item) => {
-      const price = item.prix_final || item.prix;
-      return total + price * item.quantity;
-    }, 0);
+    return parseFloat(cart.total || '0.00');
   };
 
+  /**
+   * Obtenir le nombre total d'articles
+   */
   const getItemCount = () => {
-    return cart.reduce((count, item) => count + item.quantity, 0);
+    return cart.nombre_items || 0;
+  };
+
+  /**
+   * Synchroniser le panier localStorage avec l'API après connexion
+   */
+  const syncCartAfterLogin = async () => {
+    const savedCart = localStorage.getItem('cart');
+    if (!savedCart) {
+      await fetchCart();
+      return;
+    }
+
+    try {
+      const localCart = JSON.parse(savedCart);
+      if (localCart.items && localCart.items.length > 0) {
+        // Ajouter les items du localStorage à l'API
+        for (const item of localCart.items) {
+          await orderService.addToCart(item.produit.id, item.quantite);
+        }
+        localStorage.removeItem('cart');
+      }
+      await fetchCart();
+    } catch (err) {
+      console.error('Erreur sync panier:', err);
+      await fetchCart();
+    }
   };
 
   return (
     <CartContext.Provider
       value={{
-        cart,
+        cart: cart.items || [],
+        cartData: cart,
+        loading,
+        error,
         addToCart,
         removeFromCart,
         updateQuantity,
         clearCart,
         getTotal,
         getItemCount,
+        fetchCart,
+        syncCartAfterLogin,
       }}
     >
       {children}

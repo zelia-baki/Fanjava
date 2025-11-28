@@ -42,12 +42,22 @@ const ProductEdit = () => {
     loadProduct();
   }, [slug]);
 
-  const loadCategories = async () => {
+ const loadCategories = async () => {
     try {
       const data = await productService.getCategories();
-      setCategories(data);
+      
+      let categoriesList = [];
+      
+      if (Array.isArray(data)) {
+        categoriesList = data;
+      } else if (data && data.results && Array.isArray(data.results)) {
+        categoriesList = data.results;
+      }
+      
+      setCategories(categoriesList);
     } catch (err) {
       console.error('Erreur chargement catégories:', err);
+      setCategories([]);
     }
   };
 

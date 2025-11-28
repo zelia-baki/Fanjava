@@ -361,6 +361,39 @@ const Dashboard = () => {
                             <Edit className="h-5 w-5" />
                           </Link>
                         </div>
+                        // src/pages/entreprise/Dashboard.jsx
+
+<div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+  <Link
+    to="/entreprise/products"
+    className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+  >
+    {/* ... */}
+  </Link>
+
+  <Link
+    to="/entreprise/products/create"
+    className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+  >
+    {/* ... */}
+  </Link>
+
+  {/* ✅ NOUVEAU : Lien vers catégories */}
+  <Link
+    to="/entreprise/categories"
+    className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+  >
+    <div className="flex items-center gap-4">
+      <div className="bg-orange-50 p-3 rounded-lg">
+        <Tag className="h-8 w-8 text-orange-600" />
+      </div>
+      <div>
+        <h3 className="text-lg font-semibold text-gray-800">Gérer les Catégories</h3>
+        <p className="text-sm text-gray-600">Créer et modifier les catégories</p>
+      </div>
+    </div>
+  </Link>
+</div>
                       </td>
                     </tr>
                   ))}

@@ -2,11 +2,24 @@ import { Link } from 'react-router-dom';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import MainLayout from '@/layouts/MainLayout';
-import { Trash2, Plus, Minus, ShoppingBag, ArrowRight } from 'lucide-react';
+import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, Loader2 } from 'lucide-react';
 
 export default function Cart() {
-  const { cart, removeFromCart, updateQuantity, getTotal } = useCart();
+  const { cart, loading, error, removeFromCart, updateQuantity, getTotal } = useCart();
   const { user } = useAuth();
+
+  if (loading && cart.length === 0) {
+    return (
+      <MainLayout>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="text-center">
+            <Loader2 className="mx-auto h-12 w-12 text-blue-600 animate-spin" />
+            <p className="mt-4 text-gray-600">Chargement du panier...</p>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
 
   if (cart.length === 0) {
     return (
@@ -33,76 +46,96 @@ export default function Cart() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-3xl font-bold mb-8">Panier ({cart.length} articles)</h1>
 
+        {error && (
+          <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+            {error}
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Liste des articles */}
           <div className="lg:col-span-2 space-y-4">
-            {cart.map((item) => (
-              <div key={item.id} className="bg-white p-6 rounded-lg shadow-sm">
-                <div className="flex items-center space-x-4">
-                  {/* Image */}
-                  <div className="w-24 h-24 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
-                    {item.image_principale ? (
-                      <img
-                        src={item.image_principale}
-                        alt={item.nom}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400">
-                        Pas d'image
-                      </div>
-                    )}
-                  </div>
+            {cart.map((item) => {
+              const product = item.produit || item; // Support pour les deux formats
+              const itemQuantity = item.quantite || item.quantity;
+              const itemId = item.id;
+              const prixTotal = parseFloat(item.prix_total || (product.prix_final || product.prix) * itemQuantity);
 
-                  {/* Détails */}
-                  <div className="flex-grow">
-                    <Link
-                      to={`/products/${item.slug}`}
-                      className="text-lg font-semibold hover:text-blue-600"
-                    >
-                      {item.nom}
-                    </Link>
-                    <p className="text-gray-600 text-sm mt-1">{item.entreprise_nom}</p>
-                    <p className="text-blue-600 font-bold mt-2">
-                      {item.prix_final || item.prix} Ar
-                    </p>
-                  </div>
+              return (
+                <div key={itemId} className="bg-white p-6 rounded-lg shadow-sm">
+                  <div className="flex items-center space-x-4">
+                    {/* Image */}
+                    <div className="w-24 h-24 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
+                      {product.image_principale ? (
+                        <img
+                          src={product.image_principale}
+                          alt={product.nom}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                          Pas d'image
+                        </div>
+                      )}
+                    </div>
 
-                  {/* Quantité */}
-                  <div className="flex items-center space-x-2">
+                    {/* Détails */}
+                    <div className="flex-grow">
+                      <Link
+                        to={`/products/${product.slug}`}
+                        className="text-lg font-semibold hover:text-blue-600"
+                      >
+                        {product.nom}
+                      </Link>
+                      <p className="text-gray-600 text-sm mt-1">{product.entreprise_nom}</p>
+                      <p className="text-blue-600 font-bold mt-2">
+                        {parseFloat(product.prix_final || product.prix).toFixed(2)} Ar
+                      </p>
+                      {product.stock && product.stock <= 5 && (
+                        <p className="text-orange-500 text-xs mt-1">
+                          Plus que {product.stock} en stock !
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Quantité */}
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => updateQuantity(itemId, itemQuantity - 1)}
+                        disabled={loading}
+                        className="p-1 border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50"
+                      >
+                        <Minus className="w-4 h-4" />
+                      </button>
+                      <span className="w-12 text-center font-semibold">{itemQuantity}</span>
+                      <button
+                        onClick={() => updateQuantity(itemId, itemQuantity + 1)}
+                        disabled={loading || (product.stock && itemQuantity >= product.stock)}
+                        className="p-1 border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    {/* Sous-total */}
+                    <div className="text-right min-w-[100px]">
+                      <p className="text-lg font-bold text-gray-900">
+                        {prixTotal.toFixed(2)} Ar
+                      </p>
+                    </div>
+
+                    {/* Supprimer */}
                     <button
-                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                      className="p-1 border border-gray-300 rounded hover:bg-gray-100"
+                      onClick={() => removeFromCart(itemId)}
+                      disabled={loading}
+                      className="text-red-500 hover:text-red-700 disabled:opacity-50"
                     >
-                      <Minus className="w-4 h-4" />
-                    </button>
-                    <span className="w-12 text-center font-semibold">{item.quantity}</span>
-                    <button
-                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                      className="p-1 border border-gray-300 rounded hover:bg-gray-100"
-                      disabled={item.quantity >= item.stock}
-                    >
-                      <Plus className="w-4 h-4" />
+                      <Trash2 className="w-5 h-5" />
                     </button>
                   </div>
-
-                  {/* Sous-total */}
-                  <div className="text-right min-w-[100px]">
-                    <p className="text-lg font-bold text-gray-900">
-                      {((item.prix_final || item.prix) * item.quantity).toFixed(2)} Ar
-                    </p>
-                  </div>
-
-                  {/* Supprimer */}
-                  <button
-                    onClick={() => removeFromCart(item.id)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Récapitulatif */}

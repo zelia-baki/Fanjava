@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { productService } from '@/services/productService';
 import { ArrowLeft, Upload, X, Save } from 'lucide-react';
+import api from '@/services/api';
+
 
 const ProductCreate = () => {
   const navigate = useNavigate();
@@ -35,12 +37,31 @@ const ProductCreate = () => {
     loadCategories();
   }, []);
 
-  const loadCategories = async () => {
+ const loadCategories = async () => {
     try {
       const data = await productService.getCategories();
-      setCategories(data);
+      console.log('📦 Catégories reçues:', data);
+      
+      // ✅ Gérer tous les cas possibles
+      let categoriesList = [];
+      
+      if (Array.isArray(data)) {
+        // Cas 1 : data est directement un tableau
+        categoriesList = data;
+      } else if (data && data.results && Array.isArray(data.results)) {
+        // Cas 2 : data a un champ "results" (pagination)
+        categoriesList = data.results;
+      } else if (data && typeof data === 'object') {
+        // Cas 3 : data est un objet, essayer de trouver le tableau
+        categoriesList = Object.values(data);
+      }
+      
+      console.log('✅ Catégories extraites:', categoriesList);
+      setCategories(categoriesList);
+      
     } catch (err) {
-      console.error('Erreur chargement catégories:', err);
+      console.error('❌ Erreur chargement catégories:', err);
+      setCategories([]); // ✅ Remettre tableau vide en cas d'erreur
     }
   };
 
@@ -379,23 +400,24 @@ const ProductCreate = () => {
                 <h2 className="text-lg font-semibold text-gray-800 mb-4">Catégorie</h2>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Catégorie
-                  </label>
-                  <select
-                    name="categorie"
-                    value={formData.categorie}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="">Sélectionner une catégorie</option>
-                    {categories.map((cat) => (
-                      <option key={cat.id} value={cat.id}>
-                        {cat.nom}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Catégorie
+            </label>
+            <select
+              name="categorie"
+              value={formData.categorie}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="">Sélectionner une catégorie</option>
+              {/* ✅ Vérifier que c'est un array avant de mapper */}
+              {Array.isArray(categories) && categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.nom}
+                </option>
+              ))}
+            </select>
+          </div>
               </div>
 
               {/* Caractéristiques */}

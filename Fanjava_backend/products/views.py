@@ -18,7 +18,7 @@ from .serializers import (
     AvisSerializer, 
     AvisCreateSerializer,
 )
-from .permissions import IsEntrepriseOwnerOrReadOnly
+from .permissions import IsEntrepriseOwner
 
 
 class CategorieViewSet(viewsets.ModelViewSet):
@@ -27,22 +27,32 @@ class CategorieViewSet(viewsets.ModelViewSet):
     """
     queryset = Categorie.objects.all()
     serializer_class = CategorieSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
     lookup_field = 'slug'
     
+    def get_permissions(self):
+        """
+        Les catégories sont publiques en lecture
+        Seules les entreprises/admins peuvent créer/modifier
+        """
+        if self.action in ['list', 'retrieve']:
+            permission_classes = [IsAuthenticatedOrReadOnly]
+        else:
+            # Créer, modifier, supprimer = entreprise ou admin uniquement
+            permission_classes = [IsEntrepriseOwner]
+        return [permission() for permission in permission_classes]
+    
     def get_queryset(self):
-        """Filtrer les catégories parentes si demandé"""
+        """Filtrer les catégories actives pour les utilisateurs normaux"""
         queryset = super().get_queryset()
         
-        # Filtrer uniquement les catégories actives
-        queryset = queryset.filter(active=True)
+        # Si admin, voir toutes les catégories
+        if self.request.user.is_authenticated and hasattr(self.request.user, 'entreprise'):
+            if self.request.user.user_type == 'admin':
+                return queryset
         
-        # Filtrer les catégories parentes
-        parent_only = self.request.query_params.get('parent_only', None)
-        if parent_only == 'true':
-            queryset = queryset.filter(parent__isnull=True)
-        
-        return queryset
+        # Sinon, uniquement les catégories actives
+        return queryset.filter(active=True)
+
 
 
 class ProduitViewSet(viewsets.ModelViewSet):
@@ -139,6 +149,13 @@ class ProduitViewSet(viewsets.ModelViewSet):
         produits = self.get_queryset().filter(en_promotion=True, actif=True, status='active')
         serializer = ProduitListSerializer(produits, many=True, context={'request': request})
         return Response(serializer.data)
+def perform_create(self, serializer):
+    if not hasattr(self.request.user, 'entreprise'):
+        raise PermissionDenied("Seules les entreprises peuvent créer des produits")
+    serializer.save(
+        entreprise=self.request.user.entreprise,
+        status='active'  # 👈 Ajouter cette ligne
+    )
     
     @action(detail=False, methods=['get'])
     def vedette(self, request):

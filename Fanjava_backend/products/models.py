@@ -160,7 +160,7 @@ class Produit(models.Model):
     status = models.CharField(
         max_length=20, 
         choices=STATUS_CHOICES, 
-        default='draft',
+        default='active',
         verbose_name=_("Statut")
     )
     en_vedette = models.BooleanField(
@@ -304,65 +304,7 @@ class ImageProduit(models.Model):
         super().save(*args, **kwargs)
 
 
-class Avis(models.Model):
-    """
-    Avis clients sur les produits
-    """
-    
-    produit = models.ForeignKey(
-        Produit, 
-        on_delete=models.CASCADE, 
-        related_name='avis',
-        verbose_name=_("Produit")
-    )
-    client = models.ForeignKey(
-        Client, 
-        on_delete=models.CASCADE,
-        related_name='avis',
-        verbose_name=_("Client")
-    )
-    
-    note = models.IntegerField(
-        choices=[(i, f'{i} étoile{"s" if i > 1 else ""}') for i in range(1, 6)],
-        verbose_name=_("Note")
-    )
-    titre = models.CharField(
-        max_length=200, 
-        blank=True,
-        verbose_name=_("Titre")
-    )
-    commentaire = models.TextField(
-        verbose_name=_("Commentaire")
-    )
-    
-    # Modération
-    approuve = models.BooleanField(
-        default=True,
-        verbose_name=_("Approuvé")
-    )
-    
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name=_("Date de création")
-    )
-    updated_at = models.DateTimeField(
-        auto_now=True,
-        verbose_name=_("Date de modification")
-    )
-    
-    class Meta:
-        verbose_name = _("Avis")
-        verbose_name_plural = _("Avis")
-        ordering = ['-created_at']
-        # Un client ne peut laisser qu'un seul avis par produit
-        unique_together = ['produit', 'client']
-        indexes = [
-            models.Index(fields=['produit', 'approuve']),
-        ]
-    
-    def __str__(self):
-        return f"Avis de {self.client.user.username} sur {self.produit.nom} ({self.note}/5)"
-    
+
 class Avis(models.Model):
     """
     Avis clients sur les produits
