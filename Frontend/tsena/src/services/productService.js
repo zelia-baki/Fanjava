@@ -1,41 +1,69 @@
 import api from './api';
 
 export const productService = {
-  async getProducts(params = {}) {
+  // Récupérer tous les produits avec filtres
+  getProducts: async (params = {}) => {
     const response = await api.get('/products/produits/', { params });
     return response.data;
   },
 
-  async getProductBySlug(slug) {
+  // Récupérer un produit par slug
+  getProductBySlug: async (slug) => {
     const response = await api.get(`/products/produits/${slug}/`);
     return response.data;
   },
 
-  async getCategories() {
+  // Récupérer les catégories
+  getCategories: async () => {
     const response = await api.get('/products/categories/');
     return response.data;
   },
 
-  async createProduct(formData) {
-    const response = await api.post('/products/produits/create/', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
+  // Récupérer les produits en vedette
+  getFeaturedProducts: async () => {
+    const response = await api.get('/products/produits/', {
+      params: { en_vedette: true }
     });
     return response.data;
   },
 
-  async updateProduct(id, formData) {
-    const response = await api.put(`/products/produits/${id}/update/`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
+  // Récupérer les produits en promotion
+  getPromotionalProducts: async () => {
+    const response = await api.get('/products/produits/', {
+      params: { prix_promo: true }
     });
     return response.data;
   },
 
-  async deleteProduct(id) {
-    await api.delete(`/products/produits/${id}/delete/`);
+  // Rechercher des produits
+  searchProducts: async (query) => {
+    const response = await api.get('/products/produits/', {
+      params: { search: query }
+    });
+    return response.data;
   },
 
-  async createAvis(avisData) {
-    const response = await api.post('/products/avis/create/', avisData);
+  // Récupérer les avis d'un produit
+  getProductReviews: async (productId) => {
+    const response = await api.get(`/products/produits/${productId}/avis/`);
+    return response.data;
+  },
+
+  // Ajouter un avis
+  addReview: async (reviewData) => {
+    const response = await api.post('/products/avis/', reviewData);
+    return response.data;
+  },
+
+  // Modifier un avis
+  updateReview: async (reviewId, reviewData) => {
+    const response = await api.put(`/products/avis/${reviewId}/`, reviewData);
+    return response.data;
+  },
+
+  // Supprimer un avis
+  deleteReview: async (reviewId) => {
+    const response = await api.delete(`/products/avis/${reviewId}/`);
     return response.data;
   },
 };

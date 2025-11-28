@@ -17,6 +17,8 @@ class CategorieSerializer(serializers.ModelSerializer):
             'ordre',
             'active',
             'sous_categories',
+            'en_promotion',  
+            'actif', 
             'created_at',
             'updated_at'
         ]

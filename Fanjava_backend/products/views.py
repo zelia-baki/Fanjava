@@ -16,7 +16,7 @@ from .serializers import (
     ProduitCreateUpdateSerializer,
     ImageProduitSerializer,
     AvisSerializer, 
-    AvisCreateSerializer
+    AvisCreateSerializer,
 )
 from .permissions import IsEntrepriseOwnerOrReadOnly
 

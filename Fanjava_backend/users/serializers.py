@@ -15,15 +15,37 @@ class EntrepriseSerializer(serializers.ModelSerializer):
                   'whatsapp', 'status', 'verified']
         read_only_fields = ['status', 'verified']
 
+# users/serializers.py
+
 class UserSerializer(serializers.ModelSerializer):
     client = ClientSerializer(required=False)
     entreprise = EntrepriseSerializer(required=False)
     
+    is_client = serializers.SerializerMethodField()
+    is_entreprise = serializers.SerializerMethodField()
+    is_admin = serializers.SerializerMethodField()  # ✅ Ajout
+    
     class Meta:
         model = CustomUser
-        fields = ['id', 'username', 'email', 'user_type', 'phone', 
-                  'preferred_language', 'client', 'entreprise']
-        read_only_fields = ['id']
+        fields = [
+            'id', 'username', 'email', 'user_type', 'phone', 
+            'preferred_language', 
+            'is_client',
+            'is_entreprise',
+            'is_admin',  # ✅ Ajout
+            'client', 
+            'entreprise'
+        ]
+    
+    def get_is_client(self, obj):
+        return obj.user_type == 'client'
+    
+    def get_is_entreprise(self, obj):
+        # ✅ IMPORTANT : Admin peut aussi accéder aux pages entreprise
+        return obj.user_type in ['entreprise', 'admin']
+    
+    def get_is_admin(self, obj):
+        return obj.user_type == 'admin'
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, validators=[validate_password])

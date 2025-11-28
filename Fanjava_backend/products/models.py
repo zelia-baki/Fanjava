@@ -167,6 +167,14 @@ class Produit(models.Model):
         default=False,
         verbose_name=_("Produit en vedette")
     )
+    en_promotion = models.BooleanField(
+        default=False,
+        verbose_name=_("En promotion")
+    )
+    actif = models.BooleanField(
+        default=True,
+        verbose_name=_("Actif")
+    )
     
     # Statistiques
     nombre_vues = models.IntegerField(

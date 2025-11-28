@@ -30,25 +30,49 @@ export default function RegisterEntreprise() {
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
+  e.preventDefault();
+  setError('');
 
-    if (formData.password !== formData.password2) {
-      setError('Les mots de passe ne correspondent pas');
-      return;
+  if (formData.password !== formData.password2) {
+    setError('Les mots de passe ne correspondent pas');
+    return;
+  }
+
+  // ⭐ AJOUTEZ CES LOGS
+  console.log('==== DÉBUT INSCRIPTION ENTREPRISE ====');
+  console.log('📋 Données complètes:', formData);
+  console.log('📋 Entreprise:', formData.entreprise);
+  console.log('=======================================');
+
+  setLoading(true);
+
+  try {
+    await register(formData);
+    console.log('✅ Inscription réussie!');
+    navigate('/login');
+  } catch (err) {
+    // ⭐ AMÉLIOREZ L'AFFICHAGE D'ERREUR
+    console.error('❌ ERREUR LORS DE L\'INSCRIPTION');
+    console.error('❌ Erreur complète:', err);
+    console.error('❌ Réponse:', err.response?.data);
+    
+    // Afficher l'erreur détaillée
+    let errorMsg = 'Erreur lors de l\'inscription';
+    
+    if (err.response?.data) {
+      // Si c'est un objet avec des erreurs de champs
+      if (typeof err.response.data === 'object') {
+        errorMsg = JSON.stringify(err.response.data, null, 2);
+      } else {
+        errorMsg = err.response.data.message || err.response.data;
+      }
     }
-
-    setLoading(true);
-
-    try {
-      await register(formData);
-      navigate('/login');
-    } catch (err) {
-      setError(err.response?.data?.message || 'Erreur lors de l\'inscription');
-    } finally {
-      setLoading(false);
-    }
-  };
+    
+    setError(errorMsg);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const updateEntreprise = (field, value) => {
     setFormData({
