@@ -54,3 +54,24 @@ class IsClientOwner(permissions.BasePermission):
         if hasattr(request.user, 'client'):
             return obj.client == request.user.client
         return False
+
+
+class IsAdminUser(permissions.BasePermission):
+    """
+    Permission pour vérifier que l'utilisateur est un administrateur.
+    Les admins peuvent tout faire, les autres peuvent seulement lire.
+    """
+
+    def has_permission(self, request, view):
+        # Lecture autorisée pour tous
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        
+        # Écriture uniquement pour les admins
+        return (
+            request.user and 
+            request.user.is_authenticated and
+            (request.user.is_staff or 
+             request.user.is_superuser or 
+             getattr(request.user, 'user_type', None) == 'admin')
+        )

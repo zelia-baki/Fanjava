@@ -18,7 +18,7 @@ from .serializers import (
     AvisSerializer, 
     AvisCreateSerializer,
 )
-from .permissions import IsEntrepriseOwner
+from .permissions import IsEntrepriseOwner, IsAdminUser
 
 
 class CategorieViewSet(viewsets.ModelViewSet):
@@ -32,13 +32,14 @@ class CategorieViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         """
         Les catégories sont publiques en lecture
-        Seules les entreprises/admins peuvent créer/modifier
+        Seuls les admins peuvent créer/modifier/supprimer
         """
         if self.action in ['list', 'retrieve']:
+            # Lecture : tout le monde
             permission_classes = [IsAuthenticatedOrReadOnly]
         else:
-            # Créer, modifier, supprimer = entreprise ou admin uniquement
-            permission_classes = [IsEntrepriseOwner]
+            # Écriture : seulement les admins
+            permission_classes = [IsAdminUser]  # ← CHANGÉ ICI
         return [permission() for permission in permission_classes]
     
     def get_queryset(self):
@@ -46,8 +47,10 @@ class CategorieViewSet(viewsets.ModelViewSet):
         queryset = super().get_queryset()
         
         # Si admin, voir toutes les catégories
-        if self.request.user.is_authenticated and hasattr(self.request.user, 'entreprise'):
-            if self.request.user.user_type == 'admin':
+        if self.request.user.is_authenticated:
+            if (self.request.user.is_staff or 
+                self.request.user.is_superuser or 
+                getattr(self.request.user, 'user_type', None) == 'admin'):
                 return queryset
         
         # Sinon, uniquement les catégories actives

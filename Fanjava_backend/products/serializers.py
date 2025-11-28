@@ -7,26 +7,11 @@ class CategorieSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Categorie
-        fields = [
-            'id',
-            'nom',
-            'slug',
-            'description',
-            'image',
-            'parent',
-            'ordre',
-            'active',
-            'sous_categories',
-            'en_promotion',  
-            'actif', 
-            'created_at',
-            'updated_at'
-        ]
-        read_only_fields = ['slug', 'created_at', 'updated_at']
+        fields = '__all__'  # ← Utilise TOUS les champs du modèle automatiquement
     
     def get_sous_categories(self, obj):
         """Récupérer les sous-catégories actives"""
-        if obj.sous_categories.exists():
+        if hasattr(obj, 'sous_categories') and obj.sous_categories.exists():
             return CategorieSerializer(
                 obj.sous_categories.filter(active=True),
                 many=True,

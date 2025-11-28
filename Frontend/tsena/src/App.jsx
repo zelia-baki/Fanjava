@@ -20,13 +20,13 @@ import Checkout from '@/pages/cart/Checkout';
 import OrderConfirmation from '@/pages/cart/OrderConfirmation';
 
 // Entreprise
-import Dashboard from '@/pages/entreprise/Dashboard';
 import ProductListEntreprise from '@/pages/entreprise/ProductListEntreprise';
 import ProductCreate from '@/pages/entreprise/ProductCreate';
 import ProductEdit from '@/pages/entreprise/ProductEdit';
 import ClientDashboard from '@/pages/client/ClientDashboard';
 import MyOrders from '@/pages/client/MyOrders';
-
+import EntrepriseDashboard from './pages/entreprise/EntrepriseDashboard';
+import CategoryManagement from './pages/admin/CategoryManagement';
 function App() {
   return (
     <BrowserRouter>
@@ -46,6 +46,13 @@ function App() {
             <Route path="/cart" element={<Cart />} />
             <Route path="/dashboard/client" element={<ClientDashboard />} />
             <Route path="/profile/orders" element={<MyOrders />} />
+
+            // Routes Entreprise
+<Route path="/dashboard/entreprise" element={<EntrepriseDashboard />} />
+<Route path="/entreprise/products" element={<ProductListEntreprise />} />
+<Route path="/entreprise/products/create" element={<ProductCreate />} />
+<Route path="/entreprise/products/:id/edit" element={<ProductEdit />} />
+<Route path="/admin/categories" element={<CategoryManagement />} />
             {/* Routes client protégées */}
             <Route
               path="/checkout"
@@ -65,15 +72,7 @@ function App() {
               }
             />
 
-            {/* Routes entreprise protégées */}
-            <Route
-              path="/entreprise/dashboard"
-              element={
-                <ProtectedRoute userType="entreprise">
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
+          
 
             <Route
               path="/entreprise/products"
