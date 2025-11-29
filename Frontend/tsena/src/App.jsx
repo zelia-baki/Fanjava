@@ -1,4 +1,4 @@
-// src/App.jsx - VERSION CORRIGÉE
+// src/App.jsx - VERSION AVEC ROUTES ADMIN
 
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from '@/context/AuthContext';
@@ -19,25 +19,38 @@ import Cart from '@/pages/cart/Cart';
 import Checkout from '@/pages/cart/Checkout';
 import OrderConfirmation from '@/pages/cart/OrderConfirmation';
 
+// Client
+import ClientDashboard from '@/pages/client/ClientDashboard';
+import MyOrders from '@/pages/client/MyOrders';
+import MyReviews from '@/pages/client/MyReviews';
+
 // Entreprise
+import EntrepriseDashboard from '@/pages/entreprise/EntrepriseDashboard';
 import ProductListEntreprise from '@/pages/entreprise/ProductListEntreprise';
 import ProductCreate from '@/pages/entreprise/ProductCreate';
 import ProductEdit from '@/pages/entreprise/ProductEdit';
-import ClientDashboard from '@/pages/client/ClientDashboard';
-import MyOrders from '@/pages/client/MyOrders';
-import EntrepriseDashboard from '@/pages/entreprise/EntrepriseDashboard';
-import CategoryManagement from '@/pages/admin/CategoryManagement';
 import EntrepriseOrders from '@/pages/entreprise/EntrepriseOrders';
 import OrderDetail from '@/pages/entreprise/OrderDetail';
-import MyReviews from '@/pages/client/MyReviews';
 import EntrepriseReviews from '@/pages/entreprise/EntrepriseReviews';
+
+// Admin
+import AdminDashboard from '@/pages/admin/AdminDashboard';
+import UsersManagement from '@/pages/admin/UsersManagement';
+import ProductsManagement from '@/pages/admin/ProductsManagement';
+import OrdersManagement from '@/pages/admin/OrdersManagement';
+import ReviewsManagement from '@/pages/admin/ReviewsManagement';
+import NotificationsManagement from '@/pages/admin/NotificationsManagement';
+import CategoryManagement from '@/pages/admin/CategoryManagement';
+import NotificationsPage from '@/pages/NotificationsPage';
+
+
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <CartProvider>
           <Routes>
-            {/* Routes publiques */}
+            {/* ==================== ROUTES PUBLIQUES ==================== */}
             <Route path="/login" element={<Login />} />
             <Route path="/register/client" element={<RegisterClient />} />
             <Route path="/register/entreprise" element={<RegisterEntreprise />} />
@@ -46,24 +59,34 @@ function App() {
             <Route path="/" element={<ProductList />} />
             <Route path="/products/:slug" element={<ProductDetail />} />
 
-            {/* Routes panier et client */}
+            {/* Routes panier */}
             <Route path="/cart" element={<Cart />} />
-            <Route path="/dashboard/client" element={<ClientDashboard />} />
-            <Route path="/profile/orders" element={<MyOrders />} />
 
-            {/* Routes Entreprise */}
-            <Route path="/dashboard/entreprise" element={<EntrepriseDashboard />} />
-            <Route path="/admin/categories" element={<CategoryManagement />} />
-
-            <Route path="/entreprise/orders" element={<EntrepriseOrders />} />
-            <Route path="/entreprise/orders/:id" element={<OrderDetail />} />
-            // Routes Client
-<Route path="/myreviews" element={<MyReviews />} />
-
-// Routes Entreprise
-<Route path="/entreprise/reviews" element={<EntrepriseReviews />} />
-
-            {/* Routes client protégées */}
+            {/* ==================== ROUTES CLIENT ==================== */}
+            <Route
+              path="/dashboard/client"
+              element={
+                <ProtectedRoute userType="client">
+                  <ClientDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile/orders"
+              element={
+                <ProtectedRoute userType="client">
+                  <MyOrders />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/myreviews"
+              element={
+                <ProtectedRoute userType="client">
+                  <MyReviews />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/checkout"
               element={
@@ -72,7 +95,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
             <Route
               path="/order-confirmation/:orderId"
               element={
@@ -82,7 +104,15 @@ function App() {
               }
             />
 
-            {/* Routes entreprise protégées */}
+            {/* ==================== ROUTES ENTREPRISE ==================== */}
+            <Route
+              path="/dashboard/entreprise"
+              element={
+                <ProtectedRoute userType="entreprise">
+                  <EntrepriseDashboard />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/entreprise/products"
               element={
@@ -91,7 +121,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
             <Route
               path="/entreprise/products/create"
               element={
@@ -100,8 +129,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
-            {/* ✅ CORRIGÉ : Utiliser :slug au lieu de :id */}
             <Route
               path="/entreprise/products/:slug/edit"
               element={
@@ -110,8 +137,96 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/entreprise/orders"
+              element={
+                <ProtectedRoute userType="entreprise">
+                  <EntrepriseOrders />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/entreprise/orders/:id"
+              element={
+                <ProtectedRoute userType="entreprise">
+                  <OrderDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/entreprise/reviews"
+              element={
+                <ProtectedRoute userType="entreprise">
+                  <EntrepriseReviews />
+                </ProtectedRoute>
+              }
+            />
 
-            {/* Route 404 */}
+            {/* ==================== ROUTES ADMIN ==================== */}
+            <Route
+              path="/admin/dashboard"
+              element={
+                <ProtectedRoute userType="admin">
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/users"
+              element={
+                <ProtectedRoute userType="admin">
+                  <UsersManagement />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/products"
+              element={
+                <ProtectedRoute userType="admin">
+                  <ProductsManagement />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/orders"
+              element={
+                <ProtectedRoute userType="admin">
+                  <OrdersManagement />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/reviews"
+              element={
+                <ProtectedRoute userType="admin">
+                  <ReviewsManagement />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/notifications"
+              element={
+                <ProtectedRoute userType="admin">
+                  <NotificationsManagement />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/categories"
+              element={
+                <ProtectedRoute userType="admin">
+                  <CategoryManagement />
+                </ProtectedRoute>
+              }
+            />
+            
+            <Route path="/notifications" element={
+              <ProtectedRoute>
+                <NotificationsPage />
+              </ProtectedRoute>
+            } />
+
+            {/* ==================== ROUTE 404 ==================== */}
             <Route
               path="*"
               element={

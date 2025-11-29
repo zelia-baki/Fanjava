@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import MainLayout from '@/layouts/MainLayout';
 import { useAuth } from '@/context/AuthContext';
-import { 
-  Package, 
-  ShoppingBag, 
-  DollarSign, 
+import {
+  Package,
+  ShoppingBag,
+  DollarSign,
   TrendingUp,
   Loader2,
   Plus,
@@ -44,7 +44,7 @@ export default function EntrepriseDashboard() {
 
       // 1. Récupérer TOUS les produits de l'entreprise (pas de filtre status)
       const productsResponse = await api.get('/products/produits/', {
-        params: { 
+        params: {
           mes_produits: 'true'
           // Ne pas filtrer par status pour avoir TOUS les produits
         }
@@ -86,7 +86,7 @@ export default function EntrepriseDashboard() {
 
         // Filtrer les commandes qui contiennent au moins un produit de l'entreprise
         const productIds = products.map(p => p.id);
-        
+
         orders = allOrders.filter(order => {
           // Vérifier si la commande contient des produits de l'entreprise
           if (order.lignes && Array.isArray(order.lignes)) {
@@ -109,7 +109,7 @@ export default function EntrepriseDashboard() {
           return sum + parseFloat(order.montant_total || 0);
         }, 0);
 
-        pendingOrders = orders.filter(o => 
+        pendingOrders = orders.filter(o =>
           o.status === 'pending' || o.status === 'confirmed' || o.status === 'processing'
         ).length;
 
@@ -343,7 +343,7 @@ export default function EntrepriseDashboard() {
               <div>
                 <p className="text-sm text-purple-800 mb-1">Taux Conversion</p>
                 <p className="text-3xl font-bold text-purple-900">
-                  {stats.totalViews > 0 
+                  {stats.totalViews > 0
                     ? ((stats.totalSales / stats.totalViews) * 100).toFixed(1)
                     : '0.0'
                   }%
@@ -399,9 +399,8 @@ export default function EntrepriseDashboard() {
                             minimumFractionDigits: 2
                           })} Ar
                         </p>
-                        <span className={`inline-block px-2 py-1 rounded-full text-xs font-semibold mt-1 ${
-                          getOrderStatusColor(order.status)
-                        }`}>
+                        <span className={`inline-block px-2 py-1 rounded-full text-xs font-semibold mt-1 ${getOrderStatusColor(order.status)
+                          }`}>
                           {getOrderStatusLabel(order.status)}
                         </span>
                       </div>
@@ -539,8 +538,8 @@ export default function EntrepriseDashboard() {
               <ShoppingBag className="w-8 h-8 mx-auto mb-2 text-blue-600 group-hover:scale-110 transition-transform" />
               <p className="font-medium text-gray-900">Voir les commandes</p>
             </Link>
-            <Link to="/entreprise/reviews"               className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow text-center"
->Gérer les Avis</Link>
+            <Link to="/entreprise/reviews" className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow text-center"
+            >Gérer les Avis</Link>
           </div>
         </div>
       </div>
