@@ -96,6 +96,10 @@ class CommandeSerializer(serializers.ModelSerializer):
         read_only_fields = [
             'numero_commande',
             'montant_final',
+            'client',              # ← AJOUTE ICI
+            'entreprise',          # ← AJOUTE ICI
+            'montant_total',       # ← AJOUTE ICI
+            'frais_livraison', 
             'created_at',
             'updated_at'
         ]

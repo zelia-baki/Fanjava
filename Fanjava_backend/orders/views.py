@@ -9,7 +9,6 @@ from collections import defaultdict
 from .models import Panier, PanierItem, Commande, LigneCommande
 from .serializers import (
     PanierSerializer, 
-    PanierItemSerializer, 
     CommandeSerializer,
     CommandeCreateSerializer
 )
@@ -71,36 +70,43 @@ class PanierViewSet(viewsets.ViewSet):
         serializer = PanierSerializer(panier)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['patch'])
-    def update_item(self, request):
-        """Mettre à jour la quantité d'un article"""
-        client = request.user.client
-        panier = get_object_or_404(Panier, client=client)
-        
-        item_id = request.data.get('item_id')
-        quantite = request.data.get('quantite')
-        
-        if quantite < 1:
-            return Response(
-                {'error': 'La quantité doit être au moins 1'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        item = get_object_or_404(PanierItem, id=item_id, panier=panier)
-        
-        # Vérifier le stock
-        if item.produit.stock < quantite:
-            return Response(
-                {'error': f'Stock insuffisant. Stock disponible: {item.produit.stock}'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        item.quantite = quantite
-        item.save()
-        
-        serializer = PanierSerializer(panier)
-        return Response(serializer.data)
+@action(detail=False, methods=['patch'])
+def update(self, request, *args, **kwargs):
+  
+    commande = self.get_object()
     
+    # DEBUG - LOGS
+    print("=" * 60)
+    print("📥 DONNÉES REÇUES:", request.data)
+    print("🔑 User:", request.user.username)
+    print("🏢 Has entreprise:", hasattr(request.user, 'entreprise'))
+    print("=" * 60)
+    
+    # Vérifier que c'est bien l'entreprise de la commande
+    if hasattr(request.user, 'entreprise'):
+        if commande.entreprise != request.user.entreprise:
+            return Response(
+                {'error': 'Vous ne pouvez pas modifier cette commande'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+    elif not (request.user.is_staff or request.user.is_superuser):
+        return Response(
+            {'error': 'Non autorisé'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+    
+    # Mettre à jour la commande
+    serializer = self.get_serializer(commande, data=request.data, partial=True)
+    
+    # DEBUG - AFFICHER LES ERREURS
+    if not serializer.is_valid():
+        print("❌ ERREURS DU SERIALIZER:", serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    serializer.save()
+    print("✅ COMMANDE MISE À JOUR AVEC SUCCÈS")
+    
+    return Response(serializer.data)
     @action(detail=False, methods=['delete'])
     def remove_item(self, request):
         """Supprimer un article du panier"""
@@ -125,16 +131,67 @@ class PanierViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
 
-class CommandeViewSet(viewsets.ReadOnlyModelViewSet):
+class CommandeViewSet(viewsets.ModelViewSet):  # ← CHANGÉ DE ReadOnlyModelViewSet à ModelViewSet
     """ViewSet pour gérer les commandes"""
     permission_classes = [IsAuthenticated]
     serializer_class = CommandeSerializer
     
     def get_queryset(self):
-        """Ne retourner que les commandes du client connecté"""
-        return Commande.objects.filter(
-            client=self.request.user.client
-        ).prefetch_related('lignes')
+        """
+        Retourner les commandes selon le type d'utilisateur
+        - Client : ses propres commandes
+        - Entreprise : commandes reçues
+        - Admin : toutes les commandes
+        """
+        user = self.request.user
+        
+        # Si c'est un client
+        if hasattr(user, 'client'):
+            return Commande.objects.filter(
+                client=user.client
+            ).prefetch_related('lignes')
+        
+        # Si c'est une entreprise
+        elif hasattr(user, 'entreprise'):
+            return Commande.objects.filter(
+                entreprise=user.entreprise
+            ).prefetch_related('lignes', 'client__user')
+        
+        # Si c'est un admin
+        elif user.is_staff or user.is_superuser:
+            return Commande.objects.all().prefetch_related('lignes', 'client__user')
+        
+        return Commande.objects.none()
+    
+    def update(self, request, *args, **kwargs):
+        """
+        Permettre la mise à jour du statut (entreprise uniquement)
+        """
+        commande = self.get_object()
+        
+        # Vérifier que c'est bien l'entreprise de la commande
+        if hasattr(request.user, 'entreprise'):
+            if commande.entreprise != request.user.entreprise:
+                return Response(
+                    {'error': 'Vous ne pouvez pas modifier cette commande'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+        elif not (request.user.is_staff or request.user.is_superuser):
+            return Response(
+                {'error': 'Non autorisé'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Mettre à jour la commande
+        serializer = self.get_serializer(commande, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        
+        return Response(serializer.data)
+    
+    def partial_update(self, request, *args, **kwargs):
+        """Permettre les mises à jour partielles (PATCH)"""
+        return self.update(request, *args, **kwargs)
     
     @action(detail=False, methods=['post'])
     def create_from_cart(self, request):
