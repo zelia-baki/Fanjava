@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
-import { ShoppingCart, User, LogOut, Package } from 'lucide-react';
+import { ShoppingCart, User, LogOut, Package, Shield, FolderTree } from 'lucide-react';
 
 export default function Header() {
   const { user, logout } = useAuth();
@@ -22,16 +22,44 @@ export default function Header() {
 
             {user ? (
               <>
+                {/* Affichage pour ADMIN */}
+                {user.user_type === 'admin' && (
+                  <>
+                    <Link 
+                      to="/admin/categories" 
+                      className="text-gray-700 hover:text-blue-600 flex items-center"
+                    >
+                      <FolderTree className="w-4 h-4 mr-1" />
+                      Catégories
+                    </Link>
+                    <Link 
+                      to="/admin/dashboard" 
+                      className="text-gray-700 hover:text-blue-600 flex items-center"
+                    >
+                      <Shield className="w-4 h-4 mr-1" />
+                      Admin
+                    </Link>
+                  </>
+                )}
+
+                {/* Affichage pour ENTREPRISE */}
                 {user.user_type === 'entreprise' && (
-                  <Link to="/dashboard/entreprise" className="text-gray-700 hover:text-blue-600 flex items-center">
+                  <Link 
+                    to="/dashboard/entreprise" 
+                    className="text-gray-700 hover:text-blue-600 flex items-center"
+                  >
                     <Package className="w-4 h-4 mr-1" />
                     Dashboard
                   </Link>
                 )}
 
+                {/* Affichage pour CLIENT */}
                 {user.user_type === 'client' && (
                   <>
-                    <Link to="/cart" className="text-gray-700 hover:text-blue-600 relative">
+                    <Link 
+                      to="/cart" 
+                      className="text-gray-700 hover:text-blue-600 relative"
+                    >
                       <ShoppingCart className="w-5 h-5" />
                       {getItemCount() > 0 && (
                         <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
@@ -40,13 +68,17 @@ export default function Header() {
                       )}
                     </Link>
 
-                    <Link to="/dashboard/client" className="text-gray-700 hover:text-blue-600 flex items-center">
+                    <Link 
+                      to="/dashboard/client" 
+                      className="text-gray-700 hover:text-blue-600 flex items-center"
+                    >
                       <User className="w-4 h-4 mr-1" />
                       Mon compte
                     </Link>
                   </>
                 )}
 
+                {/* Bouton déconnexion pour tous */}
                 <button
                   onClick={logout}
                   className="text-gray-700 hover:text-red-600 flex items-center"
@@ -57,7 +89,11 @@ export default function Header() {
               </>
             ) : (
               <>
-                <Link to="/cart" className="text-gray-700 hover:text-blue-600 relative">
+                {/* Utilisateur non connecté */}
+                <Link 
+                  to="/cart" 
+                  className="text-gray-700 hover:text-blue-600 relative"
+                >
                   <ShoppingCart className="w-5 h-5" />
                   {getItemCount() > 0 && (
                     <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
@@ -66,7 +102,10 @@ export default function Header() {
                   )}
                 </Link>
 
-                <Link to="/login" className="text-gray-700 hover:text-blue-600">
+                <Link 
+                  to="/login" 
+                  className="text-gray-700 hover:text-blue-600"
+                >
                   Connexion
                 </Link>
               </>
