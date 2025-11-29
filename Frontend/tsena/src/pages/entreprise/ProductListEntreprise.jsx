@@ -38,15 +38,16 @@ export default function ProductListEntreprise() {
     }
   };
 
-  const handleDelete = async (productId, productName) => {
+  const handleDelete = async (productSlug, productName) => {
     if (!window.confirm(`Êtes-vous sûr de vouloir supprimer "${productName}" ?`)) {
       return;
     }
 
     try {
-      setDeleteLoading(productId);
-      await api.delete(`/products/produits/${productId}/`);
-      setProducts(products.filter(p => p.id !== productId));
+      setDeleteLoading(productSlug);
+      // ✅ CORRIGÉ : Utiliser le slug pour la suppression
+      await api.delete(`/products/produits/${productSlug}/`);
+      setProducts(products.filter(p => p.slug !== productSlug));
       alert('Produit supprimé avec succès !');
     } catch (err) {
       console.error('Erreur suppression:', err);
@@ -249,20 +250,21 @@ export default function ProductListEntreprise() {
                             >
                               <Eye className="w-5 h-5" />
                             </Link>
+                            {/* ✅ CORRIGÉ : Utiliser product.slug au lieu de product.id */}
                             <Link
-                              to={`/entreprise/products/${product.id}/edit`}
+                              to={`/entreprise/products/${product.slug}/edit`}
                               className="text-blue-600 hover:text-blue-900"
                               title="Modifier"
                             >
                               <Edit className="w-5 h-5" />
                             </Link>
                             <button
-                              onClick={() => handleDelete(product.id, product.nom)}
-                              disabled={deleteLoading === product.id}
+                              onClick={() => handleDelete(product.slug, product.nom)}
+                              disabled={deleteLoading === product.slug}
                               className="text-red-600 hover:text-red-900 disabled:opacity-50"
                               title="Supprimer"
                             >
-                              {deleteLoading === product.id ? (
+                              {deleteLoading === product.slug ? (
                                 <Loader2 className="w-5 h-5 animate-spin" />
                               ) : (
                                 <Trash2 className="w-5 h-5" />

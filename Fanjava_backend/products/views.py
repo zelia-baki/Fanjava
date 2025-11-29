@@ -2,7 +2,7 @@ from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.exceptions import PermissionDenied
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
@@ -35,32 +35,49 @@ class CategorieViewSet(viewsets.ModelViewSet):
         Seuls les admins peuvent créer/modifier/supprimer
         """
         if self.action in ['list', 'retrieve']:
-            # Lecture : tout le monde
             permission_classes = [IsAuthenticatedOrReadOnly]
         else:
-            # Écriture : seulement les admins
-            permission_classes = [IsAdminUser]  # ← CHANGÉ ICI
+            permission_classes = [IsAdminUser]
         return [permission() for permission in permission_classes]
     
     def get_queryset(self):
         """Filtrer les catégories actives pour les utilisateurs normaux"""
         queryset = super().get_queryset()
         
-        # Si admin, voir toutes les catégories
         if self.request.user.is_authenticated:
             if (self.request.user.is_staff or 
                 self.request.user.is_superuser or 
                 getattr(self.request.user, 'user_type', None) == 'admin'):
                 return queryset
         
-        # Sinon, uniquement les catégories actives
         return queryset.filter(active=True)
 
+
+class ImageProduitViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet pour gérer les images de produits
+    """
+    queryset = ImageProduit.objects.all()
+    serializer_class = ImageProduitSerializer
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+    
+    def get_queryset(self):
+        """Filtrer par produit si spécifié"""
+        queryset = super().get_queryset()
+        produit_id = self.request.query_params.get('produit', None)
+        if produit_id:
+            queryset = queryset.filter(produit_id=produit_id)
+        return queryset
+    
+    def perform_create(self, serializer):
+        """Associer l'image au produit"""
+        serializer.save()
 
 
 class ProduitViewSet(viewsets.ModelViewSet):
     """
-    ViewSet pour gérer les produits
+    ViewSet pour gérer les produits avec upload d'images
     """
     queryset = Produit.objects.select_related('categorie', 'entreprise').prefetch_related('images')
     permission_classes = [IsAuthenticatedOrReadOnly]
@@ -70,7 +87,7 @@ class ProduitViewSet(viewsets.ModelViewSet):
     search_fields = ['nom', 'description', 'description_courte']
     ordering_fields = ['prix', 'created_at', 'nom', 'note_moyenne', 'nombre_ventes']
     ordering = ['-created_at']
-    parser_classes = [MultiPartParser, FormParser]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
     
     def get_serializer_class(self):
         """Utiliser des serializers différents selon l'action"""
@@ -120,18 +137,77 @@ class ProduitViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
     
-    def perform_create(self, serializer):
-        """Associer automatiquement le produit à l'entreprise connectée"""
-        if not hasattr(self.request.user, 'entreprise'):
+    def create(self, request, *args, **kwargs):
+        """
+        Créer un produit avec gestion des images multiples
+        """
+        if not hasattr(request.user, 'entreprise'):
             raise PermissionDenied("Seules les entreprises peuvent créer des produits")
-        serializer.save(entreprise=self.request.user.entreprise)
+        
+        # Extraire les images du request
+        images = []
+        image_index = 0
+        while f'image_{image_index}' in request.FILES:
+            images.append(request.FILES[f'image_{image_index}'])
+            image_index += 1
+        
+        # Créer le produit
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        produit = serializer.save(entreprise=request.user.entreprise, status='active')
+        
+        # Créer les images
+        for index, image_file in enumerate(images):
+            ImageProduit.objects.create(
+                produit=produit,
+                image=image_file,
+                est_principale=(index == 0),  # La première image est principale
+                ordre=index
+            )
+        
+        # Retourner le produit créé avec les images
+        headers = self.get_success_headers(serializer.data)
+        product_serializer = ProduitDetailSerializer(produit, context={'request': request})
+        return Response(product_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
     
-    def perform_update(self, serializer):
-        """Vérifier que l'utilisateur est le propriétaire"""
-        produit = self.get_object()
-        if hasattr(self.request.user, 'entreprise') and produit.entreprise != self.request.user.entreprise:
+    def update(self, request, *args, **kwargs):
+        """
+        Mettre à jour un produit avec gestion des nouvelles images
+        """
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        
+        # Vérifier les permissions
+        if hasattr(request.user, 'entreprise') and instance.entreprise != request.user.entreprise:
             raise PermissionDenied("Vous ne pouvez pas modifier ce produit")
-        serializer.save()
+        
+        # Extraire les nouvelles images
+        images = []
+        image_index = 0
+        while f'image_{image_index}' in request.FILES:
+            images.append(request.FILES[f'image_{image_index}'])
+            image_index += 1
+        
+        # Mettre à jour le produit
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        produit = serializer.save()
+        
+        # Ajouter les nouvelles images
+        if images:
+            # Compter les images existantes pour l'ordre
+            existing_count = produit.images.count()
+            for index, image_file in enumerate(images):
+                ImageProduit.objects.create(
+                    produit=produit,
+                    image=image_file,
+                    est_principale=(existing_count == 0 and index == 0),
+                    ordre=existing_count + index
+                )
+        
+        # Retourner le produit mis à jour
+        product_serializer = ProduitDetailSerializer(produit, context={'request': request})
+        return Response(product_serializer.data)
     
     def perform_destroy(self, instance):
         """Vérifier que l'utilisateur est le propriétaire"""
@@ -152,13 +228,6 @@ class ProduitViewSet(viewsets.ModelViewSet):
         produits = self.get_queryset().filter(en_promotion=True, actif=True, status='active')
         serializer = ProduitListSerializer(produits, many=True, context={'request': request})
         return Response(serializer.data)
-def perform_create(self, serializer):
-    if not hasattr(self.request.user, 'entreprise'):
-        raise PermissionDenied("Seules les entreprises peuvent créer des produits")
-    serializer.save(
-        entreprise=self.request.user.entreprise,
-        status='active'  # 👈 Ajouter cette ligne
-    )
     
     @action(detail=False, methods=['get'])
     def vedette(self, request):

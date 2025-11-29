@@ -1,4 +1,4 @@
-// src/App.jsx
+// src/App.jsx - VERSION CORRIGÉE
 
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from '@/context/AuthContext';
@@ -27,6 +27,7 @@ import ClientDashboard from '@/pages/client/ClientDashboard';
 import MyOrders from '@/pages/client/MyOrders';
 import EntrepriseDashboard from './pages/entreprise/EntrepriseDashboard';
 import CategoryManagement from './pages/admin/CategoryManagement';
+
 function App() {
   return (
     <BrowserRouter>
@@ -42,17 +43,15 @@ function App() {
             <Route path="/" element={<ProductList />} />
             <Route path="/products/:slug" element={<ProductDetail />} />
 
-            {/* Routes panier */}
+            {/* Routes panier et client */}
             <Route path="/cart" element={<Cart />} />
             <Route path="/dashboard/client" element={<ClientDashboard />} />
             <Route path="/profile/orders" element={<MyOrders />} />
 
-            // Routes Entreprise
+            {/* Routes Entreprise */}
             <Route path="/dashboard/entreprise" element={<EntrepriseDashboard />} />
-            <Route path="/entreprise/products" element={<ProductListEntreprise />} />
-            <Route path="/entreprise/products/create" element={<ProductCreate />} />
-            <Route path="/entreprise/products/:id/edit" element={<ProductEdit />} />
             <Route path="/admin/categories" element={<CategoryManagement />} />
+
             {/* Routes client protégées */}
             <Route
               path="/checkout"
@@ -72,8 +71,7 @@ function App() {
               }
             />
 
-
-
+            {/* Routes entreprise protégées */}
             <Route
               path="/entreprise/products"
               element={
@@ -92,8 +90,9 @@ function App() {
               }
             />
 
+            {/* ✅ CORRIGÉ : Utiliser :slug au lieu de :id */}
             <Route
-              path="/entreprise/products/edit/:slug"
+              path="/entreprise/products/:slug/edit"
               element={
                 <ProtectedRoute userType="entreprise">
                   <ProductEdit />
@@ -111,9 +110,7 @@ function App() {
                     <p className="text-gray-600">Page non trouvée</p>
                   </div>
                 </div>
-
               }
-
             />
           </Routes>
         </CartProvider>

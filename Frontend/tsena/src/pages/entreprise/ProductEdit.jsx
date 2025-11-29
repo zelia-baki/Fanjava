@@ -5,7 +5,8 @@ import { ArrowLeft, Upload, X, Loader2, Save } from 'lucide-react';
 import api from '@/services/api';
 
 export default function ProductEdit() {
-  const { id } = useParams();
+  // ✅ CORRIGÉ : Le paramètre s'appelle maintenant 'slug' dans l'URL
+  const { slug } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -32,13 +33,14 @@ export default function ProductEdit() {
 
   useEffect(() => {
     fetchData();
-  }, [id]);
+  }, [slug]); // ✅ Dépendance sur slug au lieu de id
 
   const fetchData = async () => {
     try {
       setLoading(true);
       const [productRes, categoriesRes] = await Promise.all([
-        api.get(`/products/produits/${id}/`),
+        // ✅ CORRIGÉ : Utiliser slug au lieu de id
+        api.get(`/products/produits/${slug}/`),
         api.get('/products/categories/')
       ]);
 
@@ -51,7 +53,7 @@ export default function ProductEdit() {
         prix_promo: product.prix_promo || '',
         stock: product.stock || '',
         seuil_alerte_stock: product.seuil_alerte_stock || '10',
-        categorie: product.categorie || '',
+        categorie: product.categorie?.id || product.categorie || '',
         poids: product.poids || '',
         en_vedette: product.en_vedette || false,
         en_promotion: product.en_promotion || false,
@@ -103,7 +105,8 @@ export default function ProductEdit() {
     if (!window.confirm('Supprimer cette image ?')) return;
 
     try {
-      await api.delete(`/products/produits/${id}/supprimer_image/`, {
+      // ✅ CORRIGÉ : Utiliser slug au lieu de id
+      await api.delete(`/products/produits/${slug}/supprimer_image/`, {
         data: { image_id: imageId }
       });
       setExistingImages(prev => prev.filter(img => img.id !== imageId));
@@ -156,7 +159,8 @@ export default function ProductEdit() {
         formDataToSend.append(`image_${index}`, image);
       });
 
-      await api.put(`/products/produits/${id}/`, formDataToSend, {
+      // ✅ CORRIGÉ : Utiliser slug au lieu de id
+      await api.put(`/products/produits/${slug}/`, formDataToSend, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
