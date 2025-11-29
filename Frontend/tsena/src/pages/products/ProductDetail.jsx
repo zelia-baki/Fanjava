@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import MainLayout from '@/layouts/MainLayout';
 import { productService } from '@/services/productService';
 import { useCart } from '@/context/CartContext';
+import ReviewSection from '@/components/reviews/ReviewSection';
 import {
   ShoppingCart,
   Star,
@@ -213,7 +214,11 @@ export default function ProductDetail() {
                 )}
               </div>
             </div>
-
+<ReviewSection 
+  produitId={product.id}
+  noteMoyenne={product.note_moyenne}
+  nombreAvis={product.nombre_avis}
+/>
             {/* Description courte */}
             {product.description_courte && (
               <p className="text-gray-700 mb-6">{product.description_courte}</p>

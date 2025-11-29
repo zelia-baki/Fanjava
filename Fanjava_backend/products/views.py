@@ -318,11 +318,24 @@ class AvisViewSet(viewsets.ModelViewSet):
             return AvisCreateSerializer
         return AvisSerializer
     
-    def perform_create(self, serializer):
-        """Associer automatiquement l'avis au client connecté"""
-        if not hasattr(self.request.user, 'client'):
-            raise PermissionDenied("Seuls les clients peuvent laisser des avis")
-        serializer.save(client=self.request.user.client)
+def perform_create(self, serializer):
+    
+    # DEBUG
+    print("=" * 60)
+    print("📥 DONNÉES REÇUES:", self.request.data)
+    print("👤 User:", self.request.user)
+    print("🔑 Has client:", hasattr(self.request.user, 'client'))
+    print("=" * 60)
+    
+    if not hasattr(self.request.user, 'client'):
+        raise PermissionDenied("Seuls les clients peuvent laisser des avis")
+    
+    # Tester la validation
+    if not serializer.is_valid():
+        print("❌ ERREURS VALIDATION:", serializer.errors)
+    
+    serializer.save(client=self.request.user.client)
+    print("✅ AVIS CRÉÉ AVEC SUCCÈS")
     
     def update(self, request, *args, **kwargs):
         """Autoriser seulement la modification de son propre avis"""

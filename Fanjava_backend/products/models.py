@@ -323,7 +323,11 @@ class Avis(models.Model):
         related_name='avis',
         verbose_name=_("Client")
     )
-    
+    titre = models.CharField(
+        max_length=100,
+        blank=True,
+        verbose_name=_("Titre de l'avis")
+    )
     # Contenu de l'avis
     note = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(5)],

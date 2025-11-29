@@ -25,9 +25,12 @@ import ProductCreate from '@/pages/entreprise/ProductCreate';
 import ProductEdit from '@/pages/entreprise/ProductEdit';
 import ClientDashboard from '@/pages/client/ClientDashboard';
 import MyOrders from '@/pages/client/MyOrders';
-import EntrepriseDashboard from './pages/entreprise/EntrepriseDashboard';
-import CategoryManagement from './pages/admin/CategoryManagement';
-
+import EntrepriseDashboard from '@/pages/entreprise/EntrepriseDashboard';
+import CategoryManagement from '@/pages/admin/CategoryManagement';
+import EntrepriseOrders from '@/pages/entreprise/EntrepriseOrders';
+import OrderDetail from '@/pages/entreprise/OrderDetail';
+import MyReviews from '@/pages/client/MyReviews';
+import EntrepriseReviews from '@/pages/entreprise/EntrepriseReviews';
 function App() {
   return (
     <BrowserRouter>
@@ -51,6 +54,14 @@ function App() {
             {/* Routes Entreprise */}
             <Route path="/dashboard/entreprise" element={<EntrepriseDashboard />} />
             <Route path="/admin/categories" element={<CategoryManagement />} />
+
+            <Route path="/entreprise/orders" element={<EntrepriseOrders />} />
+            <Route path="/entreprise/orders/:id" element={<OrderDetail />} />
+            // Routes Client
+<Route path="/myreviews" element={<MyReviews />} />
+
+// Routes Entreprise
+<Route path="/entreprise/reviews" element={<EntrepriseReviews />} />
 
             {/* Routes client protégées */}
             <Route

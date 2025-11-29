@@ -539,6 +539,8 @@ export default function EntrepriseDashboard() {
               <ShoppingBag className="w-8 h-8 mx-auto mb-2 text-blue-600 group-hover:scale-110 transition-transform" />
               <p className="font-medium text-gray-900">Voir les commandes</p>
             </Link>
+            <Link to="/entreprise/reviews"               className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow text-center"
+>Gérer les Avis</Link>
           </div>
         </div>
       </div>

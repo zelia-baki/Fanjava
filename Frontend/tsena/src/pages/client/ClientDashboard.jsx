@@ -267,6 +267,10 @@ export default function ClientDashboard() {
                 >
                   Mes commandes
                 </Link>
+                <Link to="/myreviews" 
+                  className="block w-full bg-gray-100 text-gray-800 text-center py-2 rounded-lg hover:bg-gray-200 transition-colors"
+
+                >Mes Avis</Link>
               </div>
             </div>
           </div>
