@@ -37,22 +37,22 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register/client" element={<RegisterClient />} />
             <Route path="/register/entreprise" element={<RegisterEntreprise />} />
-            
+
             {/* Routes produits publiques */}
             <Route path="/" element={<ProductList />} />
             <Route path="/products/:slug" element={<ProductDetail />} />
-            
+
             {/* Routes panier */}
             <Route path="/cart" element={<Cart />} />
             <Route path="/dashboard/client" element={<ClientDashboard />} />
             <Route path="/profile/orders" element={<MyOrders />} />
 
             // Routes Entreprise
-<Route path="/dashboard/entreprise" element={<EntrepriseDashboard />} />
-<Route path="/entreprise/products" element={<ProductListEntreprise />} />
-<Route path="/entreprise/products/create" element={<ProductCreate />} />
-<Route path="/entreprise/products/:id/edit" element={<ProductEdit />} />
-<Route path="/admin/categories" element={<CategoryManagement />} />
+            <Route path="/dashboard/entreprise" element={<EntrepriseDashboard />} />
+            <Route path="/entreprise/products" element={<ProductListEntreprise />} />
+            <Route path="/entreprise/products/create" element={<ProductCreate />} />
+            <Route path="/entreprise/products/:id/edit" element={<ProductEdit />} />
+            <Route path="/admin/categories" element={<CategoryManagement />} />
             {/* Routes client protégées */}
             <Route
               path="/checkout"
@@ -62,7 +62,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            
+
             <Route
               path="/order-confirmation/:orderId"
               element={
@@ -72,7 +72,7 @@ function App() {
               }
             />
 
-          
+
 
             <Route
               path="/entreprise/products"
@@ -111,9 +111,9 @@ function App() {
                     <p className="text-gray-600">Page non trouvée</p>
                   </div>
                 </div>
-                
+
               }
-              
+
             />
           </Routes>
         </CartProvider>

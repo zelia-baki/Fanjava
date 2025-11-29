@@ -7,7 +7,25 @@ class CategorieSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Categorie
-        fields = '__all__'  # ← Utilise TOUS les champs du modèle automatiquement
+        fields = [
+            'id',
+            'nom',
+            'slug',
+            'description',
+            'image',
+            'parent',
+            'ordre',
+            'active',
+            'created_at',
+            'sous_categories'
+        ]
+        read_only_fields = ['slug', 'created_at']  # Le slug est généré automatiquement
+        extra_kwargs = {
+            'description': {'required': False, 'allow_blank': True},
+            'image': {'required': False, 'allow_null': True},
+            'parent': {'required': False, 'allow_null': True},
+            'ordre': {'required': False, 'default': 0},
+        }
     
     def get_sous_categories(self, obj):
         """Récupérer les sous-catégories actives"""
