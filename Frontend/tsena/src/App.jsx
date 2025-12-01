@@ -42,6 +42,8 @@ import ReviewsManagement from '@/pages/admin/ReviewsManagement';
 import NotificationsManagement from '@/pages/admin/NotificationsManagement';
 import CategoryManagement from '@/pages/admin/CategoryManagement';
 import NotificationsPage from '@/pages/NotificationsPage';
+import NotificationsSent from './pages/admin/NotificationsSent';
+
 
 
 function App() {
@@ -212,6 +214,14 @@ function App() {
               }
             />
             <Route
+              path="/admin/notifications-sent"
+              element={
+                <ProtectedRoute userType="admin">
+                  <NotificationsSent />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/admin/categories"
               element={
                 <ProtectedRoute userType="admin">
@@ -219,7 +229,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            
+
             <Route path="/notifications" element={
               <ProtectedRoute>
                 <NotificationsPage />

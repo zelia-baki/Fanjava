@@ -1,4 +1,4 @@
-// src/pages/admin/NotificationsManagement.jsx
+// src/pages/admin/NotificationsManagement.jsx - VERSION V2 UPDATED
 
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
@@ -11,7 +11,8 @@ import {
   X,
   Loader2,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Eye
 } from 'lucide-react';
 import api from '@/services/api';
 
@@ -20,10 +21,10 @@ export default function NotificationsManagement() {
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
   
-  // Formulaire d'envoi
+  // Formulaire d'envoi - CHANGÉ POUR V2
   const [formData, setFormData] = useState({
     recipient_type: 'all', // all, clients, entreprises, specific
-    user_ids: [],
+    specific_recipients: [], // CHANGÉ: specific_recipients au lieu de user_ids
     type_notification: 'general',
     titre: '',
     message: '',
@@ -69,40 +70,46 @@ export default function NotificationsManagement() {
     setSuccess('');
 
     try {
-      let userIds = [];
-
-      // Déterminer les destinataires
-      if (formData.recipient_type === 'all') {
-        userIds = users.map(u => u.id);
-      } else if (formData.recipient_type === 'clients') {
-        userIds = users.filter(u => u.user_type === 'client').map(u => u.id);
-      } else if (formData.recipient_type === 'entreprises') {
-        userIds = users.filter(u => u.user_type === 'entreprise').map(u => u.id);
-      } else if (formData.recipient_type === 'specific') {
-        userIds = selectedUsers;
-      }
-
-      if (userIds.length === 0) {
-        setError('Veuillez sélectionner au moins un destinataire');
-        setLoading(false);
-        return;
-      }
-
-      // Envoyer la notification en masse
-      await api.post('/notifications/bulk/', {
-        user_ids: userIds,
-        type_notification: formData.type_notification,
+      // CHANGÉ POUR V2: Préparer les données selon le nouveau format
+      const payload = {
+        recipient_type: formData.recipient_type,
         titre: formData.titre,
         message: formData.message,
+        type_notification: formData.type_notification,
         lien: formData.lien
-      });
+      };
 
-      setSuccess(`Notification envoyée avec succès à ${userIds.length} utilisateur(s)`);
+      // Ajouter specific_recipients seulement si nécessaire
+      if (formData.recipient_type === 'specific') {
+        if (selectedUsers.length === 0) {
+          setError('Veuillez sélectionner au moins un destinataire');
+          setLoading(false);
+          return;
+        }
+        payload.specific_recipients = selectedUsers;
+      }
+
+      // CHANGÉ POUR V2: Utiliser le nouveau endpoint
+      const response = await api.post('/notifications/create_notification/', payload);
+
+      // Calculer le nombre de destinataires pour le message
+      let recipientCount = 0;
+      if (formData.recipient_type === 'all') {
+        recipientCount = users.length;
+      } else if (formData.recipient_type === 'clients') {
+        recipientCount = users.filter(u => u.user_type === 'client').length;
+      } else if (formData.recipient_type === 'entreprises') {
+        recipientCount = users.filter(u => u.user_type === 'entreprise').length;
+      } else if (formData.recipient_type === 'specific') {
+        recipientCount = selectedUsers.length;
+      }
+
+      setSuccess(`Notification créée avec succès pour ${recipientCount} destinataire(s)`);
       
       // Réinitialiser le formulaire
       setFormData({
         recipient_type: 'all',
-        user_ids: [],
+        specific_recipients: [],
         type_notification: 'general',
         titre: '',
         message: '',
@@ -111,7 +118,7 @@ export default function NotificationsManagement() {
       setSelectedUsers([]);
     } catch (err) {
       console.error('Erreur envoi notification:', err);
-      setError(err.response?.data?.message || 'Erreur lors de l\'envoi de la notification');
+      setError(err.response?.data?.message || 'Erreur lors de la création de la notification');
     } finally {
       setLoading(false);
     }
@@ -120,8 +127,8 @@ export default function NotificationsManagement() {
   return (
     <MainLayout>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* En-tête */}
-        <div className="flex justify-between items-center mb-8">
+        {/* En-tête - UPDATED */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 space-y-4 sm:space-y-0">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">
               Envoyer des Notifications
@@ -130,19 +137,28 @@ export default function NotificationsManagement() {
               Communiquez avec vos utilisateurs
             </p>
           </div>
-          <Link
-            to="/admin/dashboard"
-            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
-          >
-            Retour au dashboard
-          </Link>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              to="/admin/notifications-sent"
+              className="inline-flex items-center px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
+            >
+              <Eye className="w-4 h-4 mr-2" />
+              Voir mes notifications
+            </Link>
+            <Link
+              to="/admin/dashboard"
+              className="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              Retour au dashboard
+            </Link>
+          </div>
         </div>
 
         {/* Alertes */}
         {success && (
           <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4 flex items-start">
             <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 mr-3 flex-shrink-0" />
-            <div>
+            <div className="flex-1">
               <p className="text-green-800 font-medium">Succès</p>
               <p className="text-green-700 text-sm mt-1">{success}</p>
             </div>
@@ -158,7 +174,7 @@ export default function NotificationsManagement() {
         {error && (
           <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start">
             <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" />
-            <div>
+            <div className="flex-1">
               <p className="text-red-800 font-medium">Erreur</p>
               <p className="text-red-700 text-sm mt-1">{error}</p>
             </div>
@@ -178,7 +194,7 @@ export default function NotificationsManagement() {
             <label className="block text-sm font-medium text-gray-700 mb-3">
               Destinataires
             </label>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
               <button
                 type="button"
                 onClick={() => setFormData(prev => ({ ...prev, recipient_type: 'all' }))}
@@ -356,14 +372,17 @@ export default function NotificationsManagement() {
           <div className="flex items-center justify-end space-x-4 pt-4 border-t border-gray-200">
             <button
               type="button"
-              onClick={() => setFormData({
-                recipient_type: 'all',
-                user_ids: [],
-                type_notification: 'general',
-                titre: '',
-                message: '',
-                lien: ''
-              })}
+              onClick={() => {
+                setFormData({
+                  recipient_type: 'all',
+                  specific_recipients: [],
+                  type_notification: 'general',
+                  titre: '',
+                  message: '',
+                  lien: ''
+                });
+                setSelectedUsers([]);
+              }}
               className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
             >
               Réinitialiser

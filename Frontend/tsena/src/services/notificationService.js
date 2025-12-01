@@ -1,4 +1,4 @@
-// src/services/notificationService.js
+// src/services/notificationService.js - VERSION V2
 
 import api from './api';
 
@@ -36,10 +36,36 @@ export const notificationService = {
   },
 
   /**
-   * Supprimer une notification
+   * Masquer une notification (soft delete) - CHANGÉ POUR V2
    */
-  async deleteNotification(notificationId) {
-    await api.delete(`/notifications/${notificationId}/`);
+  async hideNotification(notificationId) {
+    await api.delete(`/notifications/${notificationId}/hide/`);
+  },
+
+  // NOUVEAUX ENDPOINTS POUR ADMIN V2
+  
+  /**
+   * Récupérer toutes les notifications créées (admin uniquement)
+   */
+  async getAdminNotifications() {
+    const response = await api.get('/notifications/list_admin/');
+    return response.data;
+  },
+
+  /**
+   * Obtenir les statistiques d'une notification (admin uniquement)
+   */
+  async getNotificationStats(notificationId) {
+    const response = await api.get(`/notifications/${notificationId}/stats/`);
+    return response.data;
+  },
+
+  /**
+   * Activer/désactiver une notification (admin uniquement)
+   */
+  async toggleActive(notificationId) {
+    const response = await api.patch(`/notifications/${notificationId}/toggle_active/`);
+    return response.data;
   }
 };
 

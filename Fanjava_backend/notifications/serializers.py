@@ -1,130 +1,165 @@
-# notifications/serializers.py - CORRIGÉ SELON LE MODÈLE
+# notifications/serializers.py - NOUVELLE ARCHITECTURE
 
 from rest_framework import serializers
-from .models import Notification
+from .models import Notification, NotificationStatus
 from users.models import CustomUser
 
 
 class NotificationSerializer(serializers.ModelSerializer):
-    """Serializer pour afficher les notifications"""
-    user_username = serializers.CharField(source='user.username', read_only=True)
-    user_email = serializers.EmailField(source='user.email', read_only=True)
+    """Serializer pour afficher les notifications aux utilisateurs"""
+    created_by_username = serializers.CharField(source='created_by.username', read_only=True)
     type_display = serializers.CharField(source='get_type_notification_display', read_only=True)
+    recipient_type_display = serializers.CharField(source='get_recipient_type_display', read_only=True)
+    recipient_count = serializers.SerializerMethodField()
+    
+    # Statut pour l'utilisateur actuel
+    lue = serializers.SerializerMethodField()
+    date_lecture = serializers.SerializerMethodField()
     
     class Meta:
         model = Notification
         fields = [
             'id', 
-            'user', 
-            'user_username',
-            'user_email',
+            'created_by',
+            'created_by_username',
             'titre', 
             'message', 
             'type_notification',
             'type_display',
-            'lien', 
-            'lue', 
+            'lien',
+            'recipient_type',
+            'recipient_type_display',
+            'recipient_count',
+            'active',
+            'lue',
             'date_lecture',
             'created_at'
         ]
-        read_only_fields = ['id', 'created_at', 'date_lecture']
+        read_only_fields = ['id', 'created_at', 'created_by']
+    
+    def get_recipient_count(self, obj):
+        return obj.get_recipient_count()
+    
+    def get_lue(self, obj):
+        """Récupérer le statut de lecture pour l'utilisateur actuel"""
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            status = NotificationStatus.objects.filter(
+                notification=obj,
+                user=request.user
+            ).first()
+            return status.lue if status else False
+        return False
+    
+    def get_date_lecture(self, obj):
+        """Récupérer la date de lecture pour l'utilisateur actuel"""
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            status = NotificationStatus.objects.filter(
+                notification=obj,
+                user=request.user
+            ).first()
+            return status.date_lecture if status else None
+        return None
 
 
 class NotificationCreateSerializer(serializers.ModelSerializer):
-    """Serializer pour créer une notification individuelle"""
+    """Serializer pour créer une notification (admin)"""
     
     class Meta:
         model = Notification
-        fields = ['user', 'titre', 'message', 'type_notification', 'lien']
+        fields = [
+            'titre',
+            'message',
+            'type_notification',
+            'lien',
+            'recipient_type',
+            'specific_recipients'
+        ]
     
     def validate(self, data):
-        if not data.get('titre') or not data.get('titre').strip():
-            raise serializers.ValidationError({'titre': 'Le titre est requis'})
-        
-        if not data.get('message') or not data.get('message').strip():
-            raise serializers.ValidationError({'message': 'Le message est requis'})
+        # Si envoi spécifique, vérifier que specific_recipients est fourni
+        if data.get('recipient_type') == 'specific':
+            if not data.get('specific_recipients'):
+                raise serializers.ValidationError({
+                    'specific_recipients': 'La liste des destinataires est requise pour un envoi spécifique'
+                })
+            
+            # Vérifier que tous les IDs existent
+            user_ids = data.get('specific_recipients', [])
+            existing_count = CustomUser.objects.filter(id__in=user_ids).count()
+            if existing_count != len(user_ids):
+                raise serializers.ValidationError({
+                    'specific_recipients': 'Certains utilisateurs n\'existent pas'
+                })
         
         return data
-
-
-class NotificationBulkCreateSerializer(serializers.Serializer):
-    """Serializer pour créer des notifications en masse"""
-    user_ids = serializers.ListField(
-        child=serializers.IntegerField(),
-        required=True,
-        help_text="Liste des IDs des utilisateurs à notifier"
-    )
-    titre = serializers.CharField(
-        max_length=200, 
-        required=True,
-        help_text="Titre de la notification"
-    )
-    message = serializers.CharField(
-        required=True,
-        help_text="Contenu du message"
-    )
-    type_notification = serializers.ChoiceField(
-        choices=[
-            ('general', 'Général'),
-            ('order', 'Nouvelle commande'),
-            ('order_status', 'Changement de statut commande'),
-            ('stock', 'Alerte stock'),
-            ('payment', 'Paiement'),
-            ('review', 'Nouvel avis'),
-            ('account', 'Compte'),
-        ],
-        default='general',
-        help_text="Type de notification"
-    )
-    lien = serializers.CharField(
-        max_length=500, 
-        required=False, 
-        allow_blank=True,
-        help_text="Lien optionnel vers une page spécifique"
-    )
-    
-    def validate_user_ids(self, value):
-        """Valider que les user_ids sont valides"""
-        if not value:
-            raise serializers.ValidationError("La liste des utilisateurs ne peut pas être vide")
-        
-        existing_users = CustomUser.objects.filter(id__in=value)
-        existing_ids = set(existing_users.values_list('id', flat=True))
-        invalid_ids = set(value) - existing_ids
-        
-        if invalid_ids:
-            raise serializers.ValidationError(
-                f"Les utilisateurs suivants n'existent pas : {list(invalid_ids)}"
-            )
-        
-        return value
-    
-    def validate_titre(self, value):
-        """Valider le titre"""
-        if not value or not value.strip():
-            raise serializers.ValidationError("Le titre ne peut pas être vide")
-        return value.strip()
-    
-    def validate_message(self, value):
-        """Valider le message"""
-        if not value or not value.strip():
-            raise serializers.ValidationError("Le message ne peut pas être vide")
-        return value.strip()
     
     def create(self, validated_data):
-        """Créer les notifications pour tous les utilisateurs"""
-        user_ids = validated_data.pop('user_ids')
-        users = CustomUser.objects.filter(id__in=user_ids)
+        # Ajouter le créateur (admin)
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            validated_data['created_by'] = request.user
         
-        notifications = []
-        for user in users:
-            notification = Notification.objects.create(
-                user=user,
-                titre=validated_data.get('titre'),
-                message=validated_data.get('message'),
-                type_notification=validated_data.get('type_notification', 'general'),
-                lien=validated_data.get('lien', '')
-            )
-            notifications.append(notification)
-        
-        return notifications
+        return super().create(validated_data)
+
+
+class NotificationAdminSerializer(serializers.ModelSerializer):
+    """Serializer pour l'admin (vue de toutes les notifications créées)"""
+    created_by_username = serializers.CharField(source='created_by.username', read_only=True)
+    type_display = serializers.CharField(source='get_type_notification_display', read_only=True)
+    recipient_type_display = serializers.CharField(source='get_recipient_type_display', read_only=True)
+    recipient_count = serializers.SerializerMethodField()
+    read_count = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Notification
+        fields = [
+            'id',
+            'created_by',
+            'created_by_username',
+            'titre',
+            'message',
+            'type_notification',
+            'type_display',
+            'lien',
+            'recipient_type',
+            'recipient_type_display',
+            'specific_recipients',
+            'recipient_count',
+            'read_count',
+            'active',
+            'created_at'
+        ]
+    
+    def get_recipient_count(self, obj):
+        return obj.get_recipient_count()
+    
+    def get_read_count(self, obj):
+        """Nombre d'utilisateurs ayant lu la notification"""
+        return NotificationStatus.objects.filter(
+            notification=obj,
+            lue=True
+        ).count()
+
+
+class NotificationStatusSerializer(serializers.ModelSerializer):
+    """Serializer pour les statuts de notification"""
+    notification_titre = serializers.CharField(source='notification.titre', read_only=True)
+    user_username = serializers.CharField(source='user.username', read_only=True)
+    
+    class Meta:
+        model = NotificationStatus
+        fields = [
+            'id',
+            'notification',
+            'notification_titre',
+            'user',
+            'user_username',
+            'lue',
+            'date_lecture',
+            'supprimee',
+            'date_suppression',
+            'created_at'
+        ]
+        read_only_fields = ['id', 'created_at', 'date_lecture', 'date_suppression']

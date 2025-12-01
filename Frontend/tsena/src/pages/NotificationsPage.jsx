@@ -1,4 +1,4 @@
-// src/pages/NotificationsPage.jsx
+// src/pages/NotificationsPage.jsx - VERSION V2
 
 import { useState, useEffect } from 'react';
 import { Bell, Check, Trash2, Filter } from 'lucide-react';
@@ -43,9 +43,9 @@ export default function NotificationsPage() {
     }
   };
 
-  const handleDelete = async (notifId) => {
+  const handleHide = async (notifId) => {
     try {
-      await notificationService.deleteNotification(notifId);
+      await notificationService.hideNotification(notifId); // CHANGÉ: hideNotification au lieu de deleteNotification
       await loadNotifications();
     } catch (error) {
       console.error('Erreur:', error);
@@ -237,9 +237,9 @@ export default function NotificationsPage() {
                               </button>
                             )}
                             <button
-                              onClick={() => handleDelete(notif.id)}
+                              onClick={() => handleHide(notif.id)}
                               className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-                              title="Supprimer"
+                              title="Masquer"
                             >
                               <Trash2 className="w-5 h-5" />
                             </button>

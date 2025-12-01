@@ -1,4 +1,4 @@
-// src/components/NotificationBell.jsx
+// src/components/NotificationBell.jsx - VERSION V2
 
 import { useState, useEffect } from 'react';
 import { Bell, X, Check, Trash2 } from 'lucide-react';
@@ -52,12 +52,12 @@ export default function NotificationBell() {
     }
   };
 
-  const handleDelete = async (notifId) => {
+  const handleHide = async (notifId) => {
     try {
-      await notificationService.deleteNotification(notifId);
+      await notificationService.hideNotification(notifId); // CHANGÉ: hideNotification au lieu de deleteNotification
       await loadNotifications();
     } catch (error) {
-      console.error('Erreur suppression notification:', error);
+      console.error('Erreur masquage notification:', error);
     }
   };
 
@@ -194,11 +194,11 @@ export default function NotificationBell() {
                               </button>
                             )}
                             <button
-                              onClick={() => handleDelete(notif.id)}
+                              onClick={() => handleHide(notif.id)}
                               className="text-xs text-red-600 hover:text-red-800 flex items-center"
                             >
                               <Trash2 className="w-3 h-3 mr-1" />
-                              Supprimer
+                              Masquer
                             </button>
                           </div>
                         </div>
