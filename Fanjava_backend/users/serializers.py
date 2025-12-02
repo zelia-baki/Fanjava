@@ -23,30 +23,39 @@ class UserSerializer(serializers.ModelSerializer):
     
     is_client = serializers.SerializerMethodField()
     is_entreprise = serializers.SerializerMethodField()
-    is_admin = serializers.SerializerMethodField()  # ✅ Ajout
+    is_admin = serializers.SerializerMethodField()
     
     class Meta:
         model = CustomUser
         fields = [
-            'id', 'username', 'email', 'user_type', 'phone', 
+            'id', 
+            'username', 
+            'email', 
+            'first_name',      # ✅ AJOUT
+            'last_name',       # ✅ AJOUT
+            'user_type', 
+            'phone',
+            'is_active',       # ✅ AJOUT (le plus important!)
+            'created_at',      # ✅ AJOUT
             'preferred_language', 
             'is_client',
             'is_entreprise',
-            'is_admin',  # ✅ Ajout
+            'is_admin',
             'client', 
             'entreprise'
         ]
+        read_only_fields = ['created_at']  # ✅ AJOUT
     
     def get_is_client(self, obj):
         return obj.user_type == 'client'
     
     def get_is_entreprise(self, obj):
-        # ✅ IMPORTANT : Admin peut aussi accéder aux pages entreprise
         return obj.user_type in ['entreprise', 'admin']
     
     def get_is_admin(self, obj):
         return obj.user_type == 'admin'
-
+    
+    
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, validators=[validate_password])
     password2 = serializers.CharField(write_only=True)

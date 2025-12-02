@@ -1,10 +1,12 @@
+# products/views.py - SECTION CategorieViewSet MODIFIÉE
+
 from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-from rest_framework.exceptions import PermissionDenied
-from django.db.models import Q
+from rest_framework.exceptions import PermissionDenied, ValidationError
+from django.db.models import Q, Count
 from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import Categorie, Produit, ImageProduit, Avis
@@ -44,6 +46,9 @@ class CategorieViewSet(viewsets.ModelViewSet):
         """Filtrer les catégories actives pour les utilisateurs normaux"""
         queryset = super().get_queryset()
         
+        # ✅ Ajouter l'annotation du nombre de produits
+        queryset = queryset.annotate(nombre_produits=Count('produits'))
+        
         if self.request.user.is_authenticated:
             if (self.request.user.is_staff or 
                 self.request.user.is_superuser or 
@@ -51,6 +56,51 @@ class CategorieViewSet(viewsets.ModelViewSet):
                 return queryset
         
         return queryset.filter(active=True)
+    
+    def destroy(self, request, *args, **kwargs):
+        """
+        ✅ NOUVELLE MÉTHODE: Empêcher la suppression si la catégorie contient des produits
+        """
+        categorie = self.get_object()
+        
+        # Compter le nombre de produits dans cette catégorie
+        nombre_produits = categorie.produits.count()
+        
+        if nombre_produits > 0:
+            return Response(
+                {
+                    'error': f'Impossible de supprimer cette catégorie car elle contient {nombre_produits} produit(s).',
+                    'detail': 'Veuillez d\'abord déplacer ou supprimer tous les produits de cette catégorie.',
+                    'nombre_produits': nombre_produits
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Si aucun produit, autoriser la suppression
+        self.perform_destroy(categorie)
+        return Response(
+            {'message': 'Catégorie supprimée avec succès'},
+            status=status.HTTP_204_NO_CONTENT
+        )
+    
+    @action(detail=True, methods=['get'])
+    def produits(self, request, slug=None):
+        """
+        ✅ NOUVELLE ACTION: Récupérer tous les produits d'une catégorie
+        Utile pour voir ce qui bloque la suppression
+        """
+        categorie = self.get_object()
+        produits = categorie.produits.all()
+        
+        # Serializer simple pour la liste
+        from .serializers import ProduitListSerializer
+        serializer = ProduitListSerializer(produits, many=True, context={'request': request})
+        
+        return Response({
+            'categorie': categorie.nom,
+            'nombre_produits': produits.count(),
+            'produits': serializer.data
+        })
 
 
 class ImageProduitViewSet(viewsets.ModelViewSet):

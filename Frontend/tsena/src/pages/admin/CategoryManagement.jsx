@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import MainLayout from '@/layouts/MainLayout';
-import { Plus, Edit, Trash2, Loader2, Search, Tag } from 'lucide-react';
+import { Plus, Edit, Trash2, Loader2, Search, Tag, AlertCircle, Package } from 'lucide-react';
 import api from '@/services/api';
 
 export default function CategoryManagement() {
@@ -17,6 +17,11 @@ export default function CategoryManagement() {
   });
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
+  
+  // ✅ NOUVEAU: Modal pour afficher les produits bloquant la suppression
+  const [showProductsModal, setShowProductsModal] = useState(false);
+  const [categoryProducts, setCategoryProducts] = useState([]);
+  const [loadingProducts, setLoadingProducts] = useState(false);
 
   useEffect(() => {
     fetchCategories();
@@ -75,11 +80,9 @@ export default function CategoryManagement() {
       setSaving(true);
       
       if (editingCategory) {
-        // Mise à jour
-        await api.put(`/products/categories/${editingCategory.id}/`, formData);
+        await api.put(`/products/categories/${editingCategory.slug}/`, formData);
         alert('Catégorie mise à jour !');
       } else {
-        // Création
         await api.post('/products/categories/', formData);
         alert('Catégorie créée !');
       }
@@ -98,18 +101,54 @@ export default function CategoryManagement() {
     }
   };
 
+  // ✅ NOUVELLE FONCTION: Voir les produits d'une catégorie
+  const handleViewProducts = async (category) => {
+    try {
+      setLoadingProducts(true);
+      setShowProductsModal(true);
+      const response = await api.get(`/products/categories/${category.slug}/produits/`);
+      setCategoryProducts({
+        categorie: response.data.categorie,
+        nombre: response.data.nombre_produits,
+        produits: response.data.produits
+      });
+    } catch (err) {
+      console.error('Erreur chargement produits:', err);
+      alert('Erreur lors du chargement des produits');
+      setShowProductsModal(false);
+    } finally {
+      setLoadingProducts(false);
+    }
+  };
+
   const handleDelete = async (category) => {
     if (!window.confirm(`Supprimer la catégorie "${category.nom}" ?`)) {
       return;
     }
 
     try {
-      await api.delete(`/products/categories/${category.id}/`);
+      await api.delete(`/products/categories/${category.slug}/`);
       alert('Catégorie supprimée !');
       fetchCategories();
     } catch (err) {
       console.error('Erreur suppression:', err);
-      alert('Erreur lors de la suppression');
+      
+      // ✅ GESTION SPÉCIALE: Si la catégorie contient des produits
+      if (err.response?.status === 400 && err.response?.data?.nombre_produits) {
+        const nombreProduits = err.response.data.nombre_produits;
+        
+        // Afficher une alerte personnalisée
+        if (window.confirm(
+          `❌ Impossible de supprimer cette catégorie!\n\n` +
+          `Elle contient ${nombreProduits} produit(s).\n\n` +
+          `Voulez-vous voir la liste des produits?`
+        )) {
+          // Ouvrir le modal avec les produits
+          handleViewProducts(category);
+        }
+      } else {
+        alert('Erreur lors de la suppression');
+      }
     }
   };
 
@@ -160,6 +199,17 @@ export default function CategoryManagement() {
           </div>
         </div>
 
+        {/* ✅ NOUVEAU: Avertissement */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <div className="flex items-start space-x-3">
+            <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+            <div className="text-sm text-blue-800">
+              <p className="font-semibold mb-1">💡 Information importante</p>
+              <p>Vous ne pouvez pas supprimer une catégorie qui contient des produits. Déplacez d'abord les produits vers une autre catégorie.</p>
+            </div>
+          </div>
+        </div>
+
         {/* Liste */}
         {filteredCategories.length === 0 ? (
           <div className="bg-white rounded-lg shadow-sm p-12 text-center">
@@ -203,6 +253,19 @@ export default function CategoryManagement() {
                   <p className="text-sm text-gray-600 mb-4 line-clamp-2">
                     {category.description}
                   </p>
+                )}
+
+                {/* ✅ NOUVEAU: Afficher le nombre de produits */}
+                {category.nombre_produits !== undefined && (
+                  <div className="mb-3 pb-3 border-b border-gray-200">
+                    <button
+                      onClick={() => handleViewProducts(category)}
+                      className="flex items-center text-sm text-gray-600 hover:text-blue-600"
+                    >
+                      <Package className="w-4 h-4 mr-1" />
+                      {category.nombre_produits} produit{category.nombre_produits > 1 ? 's' : ''}
+                    </button>
+                  </div>
                 )}
 
                 <div className="flex items-center justify-end space-x-2 pt-3 border-t">
@@ -306,6 +369,82 @@ export default function CategoryManagement() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* ✅ NOUVEAU: Modal Liste des Produits */}
+        {showProductsModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h2 className="text-2xl font-bold text-gray-900">
+                  Produits dans "{categoryProducts.categorie}"
+                </h2>
+                <p className="text-sm text-gray-600 mt-1">
+                  {categoryProducts.nombre} produit{categoryProducts.nombre > 1 ? 's' : ''} trouvé{categoryProducts.nombre > 1 ? 's' : ''}
+                </p>
+              </div>
+
+              <div className="flex-1 overflow-y-auto px-6 py-4">
+                {loadingProducts ? (
+                  <div className="flex justify-center items-center py-12">
+                    <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {categoryProducts.produits && categoryProducts.produits.map((product) => (
+                      <div key={product.id} className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
+                        <div className="w-12 h-12 bg-gray-200 rounded overflow-hidden flex-shrink-0">
+                          {product.image_principale ? (
+                            <img
+                              src={product.image_principale}
+                              alt={product.nom}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Package className="w-6 h-6 text-gray-400" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-semibold text-gray-900">{product.nom}</p>
+                          <p className="text-sm text-gray-600">
+                            {product.prix} Ar • Stock: {product.stock}
+                          </p>
+                        </div>
+                        <Link
+                          to={`/products/${product.slug}`}
+                          className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                          target="_blank"
+                        >
+                          Voir →
+                        </Link>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="px-6 py-4 border-t border-gray-200 bg-yellow-50">
+                <div className="flex items-start space-x-3">
+                  <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+                  <div className="text-sm text-yellow-800">
+                    <p className="font-semibold mb-1">Action requise</p>
+                    <p>Pour supprimer cette catégorie, vous devez d'abord déplacer ou supprimer tous ces produits.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
+                <button
+                  onClick={() => setShowProductsModal(false)}
+                  className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+                >
+                  Fermer
+                </button>
+              </div>
             </div>
           </div>
         )}

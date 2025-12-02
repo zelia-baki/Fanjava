@@ -43,6 +43,7 @@ import NotificationsManagement from '@/pages/admin/NotificationsManagement';
 import CategoryManagement from '@/pages/admin/CategoryManagement';
 import NotificationsPage from '@/pages/NotificationsPage';
 import NotificationsSent from './pages/admin/NotificationsSent';
+import UserDetail from '@/pages/admin/UserDetail';
 
 
 
@@ -235,6 +236,15 @@ function App() {
                 <NotificationsPage />
               </ProtectedRoute>
             } />
+
+            <Route
+              path="/admin/users/:id"
+              element={
+                <ProtectedRoute userType="admin">
+                  <UserDetail />
+                </ProtectedRoute>
+              }
+            />
 
             {/* ==================== ROUTE 404 ==================== */}
             <Route

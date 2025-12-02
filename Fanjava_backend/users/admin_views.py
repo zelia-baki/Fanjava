@@ -9,10 +9,11 @@ from .serializers import UserSerializer, ClientSerializer, EntrepriseSerializer
 from .permissions import IsAdminUser
 
 
-class AdminUserViewSet(viewsets.ReadOnlyModelViewSet):
+class AdminUserViewSet(viewsets.ModelViewSet):  # ✅ Changé de ReadOnlyModelViewSet à ModelViewSet
     """
     ViewSet pour la gestion admin de tous les utilisateurs
     Accessible uniquement aux admins
+    Permet maintenant la mise à jour partielle (PATCH) pour is_active, etc.
     """
     permission_classes = [IsAdminUser]
     serializer_class = UserSerializer
@@ -29,6 +30,36 @@ class AdminUserViewSet(viewsets.ReadOnlyModelViewSet):
         user = self.get_object()
         serializer = self.get_serializer(user)
         return Response(serializer.data)
+    
+    def partial_update(self, request, pk=None):
+        """
+        Mettre à jour partiellement un utilisateur (PATCH)
+        Permet à l'admin de modifier:
+        - is_active (activer/désactiver le compte)
+        - user_type (changer le type d'utilisateur)
+        - first_name, last_name, email, etc.
+        """
+        user = self.get_object()
+        serializer = self.get_serializer(user, data=request.data, partial=True)
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def update(self, request, pk=None):
+        """
+        Mettre à jour complètement un utilisateur (PUT)
+        """
+        user = self.get_object()
+        serializer = self.get_serializer(user, data=request.data)
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     @action(detail=False, methods=['get'])
     def stats(self, request):
