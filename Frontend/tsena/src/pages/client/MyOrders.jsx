@@ -157,7 +157,7 @@ export default function MyOrders() {
                   {/* Actions */}
                   <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
                     <Link
-                      to={`/orders/${order.id}`}
+                      to={`/profile/orders/${order.id}`}
                       className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                     >
                       Voir les détails

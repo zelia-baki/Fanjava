@@ -57,8 +57,46 @@ export const orderService = {
    * Créer une commande depuis le panier
    */
   async createOrderFromCart(orderData) {
-    const response = await api.post('/orders/commandes/create_from_cart/', orderData);
-    return response.data;
+    // Récupérer le panier depuis localStorage
+    const cartString = localStorage.getItem('cart');
+    console.log('🛒 Cart brut localStorage:', cartString);
+    
+    const cartData = JSON.parse(cartString || '{"items": []}');
+    console.log('🛒 Cart parsé:', cartData);
+    
+    // Extraire les items du panier
+    const cartItems = cartData.items || [];
+    console.log('📦 Cart items:', cartItems);
+    
+    // Transformer les items en format attendu par Django
+    const items = cartItems.map(item => {
+      console.log('📦 Item original:', item);
+      const formatted = {
+        produit_id: item.produit?.id || item.id,
+        quantite: item.quantite || item.quantity || 1
+      };
+      console.log('✅ Item formaté:', formatted);
+      return formatted;
+    });
+    
+    console.log('✅ Tous les items formatés:', items);
+    
+    // Ajouter les items aux données de commande
+    const dataWithItems = {
+      ...orderData,
+      items: items
+    };
+    
+    console.log('📤 Données complètes envoyées à Django:', dataWithItems);
+    
+    try {
+      const response = await api.post('/orders/commandes/create_from_cart/', dataWithItems);
+      console.log('✅ Réponse Django:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('❌ Erreur Django:', error.response?.data);
+      throw error;
+    }
   },
 
   /**

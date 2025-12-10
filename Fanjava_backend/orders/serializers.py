@@ -96,17 +96,25 @@ class CommandeSerializer(serializers.ModelSerializer):
         read_only_fields = [
             'numero_commande',
             'montant_final',
-            'client',              # ← AJOUTE ICI
-            'entreprise',          # ← AJOUTE ICI
-            'montant_total',       # ← AJOUTE ICI
+            'client',
+            'entreprise',
+            'montant_total',
             'frais_livraison', 
             'created_at',
             'updated_at'
         ]
 
 
+# ✅ NOUVEAU SERIALIZER POUR ACCEPTER LES ITEMS DU PANIER
+class CartItemSerializer(serializers.Serializer):
+    """Serializer pour un item du panier frontend"""
+    produit_id = serializers.IntegerField()
+    quantite = serializers.IntegerField(min_value=1)
+
+
 class CommandeCreateSerializer(serializers.Serializer):
     """Serializer pour créer une commande depuis le panier"""
+    # Adresse de livraison
     adresse_livraison = serializers.CharField(max_length=500)
     ville_livraison = serializers.CharField(max_length=100)
     code_postal_livraison = serializers.CharField(max_length=10)
@@ -118,3 +126,6 @@ class CommandeCreateSerializer(serializers.Serializer):
         decimal_places=2, 
         default=0.00
     )
+    
+    # ✅ AJOUT : Items du panier
+    items = CartItemSerializer(many=True)

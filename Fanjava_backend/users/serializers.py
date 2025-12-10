@@ -16,7 +16,6 @@ class EntrepriseSerializer(serializers.ModelSerializer):
         read_only_fields = ['status', 'verified']
 
 # users/serializers.py
-
 class UserSerializer(serializers.ModelSerializer):
     client = ClientSerializer(required=False)
     entreprise = EntrepriseSerializer(required=False)
@@ -31,12 +30,12 @@ class UserSerializer(serializers.ModelSerializer):
             'id', 
             'username', 
             'email', 
-            'first_name',      # ✅ AJOUT
-            'last_name',       # ✅ AJOUT
+            'first_name',
+            'last_name',
             'user_type', 
             'phone',
-            'is_active',       # ✅ AJOUT (le plus important!)
-            'created_at',      # ✅ AJOUT
+            'is_active',
+            'created_at',
             'preferred_language', 
             'is_client',
             'is_entreprise',
@@ -44,7 +43,7 @@ class UserSerializer(serializers.ModelSerializer):
             'client', 
             'entreprise'
         ]
-        read_only_fields = ['created_at']  # ✅ AJOUT
+        read_only_fields = ['created_at']
     
     def get_is_client(self, obj):
         return obj.user_type == 'client'
@@ -55,6 +54,31 @@ class UserSerializer(serializers.ModelSerializer):
     def get_is_admin(self, obj):
         return obj.user_type == 'admin'
     
+    def update(self, instance, validated_data):
+        # Extraire les données nested
+        client_data = validated_data.pop('client', None)
+        entreprise_data = validated_data.pop('entreprise', None)
+        
+        # Mettre à jour l'utilisateur
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        
+        # Mettre à jour le profil client si présent
+        if client_data and hasattr(instance, 'client'):
+            client = instance.client
+            for attr, value in client_data.items():
+                setattr(client, attr, value)
+            client.save()
+        
+        # Mettre à jour le profil entreprise si présent
+        if entreprise_data and hasattr(instance, 'entreprise'):
+            entreprise = instance.entreprise
+            for attr, value in entreprise_data.items():
+                setattr(entreprise, attr, value)
+            entreprise.save()
+        
+        return instance    
     
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, validators=[validate_password])

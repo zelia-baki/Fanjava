@@ -202,7 +202,7 @@ export default function ClientDashboard() {
                         </div>
                       </div>
                       <Link
-                        to={`/orders/${order.id}`}
+                        to={`/profile/orders/${order.id}`}
                         className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center"
                       >
                         Voir les détails

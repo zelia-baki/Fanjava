@@ -13,6 +13,7 @@ import RegisterEntreprise from '@/pages/auth/RegisterEntreprise';
 // Public - Products
 import ProductList from '@/pages/products/ProductList';
 import ProductDetail from '@/pages/products/ProductDetail';
+import ProfileEdit from '@/pages/client/ProfileEdit';
 
 // Cart & Checkout
 import Cart from '@/pages/cart/Cart';
@@ -23,6 +24,8 @@ import OrderConfirmation from '@/pages/cart/OrderConfirmation';
 import ClientDashboard from '@/pages/client/ClientDashboard';
 import MyOrders from '@/pages/client/MyOrders';
 import MyReviews from '@/pages/client/MyReviews';
+import ClientOrderDetail from '@/pages/client/ClientOrderDetail';
+import UserDetail from '@/pages/admin/UserDetail';
 
 // Entreprise
 import EntrepriseDashboard from '@/pages/entreprise/EntrepriseDashboard';
@@ -43,7 +46,6 @@ import NotificationsManagement from '@/pages/admin/NotificationsManagement';
 import CategoryManagement from '@/pages/admin/CategoryManagement';
 import NotificationsPage from '@/pages/NotificationsPage';
 import NotificationsSent from './pages/admin/NotificationsSent';
-import UserDetail from '@/pages/admin/UserDetail';
 
 
 
@@ -90,6 +92,23 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
+            <Route
+              path="/profile/orders/:id"
+              element={
+                <ProtectedRoute userType="client">
+                  <ClientOrderDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile/edit"
+              element={
+                <ProtectedRoute userType="client">
+                  <ProfileEdit />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/checkout"
               element={
@@ -99,7 +118,7 @@ function App() {
               }
             />
             <Route
-              path="/order-confirmation/:orderId"
+              path="/order-confirmation"
               element={
                 <ProtectedRoute userType="client">
                   <OrderConfirmation />

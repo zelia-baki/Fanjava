@@ -4,7 +4,7 @@ import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { orderService } from '@/services/orderService';
 import MainLayout from '@/layouts/MainLayout';
-import { ArrowLeft, CreditCard, MapPin, Phone, User, Loader2 } from 'lucide-react';
+import { ArrowLeft, CreditCard, MapPin, Phone, User, Loader2, Info } from 'lucide-react';
 
 export default function Checkout() {
   const navigate = useNavigate();
@@ -21,7 +21,7 @@ export default function Checkout() {
     pays_livraison: 'Madagascar',
     telephone_livraison: '',
     note_client: '',
-    frais_livraison: '5000.00', // 5000 Ar par défaut
+    frais_livraison: '0.00', // À discuter avec l'entreprise
   });
 
   const [errors, setErrors] = useState({});
@@ -245,21 +245,20 @@ export default function Checkout() {
                   )}
                 </div>
 
-                {/* Frais de livraison */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Frais de livraison
-                  </label>
-                  <select
-                    name="frais_livraison"
-                    value={formData.frais_livraison}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="5000.00">Livraison standard - 5 000 Ar</option>
-                    <option value="10000.00">Livraison express - 10 000 Ar</option>
-                    <option value="0.00">Retrait en magasin - Gratuit</option>
-                  </select>
+                {/* Info frais de livraison */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-start">
+                    <Info className="w-5 h-5 text-blue-600 mr-2 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm font-semibold text-blue-900 mb-1">
+                        Frais de livraison
+                      </p>
+                      <p className="text-sm text-blue-800">
+                        Les frais de livraison seront discutés directement avec l'entreprise vendeuse. 
+                        Vous serez contacté pour confirmer le montant avant l'expédition.
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Note */}
@@ -340,12 +339,15 @@ export default function Checkout() {
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Frais de livraison</span>
-                  <span>{fraisLivraison.toFixed(2)} Ar</span>
+                  <span className="text-sm text-blue-600">À discuter</span>
                 </div>
                 <div className="border-t pt-3 flex justify-between text-xl font-bold">
-                  <span>Total</span>
-                  <span className="text-blue-600">{total.toFixed(2)} Ar</span>
+                  <span>Total estimé</span>
+                  <span className="text-blue-600">{sousTotal.toFixed(2)} Ar</span>
                 </div>
+                <p className="text-xs text-gray-500 text-center">
+                  + frais de livraison (à confirmer)
+                </p>
               </div>
 
               {/* Info sécurité */}
