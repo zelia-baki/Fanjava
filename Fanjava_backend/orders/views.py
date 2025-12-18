@@ -129,8 +129,10 @@ class CommandeViewSet(viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         """
         Permettre la mise à jour du statut (entreprise uniquement)
+        ✅ AVEC NOTIFICATION AUTOMATIQUE
         """
         commande = self.get_object()
+        old_status = commande.status  # ✅ SAUVEGARDER L'ANCIEN STATUT
         
         # Vérifier que c'est bien l'entreprise de la commande
         if hasattr(request.user, 'entreprise'):
@@ -149,6 +151,30 @@ class CommandeViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(commande, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        
+        # ✅ CRÉER NOTIFICATION SI LE STATUT A CHANGÉ
+        if old_status != commande.status:
+            from notifications.models import Notification
+            
+            status_labels = {
+                'pending': 'En attente',
+                'confirmed': 'Confirmée',
+                'processing': 'En préparation',
+                'shipped': 'Expédiée',
+                'delivered': 'Livrée',
+                'cancelled': 'Annulée'
+            }
+            
+            Notification.objects.create(
+                created_by=request.user,
+                type_notification='order_status',
+                titre=f'Commande #{commande.numero_commande}',
+                message=f'Votre commande est maintenant : {status_labels.get(commande.status, commande.status)}',
+                lien=f'/profile/orders/{commande.id}',
+                recipient_type='specific',
+                specific_recipients=[commande.client.user.id],
+                active=True
+            )
         
         return Response(serializer.data)
     

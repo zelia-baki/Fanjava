@@ -162,47 +162,48 @@ export default function ProductList() {
           </div>
         )}
 
-        {/* Loading */}
-        {loading && (
-          <div className="flex justify-center items-center py-16">
-            <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
-            <span className="ml-3 text-gray-600">Chargement des produits...</span>
-          </div>
-        )}
-
         {/* Liste des produits */}
-        {!loading && (
-          <>
-            {products.length === 0 ? (
-              <div className="text-center py-16">
-                <Filter className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                  Aucun produit trouvé
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  Essayez de modifier vos critères de recherche
-                </p>
-                <button
-                  onClick={clearFilters}
-                  className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
-                >
-                  Voir tous les produits
-                </button>
-              </div>
-            ) : (
-              <>
-                <p className="text-gray-600 mb-4">
-                  {products.length} produit{products.length > 1 ? 's' : ''} trouvé{products.length > 1 ? 's' : ''}
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {products.map((product) => (
-                    <ProductCard key={product.id} product={product} />
-                  ))}
+        <div className="relative">
+          {loading && products.length === 0 ? (
+            <div className="flex justify-center items-center py-16">
+              <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+              <span className="ml-3 text-gray-600">Chargement des produits...</span>
+            </div>
+          ) : products.length === 0 ? (
+            <div className="text-center py-16">
+              <Filter className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                Aucun produit trouvé
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Essayez de modifier vos critères de recherche
+              </p>
+              <button
+                onClick={clearFilters}
+                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+              >
+                Voir tous les produits
+              </button>
+            </div>
+          ) : (
+            <>
+              {loading && (
+                <div className="absolute top-0 right-0 bg-white/80 px-3 py-1 rounded-lg shadow-sm z-10">
+                  <Loader2 className="w-4 h-4 text-blue-600 animate-spin inline" />
+                  <span className="ml-2 text-sm text-gray-600">Recherche...</span>
                 </div>
-              </>
-            )}
-          </>
-        )}
+              )}
+              <p className="text-gray-600 mb-4">
+                {products.length} produit{products.length > 1 ? 's' : ''} trouvé{products.length > 1 ? 's' : ''}
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {products.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </MainLayout>
   );

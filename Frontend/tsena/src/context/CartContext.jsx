@@ -1,4 +1,4 @@
-import { createContext, useState, useContext, useEffect } from 'react';
+import { createContext, useState, useContext, useEffect, useMemo } from 'react';
 import { orderService } from '@/services/orderService';
 import { useAuth } from './AuthContext';
 
@@ -31,6 +31,15 @@ export const CartProvider = ({ children }) => {
       }
     }
   }, [isAuthenticated]);
+
+  // OPTIMISATION - Mémorisation des calculs
+  const total = useMemo(() => {
+    return parseFloat(cart.total || '0.00');
+  }, [cart.total]);
+
+  const itemCount = useMemo(() => {
+    return cart.nombre_items || 0;
+  }, [cart.nombre_items]);
 
   /**
    * Récupérer le panier depuis l'API
@@ -228,20 +237,6 @@ export const CartProvider = ({ children }) => {
   };
 
   /**
-   * Obtenir le montant total
-   */
-  const getTotal = () => {
-    return parseFloat(cart.total || '0.00');
-  };
-
-  /**
-   * Obtenir le nombre total d'articles
-   */
-  const getItemCount = () => {
-    return cart.nombre_items || 0;
-  };
-
-  /**
    * Synchroniser le panier localStorage avec l'API après connexion
    */
   const syncCartAfterLogin = async () => {
@@ -278,8 +273,8 @@ export const CartProvider = ({ children }) => {
         removeFromCart,
         updateQuantity,
         clearCart,
-        getTotal,
-        getItemCount,
+        getTotal: () => total,
+        getItemCount: () => itemCount,
         fetchCart,
         syncCartAfterLogin,
       }}

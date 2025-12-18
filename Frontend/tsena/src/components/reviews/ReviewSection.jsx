@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Star, TrendingUp } from 'lucide-react';
+import { Star } from 'lucide-react';
 import ReviewList from './ReviewList';
 import ReviewForm from './ReviewForm';
 import { useAuth } from '@/context/AuthContext';
@@ -17,37 +17,35 @@ export default function ReviewSection({ produitId, noteMoyenne, nombreAvis }) {
     checkCanReview();
   }, [produitId]);
 
- const fetchAvis = async () => {
-  try {
-    setLoading(true);
-    // Au lieu de /produits/{id}/avis/, utilise l'endpoint avis directement
-    const response = await api.get(`/products/avis/?produit=${produitId}`);
-    setAvis(response.data.results || response.data);
-  } catch (err) {
-    console.error('Erreur chargement avis:', err);
-  } finally {
-    setLoading(false);
-  }
-};
+  const fetchAvis = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get(`/products/avis/?produit=${produitId}`);
+      // Les données sont déjà enrichies par le backend
+      setAvis(response.data.results || response.data);
+    } catch (err) {
+      console.error('Erreur chargement avis:', err);
+      setAvis([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const checkCanReview = async () => {
-    // Vérifier si l'utilisateur est un client et a acheté le produit
     if (!user || !user.client) {
       setCanReview(false);
       return;
     }
 
     try {
-      // Appeler l'API pour vérifier
       const response = await api.get(`/products/avis/?produit=${produitId}`);
-      // Si l'utilisateur a déjà laissé un avis, il ne peut pas en laisser un autre
       const hasReviewed = response.data.results?.some(
         review => review.client === user.client.id
       );
       setCanReview(!hasReviewed);
     } catch (err) {
       console.error('Erreur vérification avis:', err);
-      setCanReview(true); // Par défaut, autoriser
+      setCanReview(true);
     }
   };
 
@@ -98,14 +96,14 @@ export default function ReviewSection({ produitId, noteMoyenne, nombreAvis }) {
         {/* Note moyenne */}
         <div className="bg-white rounded-lg border border-gray-200 p-6 text-center">
           <div className="text-4xl font-bold text-gray-900 mb-2">
-            {noteMoyenne ? noteMoyenne.toFixed(1) : '0.0'}
+            {noteMoyenne ? parseFloat(noteMoyenne).toFixed(1) : '0.0'}
           </div>
           <div className="flex items-center justify-center mb-2">
             {[1, 2, 3, 4, 5].map((star) => (
               <Star
                 key={star}
                 className={`w-5 h-5 ${
-                  star <= Math.round(noteMoyenne)
+                  star <= Math.round(parseFloat(noteMoyenne || 0))
                     ? 'fill-yellow-400 text-yellow-400'
                     : 'text-gray-300'
                 }`}
@@ -113,7 +111,7 @@ export default function ReviewSection({ produitId, noteMoyenne, nombreAvis }) {
             ))}
           </div>
           <p className="text-sm text-gray-600">
-            Basé sur {nombreAvis} avis
+            Basé sur {nombreAvis || 0} avis
           </p>
         </div>
 
@@ -129,7 +127,7 @@ export default function ReviewSection({ produitId, noteMoyenne, nombreAvis }) {
         <div className="mb-6">
           <button
             onClick={() => setShowForm(true)}
-            className="w-full md:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center"
+            className="w-full md:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center transition-colors"
           >
             <Star className="w-5 h-5 mr-2" />
             Laisser un avis
@@ -152,6 +150,12 @@ export default function ReviewSection({ produitId, noteMoyenne, nombreAvis }) {
       {loading ? (
         <div className="text-center py-8">
           <p className="text-gray-600">Chargement des avis...</p>
+        </div>
+      ) : avis.length === 0 ? (
+        <div className="text-center py-12 bg-gray-50 rounded-lg">
+          <Star className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+          <p className="text-gray-600">Aucun avis pour le moment</p>
+          <p className="text-sm text-gray-500 mt-1">Soyez le premier à laisser un avis !</p>
         </div>
       ) : (
         <ReviewList avis={avis} />

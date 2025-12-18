@@ -178,13 +178,17 @@ export default function ClientOrderDetail() {
               {order.lignes && order.lignes.map((ligne) => (
                 <div key={ligne.id} className="py-4 flex items-center justify-between">
                   <div className="flex items-center space-x-4">
-                    {/* Image du produit */}
+                    {/* Image du produit - CORRIGÉ */}
                     <div className="w-16 h-16 bg-gray-200 rounded flex-shrink-0 overflow-hidden">
                       {ligne.produit?.image_principale ? (
                         <img
-                          src={ligne.produit.image_principale}
+                          src={`http://localhost:8000${ligne.produit.image_principale}`}
                           alt={ligne.nom_produit}
                           className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center text-gray-400 text-xs">Pas d\'image</div>';
+                          }}
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
@@ -291,16 +295,19 @@ export default function ClientOrderDetail() {
             </div>
           </div>
 
-          {/* Besoin d'aide */}
+          {/* Besoin d'aide - CORRIGÉ */}
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
             <Mail className="w-8 h-8 text-gray-400 mx-auto mb-3" />
             <h3 className="font-semibold text-gray-900 mb-2">Besoin d'aide ?</h3>
             <p className="text-sm text-gray-600 mb-4">
-              Vous avez une question concernant votre commande ?
+              Vous avez une question concernant votre commande #{order.numero_commande} ?
             </p>
-            <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+            <a 
+              href={`mailto:support@fanjava.com?subject=Question commande ${order.numero_commande}&body=Bonjour,%0D%0A%0D%0AJ'ai une question concernant ma commande #${order.numero_commande}.%0D%0A%0D%0AMerci`}
+              className="inline-block text-blue-600 hover:text-blue-700 text-sm font-medium border border-blue-600 px-6 py-2 rounded-lg hover:bg-blue-50 transition-colors"
+            >
               Contacter le support
-            </button>
+            </a>
           </div>
         </div>
       </div>
