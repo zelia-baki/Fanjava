@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+  <rect width="1920" height="1080" fill="#ffffff"/>
+  
+  <!-- Vagues fluides animées -->
+  <path d="M0,200 Q480,100 960,200 T1920,200 L1920,400 L0,400 Z" fill="#3b82f6" opacity="0.05">
+    <animate attributeName="d" 
+             values="M0,200 Q480,100 960,200 T1920,200 L1920,400 L0,400 Z;
+                     M0,200 Q480,150 960,200 T1920,200 L1920,400 L0,400 Z;
+                     M0,200 Q480,100 960,200 T1920,200 L1920,400 L0,400 Z"
+             dur="8s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.03;0.08;0.03" dur="4s" repeatCount="indefinite"/>
+  </path>
+  
+  <path d="M0,400 Q480,320 960,400 T1920,400 L1920,600 L0,600 Z" fill="#93c5fd" opacity="0.08">
+    <animate attributeName="d"
+             values="M0,400 Q480,320 960,400 T1920,400 L1920,600 L0,600 Z;
+                     M0,400 Q480,370 960,400 T1920,400 L1920,600 L0,600 Z;
+                     M0,400 Q480,320 960,400 T1920,400 L1920,600 L0,600 Z"
+             dur="10s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.05;0.12;0.05" dur="5s" repeatCount="indefinite"/>
+  </path>
+  
+  <path d="M0,600 Q480,520 960,600 T1920,600 L1920,800 L0,800 Z" fill="#3b82f6" opacity="0.06">
+    <animate attributeName="d"
+             values="M0,600 Q480,520 960,600 T1920,600 L1920,800 L0,800 Z;
+                     M0,600 Q480,570 960,600 T1920,600 L1920,800 L0,800 Z;
+                     M0,600 Q480,520 960,600 T1920,600 L1920,800 L0,800 Z"
+             dur="12s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.04;0.1;0.04" dur="6s" repeatCount="indefinite"/>
+  </path>
+  
+  <path d="M0,800 Q480,720 960,800 T1920,800 L1920,1000 L0,1000 Z" fill="#93c5fd" opacity="0.1">
+    <animate attributeName="d"
+             values="M0,800 Q480,720 960,800 T1920,800 L1920,1000 L0,1000 Z;
+                     M0,800 Q480,770 960,800 T1920,800 L1920,1000 L0,1000 Z;
+                     M0,800 Q480,720 960,800 T1920,800 L1920,1000 L0,1000 Z"
+             dur="9s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.06;0.14;0.06" dur="4.5s" repeatCount="indefinite"/>
+  </path>
+  
+  <!-- Bulles qui montent -->
+  <circle cx="300" cy="800" r="20" fill="#3b82f6" opacity="0.1">
+    <animate attributeName="cy" values="800;100" dur="15s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.1;0;0.1" dur="15s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="800" cy="900" r="15" fill="#93c5fd" opacity="0.12">
+    <animate attributeName="cy" values="900;150" dur="18s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.12;0;0.12" dur="18s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="1400" cy="850" r="25" fill="#3b82f6" opacity="0.08">
+    <animate attributeName="cy" values="850;120" dur="20s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.08;0;0.08" dur="20s" repeatCount="indefinite"/>
+  </circle>
+</svg>

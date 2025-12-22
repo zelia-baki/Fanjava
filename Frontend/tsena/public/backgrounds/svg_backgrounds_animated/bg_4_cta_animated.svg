@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <radialGradient id="radialAnimGrad">
+      <stop offset="0%" style="stop-color:#3b82f6">
+        <animate attributeName="stop-color" 
+                 values="#3b82f6;#2563eb;#3b82f6" 
+                 dur="6s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" style="stop-color:#0f172a"/>
+    </radialGradient>
+    
+    <filter id="energyGlow">
+      <feGaussianBlur stdDeviation="5" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <rect width="1920" height="1080" fill="url(#radialAnimGrad)"/>
+  
+  <!-- Energy waves depuis le centre -->
+  <circle cx="960" cy="540" r="100" fill="none" stroke="#ffffff" stroke-width="2" opacity="0" filter="url(#energyGlow)">
+    <animate attributeName="r" values="100;600" dur="4s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.6;0" dur="4s" repeatCount="indefinite"/>
+  </circle>
+  
+  <circle cx="960" cy="540" r="100" fill="none" stroke="#93c5fd" stroke-width="3" opacity="0" filter="url(#energyGlow)">
+    <animate attributeName="r" values="100;600" dur="4s" begin="1.3s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.7;0" dur="4s" begin="1.3s" repeatCount="indefinite"/>
+  </circle>
+  
+  <circle cx="960" cy="540" r="100" fill="none" stroke="#ffffff" stroke-width="2" opacity="0" filter="url(#energyGlow)">
+    <animate attributeName="r" values="100;600" dur="4s" begin="2.6s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.6;0" dur="4s" begin="2.6s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Hexagones rotatifs -->
+  <polygon points="400,260 440,280 440,320 400,340 360,320 360,280" 
+           fill="none" stroke="#ffffff" stroke-width="2" opacity="0.3">
+    <animateTransform attributeName="transform" type="rotate"
+                      from="0 400 300" to="360 400 300"
+                      dur="20s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.2;0.4;0.2" dur="3s" repeatCount="indefinite"/>
+  </polygon>
+  
+  <polygon points="1500,150 1550,175 1550,225 1500,250 1450,225 1450,175" 
+           fill="none" stroke="#ffffff" stroke-width="2" opacity="0.25">
+    <animateTransform attributeName="transform" type="rotate"
+                      from="360 1500 200" to="0 1500 200"
+                      dur="25s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.15;0.35;0.15" dur="4s" repeatCount="indefinite"/>
+  </polygon>
+  
+  <polygon points="300,770 330,785 330,815 300,830 270,815 270,785" 
+           fill="none" stroke="#ffffff" stroke-width="2" opacity="0.3">
+    <animateTransform attributeName="transform" type="rotate"
+                      from="0 300 800" to="360 300 800"
+                      dur="18s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.2;0.4;0.2" dur="3.5s" repeatCount="indefinite"/>
+  </polygon>
+  
+  <polygon points="1600,820 1645,842.5 1645,887.5 1600,910 1555,887.5 1555,842.5" 
+           fill="none" stroke="#ffffff" stroke-width="2" opacity="0.28">
+    <animateTransform attributeName="transform" type="rotate"
+                      from="360 1600 865" to="0 1600 865"
+                      dur="22s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.18;0.38;0.18" dur="3.8s" repeatCount="indefinite"/>
+  </polygon>
+  
+  <!-- Particles orbitales -->
+  <circle cx="960" cy="340" r="5" fill="#ffffff" opacity="0.6">
+    <animateTransform attributeName="transform" type="rotate"
+                      from="0 960 540" to="360 960 540"
+                      dur="15s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.4;0.8;0.4" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  
+  <circle cx="1160" cy="540" r="4" fill="#93c5fd" opacity="0.7">
+    <animateTransform attributeName="transform" type="rotate"
+                      from="120 960 540" to="480 960 540"
+                      dur="12s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.5;0.9;0.5" dur="2.5s" repeatCount="indefinite"/>
+  </circle>
+</svg>

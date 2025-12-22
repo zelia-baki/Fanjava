@@ -28,22 +28,37 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <header className="relative sticky top-0 z-50 shadow-lg">
+      {/* 🎨 BACKGROUND ANIMÉ */}
+      <div 
+        className="absolute inset-0 z-0"
+        style={{
+          backgroundImage: 'url(/backgrounds/header_wave_animated.svg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      />
+      
+      {/* Overlay léger pour améliorer la lisibilité */}
+      <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-0"></div>
+
+      {/* Contenu du header */}
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
+          {/* Logo avec effet hover */}
           <Link 
             to="/" 
-            className="text-xl sm:text-2xl font-bold text-blue-600 flex items-center"
+            className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent flex items-center hover:scale-105 transition-transform"
             onClick={closeMobileMenu}
           >
             <span className="hidden sm:inline">FanJava</span>
             <span className="sm:hidden">FJ</span>
+            <span className="ml-2 text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-normal">.mg</span>
           </Link>
 
           {/* Navigation Desktop */}
           <nav className="hidden lg:flex items-center space-x-6">
-            <Link to="/" className="text-gray-700 hover:text-blue-600 transition">
+            <Link to="/" className="text-gray-700 hover:text-blue-600 transition-all hover:scale-105 font-medium">
               Produits
             </Link>
 
@@ -54,14 +69,14 @@ export default function Header() {
                   <>
                     <Link 
                       to="/admin/categories" 
-                      className="text-gray-700 hover:text-blue-600 flex items-center transition"
+                      className="text-gray-700 hover:text-blue-600 flex items-center transition-all hover:scale-105"
                     >
                       <FolderTree className="w-4 h-4 mr-1" />
                       <span className="hidden xl:inline">Catégories</span>
                     </Link>
                     <Link 
                       to="/admin/dashboard" 
-                      className="text-gray-700 hover:text-blue-600 flex items-center transition"
+                      className="text-gray-700 hover:text-blue-600 flex items-center transition-all hover:scale-105"
                     >
                       <Shield className="w-4 h-4 mr-1" />
                       <span className="hidden xl:inline">Admin</span>
@@ -73,7 +88,7 @@ export default function Header() {
                 {user.user_type === 'entreprise' && (
                   <Link 
                     to="/dashboard/entreprise" 
-                    className="text-gray-700 hover:text-blue-600 flex items-center transition"
+                    className="text-gray-700 hover:text-blue-600 flex items-center transition-all hover:scale-105"
                   >
                     <Package className="w-4 h-4 mr-1" />
                     <span className="hidden xl:inline">Dashboard</span>
@@ -85,11 +100,11 @@ export default function Header() {
                   <>
                     <Link 
                       to="/cart" 
-                      className="text-gray-700 hover:text-blue-600 relative transition"
+                      className="text-gray-700 hover:text-blue-600 relative transition-all hover:scale-105"
                     >
                       <ShoppingCart className="w-5 h-5" />
                       {getItemCount() > 0 && (
-                        <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">
+                        <span className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold shadow-lg animate-pulse">
                           {getItemCount()}
                         </span>
                       )}
@@ -97,7 +112,7 @@ export default function Header() {
 
                     <Link 
                       to="/dashboard/client" 
-                      className="text-gray-700 hover:text-blue-600 flex items-center transition"
+                      className="text-gray-700 hover:text-blue-600 flex items-center transition-all hover:scale-105"
                     >
                       <User className="w-4 h-4 mr-1" />
                       <span className="hidden xl:inline">Mon compte</span>
@@ -105,13 +120,13 @@ export default function Header() {
                   </>
                 )}
 
-                {/* Cloche notifications - pour TOUS les utilisateurs connectés */}
+                {/* Cloche notifications */}
                 <NotificationBell />
 
                 {/* Déconnexion */}
                 <button
                   onClick={logout}
-                  className="text-gray-700 hover:text-red-600 flex items-center transition"
+                  className="text-gray-700 hover:text-red-600 flex items-center transition-all hover:scale-105"
                 >
                   <LogOut className="w-4 h-4 mr-1" />
                   <span className="hidden xl:inline">Déconnexion</span>
@@ -122,11 +137,11 @@ export default function Header() {
                 {/* Non connecté */}
                 <Link 
                   to="/cart" 
-                  className="text-gray-700 hover:text-blue-600 relative transition"
+                  className="text-gray-700 hover:text-blue-600 relative transition-all hover:scale-105"
                 >
                   <ShoppingCart className="w-5 h-5" />
                   {getItemCount() > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">
+                    <span className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold shadow-lg animate-pulse">
                       {getItemCount()}
                     </span>
                   )}
@@ -134,14 +149,14 @@ export default function Header() {
 
                 <Link 
                   to="/login" 
-                  className="text-gray-700 hover:text-blue-600 transition"
+                  className="text-gray-700 hover:text-blue-600 transition-all hover:scale-105 font-medium"
                 >
                   Connexion
                 </Link>
                 
                 <Link 
                   to="/register/client" 
-                  className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+                  className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all hover:scale-105 shadow-md font-medium"
                 >
                   S'inscrire
                 </Link>
@@ -151,29 +166,29 @@ export default function Header() {
 
           {/* Icônes mobile */}
           <div className="flex lg:hidden items-center space-x-3 sm:space-x-4">
-            {/* Panier - visible pour clients et non connectés */}
+            {/* Panier */}
             {(user?.user_type === 'client' || !user) && (
               <Link 
                 to="/cart" 
-                className="text-gray-700 hover:text-blue-600 relative transition"
+                className="text-gray-700 hover:text-blue-600 relative transition-all hover:scale-105"
                 onClick={closeMobileMenu}
               >
                 <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6" />
                 {getItemCount() > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">
+                  <span className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold shadow-lg">
                     {getItemCount()}
                   </span>
                 )}
               </Link>
             )}
 
-            {/* Notifications - pour tous les utilisateurs connectés */}
+            {/* Notifications */}
             {user && <NotificationBell />}
 
             {/* Menu hamburger */}
             <button
               onClick={toggleMobileMenu}
-              className="text-gray-700 hover:text-blue-600 p-2 -mr-2"
+              className="text-gray-700 hover:text-blue-600 p-2 -mr-2 hover:scale-105 transition-all"
               aria-label="Menu"
             >
               {mobileMenuOpen ? (
@@ -188,7 +203,7 @@ export default function Header() {
 
       {/* Menu Mobile */}
       <div 
-        className={`lg:hidden bg-white border-t border-gray-200 shadow-lg transition-all duration-300 ease-in-out ${
+        className={`lg:hidden bg-white/95 backdrop-blur-md border-t border-gray-200 shadow-xl transition-all duration-300 ease-in-out ${
           mobileMenuOpen 
             ? 'max-h-screen opacity-100' 
             : 'max-h-0 opacity-0 overflow-hidden'
@@ -197,7 +212,7 @@ export default function Header() {
         <nav className="px-4 py-4 space-y-2">
           <Link 
             to="/" 
-            className="block text-gray-700 hover:text-blue-600 hover:bg-gray-50 px-3 py-2.5 rounded-lg transition"
+            className="block text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2.5 rounded-lg transition font-medium"
             onClick={closeMobileMenu}
           >
             Produits
@@ -210,7 +225,7 @@ export default function Header() {
                 <>
                   <Link 
                     to="/admin/dashboard" 
-                    className="flex items-center text-gray-700 hover:text-blue-600 hover:bg-gray-50 px-3 py-2.5 rounded-lg transition"
+                    className="flex items-center text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2.5 rounded-lg transition"
                     onClick={closeMobileMenu}
                   >
                     <Shield className="w-5 h-5 mr-3 flex-shrink-0" />
@@ -218,7 +233,7 @@ export default function Header() {
                   </Link>
                   <Link 
                     to="/admin/users" 
-                    className="flex items-center text-gray-700 hover:text-blue-600 hover:bg-gray-50 px-3 py-2.5 rounded-lg transition"
+                    className="flex items-center text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2.5 rounded-lg transition"
                     onClick={closeMobileMenu}
                   >
                     <User className="w-5 h-5 mr-3 flex-shrink-0" />
@@ -226,7 +241,7 @@ export default function Header() {
                   </Link>
                   <Link 
                     to="/admin/categories" 
-                    className="flex items-center text-gray-700 hover:text-blue-600 hover:bg-gray-50 px-3 py-2.5 rounded-lg transition"
+                    className="flex items-center text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2.5 rounded-lg transition"
                     onClick={closeMobileMenu}
                   >
                     <FolderTree className="w-5 h-5 mr-3 flex-shrink-0" />
@@ -239,7 +254,7 @@ export default function Header() {
               {user.user_type === 'entreprise' && (
                 <Link 
                   to="/dashboard/entreprise" 
-                  className="flex items-center text-gray-700 hover:text-blue-600 hover:bg-gray-50 px-3 py-2.5 rounded-lg transition"
+                  className="flex items-center text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2.5 rounded-lg transition"
                   onClick={closeMobileMenu}
                 >
                   <Package className="w-5 h-5 mr-3 flex-shrink-0" />
@@ -251,7 +266,7 @@ export default function Header() {
               {user.user_type === 'client' && (
                 <Link 
                   to="/dashboard/client" 
-                  className="flex items-center text-gray-700 hover:text-blue-600 hover:bg-gray-50 px-3 py-2.5 rounded-lg transition"
+                  className="flex items-center text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2.5 rounded-lg transition"
                   onClick={closeMobileMenu}
                 >
                   <User className="w-5 h-5 mr-3 flex-shrink-0" />
@@ -263,7 +278,7 @@ export default function Header() {
               <div className="border-t border-gray-200 my-3"></div>
 
               {/* Info utilisateur */}
-              <div className="px-3 py-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
+              <div className="px-3 py-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border border-blue-200">
                 <p className="text-xs text-gray-600 mb-1">Connecté en tant que</p>
                 <p className="text-sm font-semibold text-blue-700">
                   {user.username}
@@ -292,21 +307,21 @@ export default function Header() {
               {/* Menu non connecté */}
               <Link 
                 to="/login" 
-                className="block text-gray-700 hover:text-blue-600 hover:bg-gray-50 px-3 py-2.5 rounded-lg transition"
+                className="block text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2.5 rounded-lg transition font-medium"
                 onClick={closeMobileMenu}
               >
                 Connexion
               </Link>
               <Link 
                 to="/register/client" 
-                className="block bg-blue-600 text-white text-center px-3 py-2.5 rounded-lg hover:bg-blue-700 transition font-semibold"
+                className="block bg-gradient-to-r from-blue-600 to-blue-700 text-white text-center px-3 py-2.5 rounded-lg hover:from-blue-700 hover:to-blue-800 transition font-semibold shadow-md"
                 onClick={closeMobileMenu}
               >
                 Créer un compte client
               </Link>
               <Link 
                 to="/register/entreprise" 
-                className="block bg-purple-600 text-white text-center px-3 py-2.5 rounded-lg hover:bg-purple-700 transition font-semibold"
+                className="block bg-gradient-to-r from-purple-600 to-purple-700 text-white text-center px-3 py-2.5 rounded-lg hover:from-purple-700 hover:to-purple-800 transition font-semibold shadow-md"
                 onClick={closeMobileMenu}
               >
                 Devenir vendeur

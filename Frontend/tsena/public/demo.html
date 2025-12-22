@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fanjava - Backgrounds Animés</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+        
+        section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            position: relative;
+        }
+        
+        .content {
+            text-align: center;
+            padding: 3rem;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 1rem;
+            backdrop-filter: blur(10px);
+            z-index: 1;
+        }
+        
+        h1 {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: white;
+            text-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+        }
+        
+        p {
+            font-size: 1.5rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .label {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(59, 130, 246, 0.9);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            z-index: 2;
+        }
+        
+        .hero { background-image: url('bg_1_hero_animated.svg'); }
+        .products { background-image: url('bg_2_product_animated.svg'); }
+        .features { background-image: url('bg_3_features_animated.svg'); }
+        .cta { background-image: url('bg_4_cta_animated.svg'); }
+        .footer { background-image: url('bg_5_footer_animated.svg'); }
+        .testimonials { background-image: url('bg_6_testimonials_animated.svg'); }
+        .about { background-image: url('bg_7_about_animated.svg'); }
+        .contact { background-image: url('bg_8_contact_animated.svg'); }
+        
+        .banner {
+            min-height: 400px;
+            background-image: url('bg_9_promo_animated.svg');
+        }
+        
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            p { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+    <section class="hero">
+        <div class="label">BG 1 - Hero Animated</div>
+        <div class="content">
+            <h1>Fanjava.mg</h1>
+            <p>Technologie & Innovation 🚀</p>
+        </div>
+    </section>
+    
+    <section class="products">
+        <div class="label">BG 2 - Products Animated</div>
+        <div class="content">
+            <h1>Nos Produits</h1>
+            <p>Caméras • Panneaux Solaires • Ordinateurs</p>
+        </div>
+    </section>
+    
+    <section class="features">
+        <div class="label">BG 3 - Features Animated</div>
+        <div class="content">
+            <h1>Pourquoi Fanjava?</h1>
+            <p>Qualité • Service • Innovation</p>
+        </div>
+    </section>
+    
+    <section class="cta">
+        <div class="label">BG 4 - CTA Animated</div>
+        <div class="content">
+            <h1>Prêt à Commander?</h1>
+            <p>Découvrez notre catalogue</p>
+        </div>
+    </section>
+    
+    <section class="testimonials">
+        <div class="label">BG 6 - Testimonials Animated</div>
+        <div class="content" style="background: rgba(255, 255, 255, 0.9); color: #1e293b;">
+            <h1 style="color: #1e293b; text-shadow: none;">Témoignages</h1>
+            <p style="color: #1e293b;">Ce que disent nos clients</p>
+        </div>
+    </section>
+    
+    <section class="about">
+        <div class="label">BG 7 - About Animated</div>
+        <div class="content" style="background: rgba(255, 255, 255, 0.9); color: #1e293b;">
+            <h1 style="color: #1e293b; text-shadow: none;">Notre Histoire</h1>
+            <p style="color: #1e293b;">Leaders tech à Madagascar</p>
+        </div>
+    </section>
+    
+    <section class="contact">
+        <div class="label">BG 8 - Contact Animated</div>
+        <div class="content" style="background: rgba(255, 255, 255, 0.9); color: #1e293b;">
+            <h1 style="color: #1e293b; text-shadow: none;">Contactez-nous</h1>
+            <p style="color: #1e293b;">hello@fanjava.mg</p>
+        </div>
+    </section>
+    
+    <section class="banner">
+        <div class="label">BG 9 - Promo Banner Animated</div>
+        <div class="content">
+            <h1>-20% ce mois-ci! 🎉</h1>
+            <p>Sur tous les panneaux solaires</p>
+        </div>
+    </section>
+    
+    <section class="footer">
+        <div class="label">BG 5 - Footer Animated</div>
+        <div class="content">
+            <h1>Merci!</h1>
+            <p>Fanjava.mg © 2025</p>
+        </div>
+    </section>
+</body>
+</html>
