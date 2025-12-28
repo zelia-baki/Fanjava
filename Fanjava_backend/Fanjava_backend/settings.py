@@ -40,13 +40,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_filters',
-    
+
     # Apps tierces
     'modeltranslation',  # ← Après django.contrib.admin mais AVANT tes apps
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
-    
+
     # Tes apps
     'users.apps.UsersConfig',
     'products.apps.ProductsConfig',
@@ -69,7 +69,9 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS=[
     "http://localhost:5173",
+    "http://217.76.57.41",
 ]
+
 
 ROOT_URLCONF = 'Fanjava_backend.urls'
 
@@ -99,8 +101,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'marketplace_db',
-        'USER': 'root',
-        'PASSWORD': '',
+        'USER': 'django_user',
+        'PASSWORD': '1234.Djangomysql',
         'HOST': 'localhost',
         'PORT': '3306',
     }
@@ -139,7 +141,7 @@ LANGUAGES = [
     ('de', _('Deutsch')),
 ]
 
-TIME_ZONE = 'Indian/Antananarivo' 
+TIME_ZONE = 'Indian/Antananarivo'
 
 USE_I18N = True
 USE_L10N = True
@@ -178,7 +180,7 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
-    'DEFAULT_FILTER_BACKENDS': [  
+    'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
     ],
 
