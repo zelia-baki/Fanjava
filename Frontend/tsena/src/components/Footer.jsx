@@ -17,10 +17,67 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="relative mt-auto overflow-hidden">
+    <>
+      {/* Styles d'animation */}
+      <style>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+        
+        @keyframes slideUp {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        @keyframes pulseSlow {
+          0%, 100% {
+            opacity: 0.3;
+          }
+          50% {
+            opacity: 0.5;
+          }
+        }
+        
+        .animate-fadeIn {
+          animation: fadeIn 0.6s ease-out forwards;
+          opacity: 0;
+        }
+        
+        .animate-slideUp {
+          animation: slideUp 0.7s ease-out forwards;
+          opacity: 0;
+        }
+        
+        .animate-pulse-slow {
+          animation: pulseSlow 8s ease-in-out infinite;
+        }
+        
+        /* Désactiver les animations complexes sur mobile pour les performances */
+        @media (prefers-reduced-motion: reduce) {
+          .animate-fadeIn,
+          .animate-slideUp {
+            animation: none;
+            opacity: 1;
+            transform: none;
+          }
+        }
+      `}</style>
+      
+    <footer className="relative mt-auto overflow-hidden animate-fadeIn">
       {/* 🎨 BACKGROUND ANIMÉ TECH */}
       <div 
-        className="absolute inset-0 z-0"
+        className="absolute inset-0 z-0 animate-pulse-slow"
         style={{
           backgroundImage: 'url(/backgrounds/footer_tech_animated.svg)',
           backgroundSize: 'cover',
@@ -38,7 +95,7 @@ export default function Footer() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             
             {/* Colonne 1 - À propos */}
-            <div>
+            <div className="animate-slideUp" style={{ animationDelay: '0.1s' }}>
               <Link to="/" className="inline-block mb-4">
                 <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
                   FanJava
@@ -56,7 +113,8 @@ export default function Footer() {
                   href="https://facebook.com" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="w-10 h-10 bg-gray-800/50 border border-gray-700 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-400 hover:border-blue-500 hover:bg-gray-800 transition-all hover:scale-110"
+                  className="w-10 h-10 bg-gray-800/50 border border-gray-700 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-400 hover:border-blue-500 hover:bg-gray-800 transition-all hover:scale-110 hover:-translate-y-1 animate-fadeIn"
+                  style={{ animationDelay: '0.2s' }}
                 >
                   <Facebook className="w-5 h-5" />
                 </a>
@@ -64,7 +122,8 @@ export default function Footer() {
                   href="https://twitter.com" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="w-10 h-10 bg-gray-800/50 border border-gray-700 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-400 hover:border-blue-500 hover:bg-gray-800 transition-all hover:scale-110"
+                  className="w-10 h-10 bg-gray-800/50 border border-gray-700 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-400 hover:border-blue-500 hover:bg-gray-800 transition-all hover:scale-110 hover:-translate-y-1 animate-fadeIn"
+                  style={{ animationDelay: '0.3s' }}
                 >
                   <Twitter className="w-5 h-5" />
                 </a>
@@ -72,7 +131,8 @@ export default function Footer() {
                   href="https://instagram.com" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="w-10 h-10 bg-gray-800/50 border border-gray-700 rounded-lg flex items-center justify-center text-gray-400 hover:text-pink-400 hover:border-pink-500 hover:bg-gray-800 transition-all hover:scale-110"
+                  className="w-10 h-10 bg-gray-800/50 border border-gray-700 rounded-lg flex items-center justify-center text-gray-400 hover:text-pink-400 hover:border-pink-500 hover:bg-gray-800 transition-all hover:scale-110 hover:-translate-y-1 animate-fadeIn"
+                  style={{ animationDelay: '0.4s' }}
                 >
                   <Instagram className="w-5 h-5" />
                 </a>
@@ -80,7 +140,8 @@ export default function Footer() {
                   href="https://linkedin.com" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="w-10 h-10 bg-gray-800/50 border border-gray-700 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-400 hover:border-blue-500 hover:bg-gray-800 transition-all hover:scale-110"
+                  className="w-10 h-10 bg-gray-800/50 border border-gray-700 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-400 hover:border-blue-500 hover:bg-gray-800 transition-all hover:scale-110 hover:-translate-y-1 animate-fadeIn"
+                  style={{ animationDelay: '0.5s' }}
                 >
                   <Linkedin className="w-5 h-5" />
                 </a>
@@ -88,7 +149,7 @@ export default function Footer() {
             </div>
 
             {/* Colonne 2 - Liens rapides */}
-            <div>
+            <div className="animate-slideUp" style={{ animationDelay: '0.2s' }}>
               <h4 className="text-white font-semibold mb-4 flex items-center">
                 <ShoppingBag className="w-4 h-4 mr-2 text-blue-400" />
                 Liens rapides
@@ -143,7 +204,7 @@ export default function Footer() {
             </div>
 
             {/* Colonne 3 - Informations */}
-            <div>
+            <div className="animate-slideUp" style={{ animationDelay: '0.3s' }}>
               <h4 className="text-white font-semibold mb-4 flex items-center">
                 <Heart className="w-4 h-4 mr-2 text-blue-400" />
                 Informations
@@ -198,7 +259,7 @@ export default function Footer() {
             </div>
 
             {/* Colonne 4 - Contact */}
-            <div>
+            <div className="animate-slideUp" style={{ animationDelay: '0.4s' }}>
               <h4 className="text-white font-semibold mb-4 flex items-center">
                 <Phone className="w-4 h-4 mr-2 text-blue-400" />
                 Contact
@@ -242,11 +303,11 @@ export default function Footer() {
           </div>
 
           {/* Section avantages */}
-          <div className="mt-12 pt-8 border-t border-gray-800">
+          <div className="mt-12 pt-8 border-t border-gray-800 animate-slideUp" style={{ animationDelay: '0.5s' }}>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               
               {/* Avantage 1 */}
-              <div className="flex items-start space-x-3 bg-gray-800/30 backdrop-blur-sm rounded-lg p-4 border border-gray-700/50 hover:border-blue-500/50 transition-all hover:scale-105">
+              <div className="flex items-start space-x-3 bg-gray-800/30 backdrop-blur-sm rounded-lg p-4 border border-gray-700/50 hover:border-blue-500/50 transition-all hover:scale-105 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/20 animate-fadeIn" style={{ animationDelay: '0.6s' }}>
                 <div className="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
                   <Truck className="w-5 h-5 text-blue-400" />
                 </div>
@@ -257,7 +318,7 @@ export default function Footer() {
               </div>
 
               {/* Avantage 2 */}
-              <div className="flex items-start space-x-3 bg-gray-800/30 backdrop-blur-sm rounded-lg p-4 border border-gray-700/50 hover:border-blue-500/50 transition-all hover:scale-105">
+              <div className="flex items-start space-x-3 bg-gray-800/30 backdrop-blur-sm rounded-lg p-4 border border-gray-700/50 hover:border-blue-500/50 transition-all hover:scale-105 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/20 animate-fadeIn" style={{ animationDelay: '0.7s' }}>
                 <div className="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
                   <Shield className="w-5 h-5 text-blue-400" />
                 </div>
@@ -268,7 +329,7 @@ export default function Footer() {
               </div>
 
               {/* Avantage 3 */}
-              <div className="flex items-start space-x-3 bg-gray-800/30 backdrop-blur-sm rounded-lg p-4 border border-gray-700/50 hover:border-blue-500/50 transition-all hover:scale-105">
+              <div className="flex items-start space-x-3 bg-gray-800/30 backdrop-blur-sm rounded-lg p-4 border border-gray-700/50 hover:border-blue-500/50 transition-all hover:scale-105 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/20 animate-fadeIn" style={{ animationDelay: '0.8s' }}>
                 <div className="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
                   <Heart className="w-5 h-5 text-blue-400" />
                 </div>
@@ -279,7 +340,7 @@ export default function Footer() {
               </div>
 
               {/* Avantage 4 */}
-              <div className="flex items-start space-x-3 bg-gray-800/30 backdrop-blur-sm rounded-lg p-4 border border-gray-700/50 hover:border-blue-500/50 transition-all hover:scale-105">
+              <div className="flex items-start space-x-3 bg-gray-800/30 backdrop-blur-sm rounded-lg p-4 border border-gray-700/50 hover:border-blue-500/50 transition-all hover:scale-105 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/20 animate-fadeIn" style={{ animationDelay: '0.9s' }}>
                 <div className="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
                   <ShoppingBag className="w-5 h-5 text-blue-400" />
                 </div>
@@ -338,5 +399,6 @@ export default function Footer() {
         </div>
       </div>
     </footer>
+    </>
   );
 }

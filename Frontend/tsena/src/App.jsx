@@ -5,6 +5,13 @@ import { AuthProvider } from '@/context/AuthContext';
 import { CartProvider } from '@/context/CartContext';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 
+// Pages informatives
+import Contact from '@/pages/static/Contact';
+import Terms from '@/pages/static/Terms';
+import Privacy from '@/pages/static/Privacy';
+import ShippingReturns from '@/pages/static/ShippingReturns';
+import FAQ from '@/pages/static/FAQ';
+
 // Auth
 import Login from '@/pages/auth/Login';
 import RegisterClient from '@/pages/auth/RegisterClient';
@@ -59,6 +66,12 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register/client" element={<RegisterClient />} />
             <Route path="/register/entreprise" element={<RegisterEntreprise />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/shipping" element={<ShippingReturns />} />
+            <Route path="/faq" element={<FAQ />} />
+
 
             {/* Routes produits publiques */}
             <Route path="/" element={<ProductList />} />
