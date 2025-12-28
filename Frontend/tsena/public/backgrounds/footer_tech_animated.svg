@@ -1,0 +1,156 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 400" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="footerGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1f2937;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#111827;stop-opacity:1">
+        <animate attributeName="stop-color" 
+                 values="#111827;#0f172a;#111827" 
+                 dur="10s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+    
+    <filter id="footerGlow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Pattern circuit -->
+    <pattern id="circuitFooter" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+      <circle cx="50" cy="50" r="2" fill="#3b82f6" opacity="0.2">
+        <animate attributeName="opacity" values="0.1;0.3;0.1" dur="3s" repeatCount="indefinite"/>
+      </circle>
+      <line x1="50" y1="50" x2="100" y2="50" stroke="#3b82f6" stroke-width="0.5" opacity="0.1"/>
+      <line x1="50" y1="50" x2="50" y2="100" stroke="#3b82f6" stroke-width="0.5" opacity="0.1"/>
+    </pattern>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1920" height="400" fill="url(#footerGrad)"/>
+  
+  <!-- Circuit pattern subtil -->
+  <rect width="1920" height="400" fill="url(#circuitFooter)" opacity="0.3"/>
+  
+  <!-- Vagues tech en haut -->
+  <path d="M0,0 Q480,30 960,0 T1920,0 L1920,80 L0,80 Z" 
+        fill="#1f2937" 
+        opacity="0.5">
+    <animate attributeName="d" 
+             values="M0,0 Q480,30 960,0 T1920,0 L1920,80 L0,80 Z;
+                     M0,0 Q480,10 960,0 T1920,0 L1920,80 L0,80 Z;
+                     M0,0 Q480,30 960,0 T1920,0 L1920,80 L0,80 Z"
+             dur="8s" repeatCount="indefinite"/>
+  </path>
+  
+  <!-- Nodes tech animés -->
+  <g opacity="0.4">
+    <!-- Node 1 avec pulse -->
+    <circle cx="200" cy="100" r="8" fill="none" stroke="#3b82f6" stroke-width="2" filter="url(#footerGlow)">
+      <animate attributeName="r" values="8;12;8" dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.6;1;0.6" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="200" cy="100" r="4" fill="#3b82f6" opacity="0.8">
+      <animate attributeName="opacity" values="0.5;1;0.5" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    
+    <!-- Node 2 -->
+    <circle cx="500" cy="150" r="8" fill="none" stroke="#60a5fa" stroke-width="2" filter="url(#footerGlow)">
+      <animate attributeName="r" values="8;12;8" dur="4s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.6;1;0.6" dur="4s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="500" cy="150" r="4" fill="#60a5fa" opacity="0.8">
+      <animate attributeName="opacity" values="0.5;1;0.5" dur="4s" repeatCount="indefinite"/>
+    </circle>
+    
+    <!-- Node 3 -->
+    <circle cx="900" cy="80" r="8" fill="none" stroke="#3b82f6" stroke-width="2" filter="url(#footerGlow)">
+      <animate attributeName="r" values="8;12;8" dur="3.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.6;1;0.6" dur="3.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="900" cy="80" r="4" fill="#3b82f6" opacity="0.8">
+      <animate attributeName="opacity" values="0.5;1;0.5" dur="3.5s" repeatCount="indefinite"/>
+    </circle>
+    
+    <!-- Node 4 -->
+    <circle cx="1300" cy="130" r="8" fill="none" stroke="#60a5fa" stroke-width="2" filter="url(#footerGlow)">
+      <animate attributeName="r" values="8;12;8" dur="4.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.6;1;0.6" dur="4.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="1300" cy="130" r="4" fill="#60a5fa" opacity="0.8">
+      <animate attributeName="opacity" values="0.5;1;0.5" dur="4.5s" repeatCount="indefinite"/>
+    </circle>
+    
+    <!-- Node 5 -->
+    <circle cx="1650" cy="100" r="8" fill="none" stroke="#3b82f6" stroke-width="2" filter="url(#footerGlow)">
+      <animate attributeName="r" values="8;12;8" dur="3.2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.6;1;0.6" dur="3.2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="1650" cy="100" r="4" fill="#3b82f6" opacity="0.8">
+      <animate attributeName="opacity" values="0.5;1;0.5" dur="3.2s" repeatCount="indefinite"/>
+    </circle>
+    
+    <!-- Lignes de connexion entre nodes -->
+    <line x1="200" y1="100" x2="500" y2="150" stroke="#3b82f6" stroke-width="1" opacity="0">
+      <animate attributeName="opacity" values="0;0.3;0" dur="4s" repeatCount="indefinite"/>
+    </line>
+    
+    <line x1="500" y1="150" x2="900" y2="80" stroke="#60a5fa" stroke-width="1" opacity="0">
+      <animate attributeName="opacity" values="0;0.25;0" dur="5s" repeatCount="indefinite"/>
+    </line>
+    
+    <line x1="900" y1="80" x2="1300" y2="130" stroke="#3b82f6" stroke-width="1" opacity="0">
+      <animate attributeName="opacity" values="0;0.3;0" dur="4.5s" repeatCount="indefinite"/>
+    </line>
+    
+    <line x1="1300" y1="130" x2="1650" y2="100" stroke="#60a5fa" stroke-width="1" opacity="0">
+      <animate attributeName="opacity" values="0;0.25;0" dur="5.5s" repeatCount="indefinite"/>
+    </line>
+  </g>
+  
+  <!-- Data particles qui se déplacent -->
+  <circle cx="0" cy="120" r="3" fill="#3b82f6" opacity="0" filter="url(#footerGlow)">
+    <animate attributeName="cx" values="0;1920" dur="15s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;0.6;0.6;0" dur="15s" repeatCount="indefinite"/>
+  </circle>
+  
+  <circle cx="0" cy="90" r="2" fill="#60a5fa" opacity="0" filter="url(#footerGlow)">
+    <animate attributeName="cx" values="0;1920" dur="18s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;0.5;0.5;0" dur="18s" repeatCount="indefinite"/>
+  </circle>
+  
+  <circle cx="0" cy="140" r="2.5" fill="#3b82f6" opacity="0" filter="url(#footerGlow)">
+    <animate attributeName="cx" values="0;1920" dur="20s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;0.7;0.7;0" dur="20s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Hexagones décoratifs -->
+  <g opacity="0.2">
+    <polygon points="100,250 120,262 120,286 100,298 80,286 80,262" 
+             fill="none" stroke="#3b82f6" stroke-width="1">
+      <animateTransform attributeName="transform" type="rotate"
+                        from="0 100 274" to="360 100 274"
+                        dur="30s" repeatCount="indefinite"/>
+    </polygon>
+    
+    <polygon points="1800,280 1825,295 1825,325 1800,340 1775,325 1775,295" 
+             fill="none" stroke="#60a5fa" stroke-width="1">
+      <animateTransform attributeName="transform" type="rotate"
+                        from="360 1800 310" to="0 1800 310"
+                        dur="35s" repeatCount="indefinite"/>
+    </polygon>
+  </g>
+  
+  <!-- Ligne lumineuse qui scan -->
+  <rect x="0" y="0" width="100" height="400" fill="url(#scanGrad)" opacity="0">
+    <animate attributeName="x" values="-100;1920" dur="8s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;0.1;0" dur="8s" repeatCount="indefinite"/>
+  </rect>
+  
+  <linearGradient id="scanGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+    <stop offset="0%" stop-color="#3b82f6" stop-opacity="0"/>
+    <stop offset="50%" stop-color="#3b82f6" stop-opacity="0.3"/>
+    <stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/>
+  </linearGradient>
+</svg>

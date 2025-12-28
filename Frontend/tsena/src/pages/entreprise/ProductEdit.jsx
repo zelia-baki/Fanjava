@@ -5,7 +5,6 @@ import { ArrowLeft, Upload, X, Loader2, Save } from 'lucide-react';
 import api from '@/services/api';
 
 export default function ProductEdit() {
-  // ✅ CORRIGÉ : Le paramètre s'appelle maintenant 'slug' dans l'URL
   const { slug } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -33,13 +32,12 @@ export default function ProductEdit() {
 
   useEffect(() => {
     fetchData();
-  }, [slug]); // ✅ Dépendance sur slug au lieu de id
+  }, [slug]);
 
   const fetchData = async () => {
     try {
       setLoading(true);
       const [productRes, categoriesRes] = await Promise.all([
-        // ✅ CORRIGÉ : Utiliser slug au lieu de id
         api.get(`/products/produits/${slug}/`),
         api.get('/products/categories/')
       ]);
@@ -105,7 +103,6 @@ export default function ProductEdit() {
     if (!window.confirm('Supprimer cette image ?')) return;
 
     try {
-      // ✅ CORRIGÉ : Utiliser slug au lieu de id
       await api.delete(`/products/produits/${slug}/supprimer_image/`, {
         data: { image_id: imageId }
       });
@@ -159,7 +156,6 @@ export default function ProductEdit() {
         formDataToSend.append(`image_${index}`, image);
       });
 
-      // ✅ CORRIGÉ : Utiliser slug au lieu de id
       await api.put(`/products/produits/${slug}/`, formDataToSend, {
         headers: {
           'Content-Type': 'multipart/form-data'
@@ -193,340 +189,347 @@ export default function ProductEdit() {
 
   return (
     <MainLayout>
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center text-blue-600 hover:text-blue-700 mb-4"
-          >
-            <ArrowLeft className="w-5 h-5 mr-2" />
-            Retour
-          </button>
-          <h1 className="text-3xl font-bold text-gray-900">Modifier le produit</h1>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Informations principales */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Informations principales</h2>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nom du produit *
-                </label>
-                <input
-                  type="text"
-                  name="nom"
-                  value={formData.nom}
-                  onChange={handleChange}
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
-                    errors.nom ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                />
-                {errors.nom && <p className="mt-1 text-sm text-red-600">{errors.nom}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Description courte
-                </label>
-                <input
-                  type="text"
-                  name="description_courte"
-                  value={formData.description_courte}
-                  onChange={handleChange}
-                  maxLength={500}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Description complète *
-                </label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  rows={6}
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
-                    errors.description ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                />
-                {errors.description && (
-                  <p className="mt-1 text-sm text-red-600">{errors.description}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Catégorie *
-                </label>
-                <select
-                  name="categorie"
-                  value={formData.categorie}
-                  onChange={handleChange}
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
-                    errors.categorie ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                >
-                  <option value="">Sélectionnez une catégorie</option>
-                  {categories.map(cat => (
-                    <option key={cat.id} value={cat.id}>{cat.nom}</option>
-                  ))}
-                </select>
-                {errors.categorie && (
-                  <p className="mt-1 text-sm text-red-600">{errors.categorie}</p>
-                )}
-              </div>
-            </div>
+      {/* 🎨 BACKGROUND ANIMÉ */}
+      <div 
+        className="min-h-screen"
+        style={{
+          backgroundImage: 'url(/backgrounds/svg_backgrounds_animated/bg_8_contact_animated.svg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed'
+        }}
+      >
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="mb-6">
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center text-blue-600 hover:text-blue-700 mb-4 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-lg"
+            >
+              <ArrowLeft className="w-5 h-5 mr-2" />
+              Retour
+            </button>
+            <h1 className="text-3xl font-bold text-gray-900">Modifier le produit</h1>
           </div>
 
-          {/* Prix et stock */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Prix et stock</h2>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Informations principales */}
+            <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-6 border border-gray-200">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Informations principales</h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Prix (Ar) *
-                </label>
-                <input
-                  type="number"
-                  name="prix"
-                  value={formData.prix}
-                  onChange={handleChange}
-                  min="0"
-                  step="0.01"
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
-                    errors.prix ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                />
-                {errors.prix && <p className="mt-1 text-sm text-red-600">{errors.prix}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Prix promotionnel (Ar)
-                </label>
-                <input
-                  type="number"
-                  name="prix_promo"
-                  value={formData.prix_promo}
-                  onChange={handleChange}
-                  min="0"
-                  step="0.01"
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
-                    errors.prix_promo ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                />
-                {errors.prix_promo && (
-                  <p className="mt-1 text-sm text-red-600">{errors.prix_promo}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Stock *
-                </label>
-                <input
-                  type="number"
-                  name="stock"
-                  value={formData.stock}
-                  onChange={handleChange}
-                  min="0"
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
-                    errors.stock ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                />
-                {errors.stock && <p className="mt-1 text-sm text-red-600">{errors.stock}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Seuil d'alerte stock
-                </label>
-                <input
-                  type="number"
-                  name="seuil_alerte_stock"
-                  value={formData.seuil_alerte_stock}
-                  onChange={handleChange}
-                  min="0"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Poids (kg)
-                </label>
-                <input
-                  type="number"
-                  name="poids"
-                  value={formData.poids}
-                  onChange={handleChange}
-                  min="0"
-                  step="0.01"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Statut
-                </label>
-                <select
-                  name="status"
-                  value={formData.status}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="active">Actif</option>
-                  <option value="draft">Brouillon</option>
-                  <option value="inactive">Inactif</option>
-                  <option value="out_of_stock">Rupture de stock</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Images existantes */}
-          {existingImages.length > 0 && (
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Images existantes</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {existingImages.map((image) => (
-                  <div key={image.id} className="relative group">
-                    <img
-                      src={image.image}
-                      alt={image.alt_text || 'Image produit'}
-                      className="w-full h-32 object-cover rounded-lg"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeExistingImage(image.id)}
-                      className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Ajouter nouvelles images */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Ajouter des images</h2>
-
-            <div className="mb-4">
-              <label className="flex items-center justify-center w-full h-32 px-4 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors">
-                <div className="text-center">
-                  <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
-                  <p className="text-sm text-gray-600">Ajouter des images</p>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Nom du produit *
+                  </label>
+                  <input
+                    type="text"
+                    name="nom"
+                    value={formData.nom}
+                    onChange={handleChange}
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                      errors.nom ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  />
+                  {errors.nom && <p className="mt-1 text-sm text-red-600">{errors.nom}</p>}
                 </div>
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={handleNewImageChange}
-                  className="hidden"
-                />
-              </label>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Description courte
+                  </label>
+                  <input
+                    type="text"
+                    name="description_courte"
+                    value={formData.description_courte}
+                    onChange={handleChange}
+                    maxLength={200}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Description *
+                  </label>
+                  <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    rows={6}
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                      errors.description ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  />
+                  {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Catégorie *
+                  </label>
+                  <select
+                    name="categorie"
+                    value={formData.categorie}
+                    onChange={handleChange}
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                      errors.categorie ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  >
+                    <option value="">Sélectionner une catégorie</option>
+                    {categories.map(cat => (
+                      <option key={cat.id} value={cat.id}>{cat.nom}</option>
+                    ))}
+                  </select>
+                  {errors.categorie && <p className="mt-1 text-sm text-red-600">{errors.categorie}</p>}
+                </div>
+              </div>
             </div>
 
-            {newImagePreviews.length > 0 && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {newImagePreviews.map((preview, index) => (
-                  <div key={index} className="relative group">
-                    <img
-                      src={preview}
-                      alt={`Nouveau ${index + 1}`}
-                      className="w-full h-32 object-cover rounded-lg"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeNewImage(index)}
-                      className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
+            {/* Prix et stock */}
+            <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-6 border border-gray-200">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Prix et stock</h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Prix (Ar) *
+                  </label>
+                  <input
+                    type="number"
+                    name="prix"
+                    value={formData.prix}
+                    onChange={handleChange}
+                    min="0"
+                    step="0.01"
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                      errors.prix ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  />
+                  {errors.prix && <p className="mt-1 text-sm text-red-600">{errors.prix}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Prix promotionnel (Ar)
+                  </label>
+                  <input
+                    type="number"
+                    name="prix_promo"
+                    value={formData.prix_promo}
+                    onChange={handleChange}
+                    min="0"
+                    step="0.01"
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                      errors.prix_promo ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  />
+                  {errors.prix_promo && (
+                    <p className="mt-1 text-sm text-red-600">{errors.prix_promo}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Stock *
+                  </label>
+                  <input
+                    type="number"
+                    name="stock"
+                    value={formData.stock}
+                    onChange={handleChange}
+                    min="0"
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                      errors.stock ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  />
+                  {errors.stock && <p className="mt-1 text-sm text-red-600">{errors.stock}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Seuil d'alerte stock
+                  </label>
+                  <input
+                    type="number"
+                    name="seuil_alerte_stock"
+                    value={formData.seuil_alerte_stock}
+                    onChange={handleChange}
+                    min="0"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Poids (kg)
+                  </label>
+                  <input
+                    type="number"
+                    name="poids"
+                    value={formData.poids}
+                    onChange={handleChange}
+                    min="0"
+                    step="0.01"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Statut
+                  </label>
+                  <select
+                    name="status"
+                    value={formData.status}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="active">Actif</option>
+                    <option value="draft">Brouillon</option>
+                    <option value="inactive">Inactif</option>
+                    <option value="out_of_stock">Rupture de stock</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Images existantes */}
+            {existingImages.length > 0 && (
+              <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-6 border border-gray-200">
+                <h2 className="text-xl font-bold text-gray-900 mb-4">Images existantes</h2>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {existingImages.map((image) => (
+                    <div key={image.id} className="relative group">
+                      <img
+                        src={image.image}
+                        alt={image.alt_text || 'Image produit'}
+                        className="w-full h-32 object-cover rounded-lg"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeExistingImage(image.id)}
+                        className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
-          </div>
 
-          {/* Options */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Options</h2>
+            {/* Ajouter nouvelles images */}
+            <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-6 border border-gray-200">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Ajouter des images</h2>
 
-            <div className="space-y-3">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  name="en_vedette"
-                  checked={formData.en_vedette}
-                  onChange={handleChange}
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                />
-                <span className="ml-2 text-sm text-gray-700">Produit en vedette</span>
-              </label>
+              <div className="mb-4">
+                <label className="flex items-center justify-center w-full h-32 px-4 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors">
+                  <div className="text-center">
+                    <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+                    <p className="text-sm text-gray-600">Ajouter des images</p>
+                  </div>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleNewImageChange}
+                    className="hidden"
+                  />
+                </label>
+              </div>
 
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  name="en_promotion"
-                  checked={formData.en_promotion}
-                  onChange={handleChange}
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                />
-                <span className="ml-2 text-sm text-gray-700">En promotion</span>
-              </label>
-
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  name="actif"
-                  checked={formData.actif}
-                  onChange={handleChange}
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                />
-                <span className="ml-2 text-sm text-gray-700">Produit actif</span>
-              </label>
-            </div>
-          </div>
-
-          {/* Boutons */}
-          <div className="flex items-center justify-end space-x-4">
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
-              disabled={saving}
-            >
-              Annuler
-            </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center"
-            >
-              {saving ? (
-                <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Enregistrement...
-                </>
-              ) : (
-                <>
-                  <Save className="w-5 h-5 mr-2" />
-                  Enregistrer
-                </>
+              {newImagePreviews.length > 0 && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {newImagePreviews.map((preview, index) => (
+                    <div key={index} className="relative group">
+                      <img
+                        src={preview}
+                        alt={`Nouveau ${index + 1}`}
+                        className="w-full h-32 object-cover rounded-lg"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeNewImage(index)}
+                        className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
               )}
-            </button>
-          </div>
-        </form>
+            </div>
+
+            {/* Options */}
+            <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-6 border border-gray-200">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Options</h2>
+
+              <div className="space-y-3">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    name="en_vedette"
+                    checked={formData.en_vedette}
+                    onChange={handleChange}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">Produit en vedette</span>
+                </label>
+
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    name="en_promotion"
+                    checked={formData.en_promotion}
+                    onChange={handleChange}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">En promotion</span>
+                </label>
+
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    name="actif"
+                    checked={formData.actif}
+                    onChange={handleChange}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">Produit actif</span>
+                </label>
+              </div>
+            </div>
+
+            {/* Boutons */}
+            <div className="flex items-center justify-end space-x-4 bg-white/90 backdrop-blur-sm rounded-lg p-4 shadow-lg border border-gray-200">
+              <button
+                type="button"
+                onClick={() => navigate(-1)}
+                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                disabled={saving}
+              >
+                Annuler
+              </button>
+              <button
+                type="submit"
+                disabled={saving}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center"
+              >
+                {saving ? (
+                  <>
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    Enregistrement...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-5 h-5 mr-2" />
+                    Enregistrer
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </MainLayout>
   );
