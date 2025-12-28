@@ -1,6 +1,10 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8000/api';
+// Définir l'URL de l'API selon l'environnement
+const API_URL =
+  process.env.NODE_ENV === 'production'
+    ? 'https://api.fanjava.mg/api' // Remplace par ton URL prod réelle
+    : 'http://localhost:8000/api';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -9,6 +13,7 @@ const api = axios.create({
   },
 });
 
+// Interceptor pour ajouter le token aux requêtes
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('access_token');
@@ -20,6 +25,7 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// Interceptor pour gérer le refresh du token
 api.interceptors.response.use(
   (response) => response,
   async (error) => {

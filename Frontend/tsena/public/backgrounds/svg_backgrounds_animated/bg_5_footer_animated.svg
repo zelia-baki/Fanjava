@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <pattern id="diamondAnim" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse">
+      <path d="M40,20 L60,40 L40,60 L20,40 Z" 
+            fill="none" stroke="#3b82f6" stroke-width="1" opacity="0.2">
+        <animate attributeName="opacity" values="0.1;0.3;0.1" dur="4s" repeatCount="indefinite"/>
+      </path>
+    </pattern>
+    
+    <linearGradient id="scanline" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#3b82f6" stop-opacity="0.3">
+        <animate attributeName="offset" values="0;1;0" dur="3s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  
+  <rect width="1920" height="1080" fill="#0f172a"/>
+  <rect width="1920" height="1080" fill="url(#diamondAnim)"/>
+  
+  <!-- Scanline effect -->
+  <rect width="1920" height="200" y="0" fill="url(#scanline)">
+    <animate attributeName="y" values="-200;1080" dur="3s" repeatCount="indefinite"/>
+  </rect>
+  
+  <!-- Code rain effect (simplifié) -->
+  <text x="100" y="0" font-family="monospace" font-size="14" fill="#3b82f6" opacity="0.4">
+    01001000 01100101 01101100 01101100 01101111
+    <animate attributeName="y" values="0;1200" dur="10s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.4;0.1;0.4" dur="5s" repeatCount="indefinite"/>
+  </text>
+  
+  <text x="600" y="-200" font-family="monospace" font-size="14" fill="#93c5fd" opacity="0.3">
+    01010111 01101111 01110010 01101100 01100100
+    <animate attributeName="y" values="-200;1200" dur="12s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.3;0.08;0.3" dur="6s" repeatCount="indefinite"/>
+  </text>
+  
+  <text x="1200" y="-400" font-family="monospace" font-size="14" fill="#3b82f6" opacity="0.35">
+    01000011 01101111 01100100 01100101
+    <animate attributeName="y" values="-400;1200" dur="15s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.35;0.1;0.35" dur="7s" repeatCount="indefinite"/>
+  </text>
+  
+  <text x="1600" y="-100" font-family="monospace" font-size="14" fill="#93c5fd" opacity="0.4">
+    01000100 01100001 01110100 01100001
+    <animate attributeName="y" values="-100;1200" dur="11s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.4;0.12;0.4" dur="5.5s" repeatCount="indefinite"/>
+  </text>
+  
+  <!-- Lignes électriques -->
+  <line x1="0" y1="300" x2="1920" y2="300" stroke="#3b82f6" stroke-width="1" opacity="0">
+    <animate attributeName="opacity" values="0;0.3;0" dur="2s" repeatCount="indefinite"/>
+  </line>
+  
+  <line x1="0" y1="700" x2="1920" y2="700" stroke="#93c5fd" stroke-width="1" opacity="0">
+    <animate attributeName="opacity" values="0;0.25;0" dur="2.5s" begin="0.5s" repeatCount="indefinite"/>
+  </line>
+</svg>

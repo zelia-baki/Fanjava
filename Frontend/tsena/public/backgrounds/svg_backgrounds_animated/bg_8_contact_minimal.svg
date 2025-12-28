@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+  <rect width="1920" height="1080" fill="#ffffff"/>
+  
+  <!-- Formes géométriques -->
+  <rect x="0" y="200" width="300" height="680" fill="#f1f5f9"/>
+  <rect x="400" y="0" width="1120" height="150" fill="#f1f5f9"/>
+  <rect x="1600" y="700" width="320" height="320" fill="#f1f5f9"/>
+  
+  <!-- Ligne d'accent -->
+  <line x1="0" y1="540" x2="1920" y2="540" stroke="#3b82f6" stroke-width="4" opacity="0.15"/>
+  
+  <!-- Points de connexion -->
+  <circle cx="200" cy="540" r="6" fill="#3b82f6"/>
+  <circle cx="400" cy="540" r="6" fill="#3b82f6"/>
+  <circle cx="600" cy="540" r="6" fill="#3b82f6"/>
+  <circle cx="800" cy="540" r="6" fill="#3b82f6"/>
+  <circle cx="1000" cy="540" r="6" fill="#3b82f6"/>
+  <circle cx="1200" cy="540" r="6" fill="#3b82f6"/>
+  <circle cx="1400" cy="540" r="6" fill="#3b82f6"/>
+  <circle cx="1600" cy="540" r="6" fill="#3b82f6"/>
+  <circle cx="1800" cy="540" r="6" fill="#3b82f6"/>
+</svg>

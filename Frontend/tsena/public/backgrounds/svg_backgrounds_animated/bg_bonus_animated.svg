@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="animatedGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f172a;stop-opacity:1">
+        <animate attributeName="stop-color" 
+                 values="#0f172a;#1e293b;#0f172a" 
+                 dur="10s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:0.3">
+        <animate attributeName="stop-color" 
+                 values="#3b82f6;#93c5fd;#3b82f6" 
+                 dur="10s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+  </defs>
+  
+  <rect width="1920" height="1080" fill="url(#animatedGrad)"/>
+  
+  <!-- Hexagone animé -->
+  <polygon points="960,400 1040,450 1040,550 960,600 880,550 880,450" 
+           fill="none" stroke="#3b82f6" stroke-width="3" opacity="0.5">
+    <animateTransform attributeName="transform" type="rotate"
+                      from="0 960 500" to="360 960 500"
+                      dur="20s" repeatCount="indefinite"/>
+  </polygon>
+</svg>

@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" fill="none">
+  <defs>
+    <linearGradient id="bgGradSquare" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#eff6ff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#dbeafe;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="hexGradSquare" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1e40af;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="circuitGradSquare" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#60a5fa;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="textGradSquare" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1e3a8a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="400" height="400" fill="url(#bgGradSquare)"/>
+  
+  <!-- Icon (centré en haut) -->
+  <g transform="translate(200, 120)">
+    <!-- Hexagon -->
+    <polygon points="0,-60 52,-30 52,30 0,60 -52,30 -52,-30" 
+             fill="url(#hexGradSquare)" 
+             stroke="#1e3a8a" 
+             stroke-width="3"/>
+    
+    <!-- Circuit pattern -->
+    <g stroke="url(#circuitGradSquare)" stroke-width="3" fill="none" opacity="0.9">
+      <line x1="-30" y1="-15" x2="30" y2="-15" stroke-linecap="round"/>
+      <line x1="-30" y1="0" x2="30" y2="0" stroke-linecap="round"/>
+      <line x1="-30" y1="15" x2="30" y2="15" stroke-linecap="round"/>
+      
+      <line x1="-15" y1="-22" x2="-15" y2="22" stroke-linecap="round"/>
+      <line x1="0" y1="-22" x2="0" y2="22" stroke-linecap="round"/>
+      <line x1="15" y1="-22" x2="15" y2="22" stroke-linecap="round"/>
+    </g>
+    
+    <!-- Nodes -->
+    <g fill="white">
+      <circle cx="-15" cy="-15" r="3.5"/>
+      <circle cx="0" cy="-15" r="3.5"/>
+      <circle cx="15" cy="-15" r="3.5"/>
+      
+      <circle cx="-15" cy="0" r="4"/>
+      <circle cx="0" cy="0" r="5">
+        <animate attributeName="r" values="5;6;5" dur="2s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="15" cy="0" r="4"/>
+      
+      <circle cx="-15" cy="15" r="3.5"/>
+      <circle cx="0" cy="15" r="3.5"/>
+      <circle cx="15" cy="15" r="3.5"/>
+    </g>
+    
+    <!-- Center highlight -->
+    <circle cx="0" cy="0" r="8" fill="none" stroke="white" stroke-width="2" opacity="0.6">
+      <animate attributeName="r" values="8;12;8" dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.4;0.8;0.4" dur="3s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- Text "FanJava" -->
+  <text x="200" y="250" 
+        font-family="Arial, Helvetica, sans-serif" 
+        font-size="60" 
+        font-weight="bold" 
+        fill="url(#textGradSquare)"
+        text-anchor="middle"
+        letter-spacing="-1">
+    FanJava
+  </text>
+  
+  <!-- ".mg" badge -->
+  <g transform="translate(200, 290)">
+    <rect x="-30" y="-15" width="60" height="30" rx="15" fill="#3b82f6" opacity="0.15"/>
+    <rect x="-30" y="-15" width="60" height="30" rx="15" fill="none" stroke="#3b82f6" stroke-width="2"/>
+    <text x="0" y="5" 
+          font-family="Arial, Helvetica, sans-serif" 
+          font-size="18" 
+          font-weight="600" 
+          fill="#3b82f6"
+          text-anchor="middle">
+      .mg
+    </text>
+  </g>
+  
+  <!-- Tagline -->
+  <text x="200" y="340" 
+        font-family="Arial, Helvetica, sans-serif" 
+        font-size="14" 
+        font-weight="400" 
+        fill="#6b7280"
+        text-anchor="middle"
+        letter-spacing="3">
+    MARKETPLACE MADAGASCAR
+  </text>
+</svg>

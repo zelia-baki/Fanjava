@@ -1,5 +1,5 @@
-import { Star, User, ThumbsUp } from 'lucide-react';
-
+import { Star, User, ThumbsUp, Package } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function ReviewList({ avis }) {
   const renderStars = (note) => {
@@ -62,6 +62,34 @@ export default function ReviewList({ avis }) {
             </div>
             {renderStars(review.note)}
           </div>
+
+          {/* ✅ NOUVEAU : Affichage du produit si disponible */}
+          {review.produit_details && (
+            <Link 
+              to={`/products/${review.produit_details.slug}`}
+              className="flex items-center gap-3 mb-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              {review.produit_details.image ? (
+                <img
+                  src={review.produit_details.image}
+                  alt={review.produit_details.nom}
+                  className="w-16 h-16 object-cover rounded"
+                />
+              ) : (
+                <div className="w-16 h-16 bg-gray-200 rounded flex items-center justify-center">
+                  <Package className="w-8 h-8 text-gray-400" />
+                </div>
+              )}
+              <div className="flex-1">
+                <p className="font-medium text-gray-900 text-sm">
+                  {review.produit_details.nom}
+                </p>
+                <p className="text-blue-600 text-sm font-semibold">
+                  {parseFloat(review.produit_details.prix_final).toFixed(2)} Ar
+                </p>
+              </div>
+            </Link>
+          )}
 
           {/* Titre */}
           {review.titre && (

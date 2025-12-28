@@ -106,220 +106,236 @@ export default function ProductDetail() {
 
   return (
     <MainLayout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Breadcrumb */}
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center text-blue-600 hover:text-blue-700 mb-6"
-        >
-          <ArrowLeft className="w-5 h-5 mr-2" />
-          Retour
-        </button>
+      {/* 🎨 BACKGROUND ANIMÉ */}
+      <div 
+        className="min-h-screen"
+        style={{
+          backgroundImage: 'url(/backgrounds/svg_backgrounds_animated/bg_6_testimonials_animated.svg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed'
+        }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Breadcrumb */}
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center text-blue-600 hover:text-blue-700 mb-6 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-lg"
+          >
+            <ArrowLeft className="w-5 h-5 mr-2" />
+            Retour
+          </button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Images */}
-          <div>
-            {/* Image principale */}
-            <div className="bg-gray-100 rounded-lg overflow-hidden mb-4 aspect-square">
-              {selectedImage ? (
-                <img
-                  src={selectedImage}
-                  alt={product.nom}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-400">
-                  Pas d'image
-                </div>
-              )}
-            </div>
-
-            {/* Miniatures */}
-            {product.images && product.images.length > 1 && (
-              <div className="grid grid-cols-4 gap-2">
-                {product.images.map((image) => (
-                  <button
-                    key={image.id}
-                    onClick={() => setSelectedImage(image.image)}
-                    className={`aspect-square rounded-lg overflow-hidden border-2 ${
-                      selectedImage === image.image
-                        ? 'border-blue-600'
-                        : 'border-gray-200'
-                    }`}
-                  >
-                    <img
-                      src={image.image}
-                      alt={image.alt_text || product.nom}
-                      className="w-full h-full object-cover"
-                    />
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Informations */}
-          <div>
-            {/* Badges */}
-            <div className="flex gap-2 mb-4">
-              {enPromo && (
-                <span className="bg-red-500 text-white text-sm font-bold px-3 py-1 rounded">
-                  -{Math.round(((prixOriginal - prix) / prixOriginal) * 100)}% PROMO
-                </span>
-              )}
-              {product.en_vedette && (
-                <span className="bg-yellow-500 text-white text-sm font-bold px-3 py-1 rounded">
-                  ⭐ VEDETTE
-                </span>
-              )}
-            </div>
-
-            {/* Titre */}
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.nom}</h1>
-
-            {/* Entreprise */}
-            <p className="text-gray-600 mb-4">
-              Vendu par <span className="font-semibold">{product.entreprise_nom}</span>
-            </p>
-
-            {/* Note */}
-            {product.note_moyenne && parseFloat(product.note_moyenne) > 0 && (
-              <div className="flex items-center gap-2 mb-4">
-                <div className="flex">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`w-5 h-5 ${
-                        i < Math.round(parseFloat(product.note_moyenne))
-                          ? 'fill-yellow-400 text-yellow-400'
-                          : 'text-gray-300'
-                      }`}
-                    />
-                  ))}
-                </div>
-                <span className="text-gray-600">
-                  {product.note_moyenne} ({product.nombre_avis || 0} avis)
-                </span>
-              </div>
-            )}
-
-            {/* Prix */}
-            <div className="mb-6">
-              <div className="flex items-baseline gap-3">
-                <p className="text-4xl font-bold text-blue-600">{prix.toFixed(2)} Ar</p>
-                {enPromo && (
-                  <p className="text-xl text-gray-500 line-through">
-                    {prixOriginal.toFixed(2)} Ar
-                  </p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Images */}
+            <div>
+              {/* Image principale */}
+              <div className="bg-white/95 backdrop-blur-sm rounded-lg overflow-hidden mb-4 aspect-square shadow-lg border border-gray-200">
+                {selectedImage ? (
+                  <img
+                    src={selectedImage}
+                    alt={product.nom}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-gray-400">
+                    Pas d'image
+                  </div>
                 )}
               </div>
-            </div>
-<ReviewSection 
-  produitId={product.id}
-  noteMoyenne={product.note_moyenne}
-  nombreAvis={product.nombre_avis}
-/>
-            {/* Description courte */}
-            {product.description_courte && (
-              <p className="text-gray-700 mb-6">{product.description_courte}</p>
-            )}
 
-            {/* Stock */}
-            <div className="mb-6">
-              {product.stock > 10 && (
-                <p className="text-green-600 font-semibold">✓ En stock</p>
-              )}
-              {product.stock <= 10 && product.stock > 0 && (
-                <p className="text-orange-600 font-semibold">
-                  ⚠️ Plus que {product.stock} en stock !
-                </p>
-              )}
-              {product.stock === 0 && (
-                <p className="text-red-600 font-semibold">✗ Rupture de stock</p>
+              {/* Miniatures */}
+              {product.images && product.images.length > 1 && (
+                <div className="grid grid-cols-4 gap-2">
+                  {product.images.map((image) => (
+                    <button
+                      key={image.id}
+                      onClick={() => setSelectedImage(image.image)}
+                      className={`aspect-square rounded-lg overflow-hidden border-2 bg-white/90 backdrop-blur-sm ${
+                        selectedImage === image.image
+                          ? 'border-blue-600 shadow-lg'
+                          : 'border-gray-200'
+                      }`}
+                    >
+                      <img
+                        src={image.image}
+                        alt={image.alt_text || product.nom}
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
               )}
             </div>
 
-            {/* Quantité */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Quantité
-              </label>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={decrementQuantity}
-                  disabled={quantity <= 1}
-                  className="p-2 border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <Minus className="w-5 h-5" />
-                </button>
-                <span className="text-xl font-semibold w-12 text-center">{quantity}</span>
-                <button
-                  onClick={incrementQuantity}
-                  disabled={quantity >= product.stock}
-                  className="p-2 border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <Plus className="w-5 h-5" />
-                </button>
+            {/* Informations */}
+            <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-6 border border-gray-200">
+              {/* Badges */}
+              <div className="flex gap-2 mb-4">
+                {enPromo && (
+                  <span className="bg-red-500 text-white text-sm font-bold px-3 py-1 rounded">
+                    -{Math.round(((prixOriginal - prix) / prixOriginal) * 100)}% PROMO
+                  </span>
+                )}
+                {product.en_vedette && (
+                  <span className="bg-yellow-500 text-white text-sm font-bold px-3 py-1 rounded">
+                    ⭐ VEDETTE
+                  </span>
+                )}
               </div>
-            </div>
 
-            {/* Bouton Ajouter au panier */}
-            <button
-              onClick={handleAddToCart}
-              disabled={adding || product.stock === 0}
-              className="w-full bg-blue-600 text-white py-4 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-lg font-semibold mb-4"
-            >
-              {adding ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Ajout en cours...
-                </>
-              ) : product.stock === 0 ? (
-                'Rupture de stock'
-              ) : (
-                <>
-                  <ShoppingCart className="w-5 h-5" />
-                  Ajouter au panier - {(prix * quantity).toFixed(2)} Ar
-                </>
+              {/* Titre */}
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.nom}</h1>
+
+              {/* Entreprise */}
+              <p className="text-gray-600 mb-4">
+                Vendu par <span className="font-semibold">{product.entreprise_nom}</span>
+              </p>
+
+              {/* Note */}
+              {product.note_moyenne && parseFloat(product.note_moyenne) > 0 && (
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="flex">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`w-5 h-5 ${
+                          i < Math.round(parseFloat(product.note_moyenne))
+                            ? 'fill-yellow-400 text-yellow-400'
+                            : 'text-gray-300'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-gray-600">
+                    {product.note_moyenne} ({product.nombre_avis || 0} avis)
+                  </span>
+                </div>
               )}
-            </button>
 
-            {/* Informations de livraison */}
-            <div className="space-y-3 border-t pt-6">
-              <div className="flex items-center gap-3 text-gray-700">
-                <Truck className="w-5 h-5 text-blue-600" />
-                <span>Livraison à partir de 5 000 Ar</span>
+              {/* Prix */}
+              <div className="mb-6">
+                <div className="flex items-baseline gap-3">
+                  <p className="text-4xl font-bold text-blue-600">{prix.toFixed(2)} Ar</p>
+                  {enPromo && (
+                    <p className="text-xl text-gray-500 line-through">
+                      {prixOriginal.toFixed(2)} Ar
+                    </p>
+                  )}
+                </div>
               </div>
-              <div className="flex items-center gap-3 text-gray-700">
-                <Shield className="w-5 h-5 text-blue-600" />
-                <span>Paiement sécurisé</span>
+
+              {/* Description courte */}
+              {product.description_courte && (
+                <p className="text-gray-700 mb-6">{product.description_courte}</p>
+              )}
+
+              {/* Stock */}
+              <div className="mb-6">
+                {product.stock > 10 && (
+                  <p className="text-green-600 font-semibold">✓ En stock</p>
+                )}
+                {product.stock <= 10 && product.stock > 0 && (
+                  <p className="text-orange-600 font-semibold">
+                    ⚠️ Plus que {product.stock} en stock !
+                  </p>
+                )}
+                {product.stock === 0 && (
+                  <p className="text-red-600 font-semibold">✗ Rupture de stock</p>
+                )}
               </div>
-            </div>
-          </div>
-        </div>
 
-        {/* Description complète */}
-        <div className="mt-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Description</h2>
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <p className="text-gray-700 whitespace-pre-line">{product.description}</p>
-          </div>
-        </div>
+              {/* Quantité */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Quantité
+                </label>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={decrementQuantity}
+                    disabled={quantity <= 1}
+                    className="p-2 border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed bg-white"
+                  >
+                    <Minus className="w-5 h-5" />
+                  </button>
+                  <span className="text-xl font-semibold w-12 text-center">{quantity}</span>
+                  <button
+                    onClick={incrementQuantity}
+                    disabled={quantity >= product.stock}
+                    className="p-2 border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed bg-white"
+                  >
+                    <Plus className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
 
-        {/* Caractéristiques */}
-        {product.poids && (
-          <div className="mt-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Caractéristiques</h2>
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <span className="text-gray-600">Poids:</span>
-                  <span className="ml-2 font-semibold">{product.poids} kg</span>
+              {/* Bouton Ajouter au panier */}
+              <button
+                onClick={handleAddToCart}
+                disabled={adding || product.stock === 0}
+                className="w-full bg-blue-600 text-white py-4 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-lg font-semibold mb-4 shadow-lg"
+              >
+                {adding ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Ajout en cours...
+                  </>
+                ) : product.stock === 0 ? (
+                  'Rupture de stock'
+                ) : (
+                  <>
+                    <ShoppingCart className="w-5 h-5" />
+                    Ajouter au panier - {(prix * quantity).toFixed(2)} Ar
+                  </>
+                )}
+              </button>
+
+              {/* Informations de livraison */}
+              <div className="space-y-3 border-t pt-6">
+                <div className="flex items-center gap-3 text-gray-700">
+                  <Truck className="w-5 h-5 text-blue-600" />
+                  <span>Livraison à partir de 5 000 Ar</span>
+                </div>
+                <div className="flex items-center gap-3 text-gray-700">
+                  <Shield className="w-5 h-5 text-blue-600" />
+                  <span>Paiement sécurisé</span>
                 </div>
               </div>
             </div>
           </div>
-        )}
+
+          {/* Description complète */}
+          <div className="mt-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Description</h2>
+            <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-6 border border-gray-200">
+              <p className="text-gray-700 whitespace-pre-line">{product.description}</p>
+            </div>
+          </div>
+
+          {/* Caractéristiques */}
+          {product.poids && (
+            <div className="mt-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Caractéristiques</h2>
+              <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-6 border border-gray-200">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <span className="text-gray-600">Poids:</span>
+                    <span className="ml-2 font-semibold">{product.poids} kg</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Section Avis */}
+          <div className="mt-8">
+            <ReviewSection 
+              produitId={product.id}
+              noteMoyenne={product.note_moyenne}
+              nombreAvis={product.nombre_avis}
+            />
+          </div>
+        </div>
       </div>
     </MainLayout>
   );

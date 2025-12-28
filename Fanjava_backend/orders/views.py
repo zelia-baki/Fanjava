@@ -70,6 +70,43 @@ class PanierViewSet(viewsets.ViewSet):
         serializer = PanierSerializer(panier)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
+@action(detail=False, methods=['patch'])
+def update(self, request, *args, **kwargs):
+  
+    commande = self.get_object()
+    
+    # DEBUG - LOGS
+    print("=" * 60)
+    print("📥 DONNÉES REÇUES:", request.data)
+    print("🔑 User:", request.user.username)
+    print("🏢 Has entreprise:", hasattr(request.user, 'entreprise'))
+    print("=" * 60)
+    
+    # Vérifier que c'est bien l'entreprise de la commande
+    if hasattr(request.user, 'entreprise'):
+        if commande.entreprise != request.user.entreprise:
+            return Response(
+                {'error': 'Vous ne pouvez pas modifier cette commande'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+    elif not (request.user.is_staff or request.user.is_superuser):
+        return Response(
+            {'error': 'Non autorisé'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+    
+    # Mettre à jour la commande
+    serializer = self.get_serializer(commande, data=request.data, partial=True)
+    
+    # DEBUG - AFFICHER LES ERREURS
+    if not serializer.is_valid():
+        print("❌ ERREURS DU SERIALIZER:", serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    serializer.save()
+    print("✅ COMMANDE MISE À JOUR AVEC SUCCÈS")
+    
+    return Response(serializer.data)
     @action(detail=False, methods=['delete'])
     def remove_item(self, request):
         """Supprimer un article du panier"""
@@ -94,7 +131,7 @@ class PanierViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
 
-class CommandeViewSet(viewsets.ModelViewSet):
+class CommandeViewSet(viewsets.ModelViewSet):  # ← CHANGÉ DE ReadOnlyModelViewSet à ModelViewSet
     """ViewSet pour gérer les commandes"""
     permission_classes = [IsAuthenticated]
     serializer_class = CommandeSerializer
@@ -158,68 +195,33 @@ class CommandeViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['post'])
     def create_from_cart(self, request):
-        """Créer une ou plusieurs commandes depuis le panier frontend (localStorage)"""
+        """Créer une ou plusieurs commandes depuis le panier (une par entreprise)"""
+        client = request.user.client
+        panier = get_object_or_404(Panier, client=client)
         
-        print("=" * 60)
-        print("🚀 DÉBUT create_from_cart")
-        print(f"👤 User: {request.user.username}")
-        print(f"📦 Request data: {request.data}")
-        
-        # Vérifier si l'utilisateur a un profil client
-        if not hasattr(request.user, 'client'):
-            print("❌ ERREUR: Utilisateur n'a pas de profil client!")
+        # Vérifier que le panier n'est pas vide
+        if not panier.items.exists():
             return Response(
-                {'error': 'Vous devez être un client pour passer commande'},
-                status=status.HTTP_403_FORBIDDEN
+                {'error': 'Le panier est vide'},
+                status=status.HTTP_400_BAD_REQUEST
             )
         
-        client = request.user.client
-        print(f"✅ Client trouvé: {client}")
-        
-        # Valider les données
+        # Valider les données d'adresse
         create_serializer = CommandeCreateSerializer(data=request.data)
         if not create_serializer.is_valid():
-            print(f"❌ ERREUR validation: {create_serializer.errors}")
             return Response(
                 create_serializer.errors,
                 status=status.HTTP_400_BAD_REQUEST
             )
         
         validated_data = create_serializer.validated_data
-        cart_items = validated_data.pop('items')  # Récupérer les items du panier
         
-        print(f"📊 Nombre d'items reçus: {len(cart_items)}")
-        
-        # Vérifier que le panier n'est pas vide
-        if not cart_items:
-            print("❌ ERREUR: Panier vide!")
-            return Response(
-                {'error': 'Le panier est vide'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        # Regrouper les items par entreprise
+        # Regrouper les items du panier par entreprise
         items_par_entreprise = defaultdict(list)
         
-        for cart_item in cart_items:
-            try:
-                produit = Produit.objects.select_related('entreprise').get(
-                    id=cart_item['produit_id']
-                )
-                print(f"  📦 Produit: {produit.nom} x{cart_item['quantite']}")
-                
-                items_par_entreprise[produit.entreprise].append({
-                    'produit': produit,
-                    'quantite': cart_item['quantite']
-                })
-            except Produit.DoesNotExist:
-                print(f"❌ ERREUR: Produit {cart_item['produit_id']} non trouvé!")
-                return Response(
-                    {'error': f"Produit {cart_item['produit_id']} non trouvé"},
-                    status=status.HTTP_404_NOT_FOUND
-                )
-        
-        print(f"🏢 Nombre d'entreprises: {len(items_par_entreprise)}")
+        for item in panier.items.all():
+            entreprise = item.produit.entreprise
+            items_par_entreprise[entreprise].append(item)
         
         # Transaction atomique pour créer toutes les commandes
         try:
@@ -228,14 +230,8 @@ class CommandeViewSet(viewsets.ModelViewSet):
                 
                 # Créer une commande pour chaque entreprise
                 for entreprise, items in items_par_entreprise.items():
-                    print(f"\n🏢 Création commande pour: {entreprise.nom_entreprise}")
-                    
                     # Calculer le montant total pour cette entreprise
-                    montant_total = sum(
-                        item['produit'].get_prix_final() * item['quantite'] 
-                        for item in items
-                    )
-                    print(f"💰 Montant total: {montant_total}")
+                    montant_total = sum(item.get_prix_total() for item in items)
                     
                     # Créer la commande
                     commande = Commande.objects.create(
@@ -251,43 +247,36 @@ class CommandeViewSet(viewsets.ModelViewSet):
                         note_client=validated_data.get('note_client', ''),
                     )
                     
-                    print(f"✅ Commande créée: {commande.numero_commande}")
-                    
                     # Créer les lignes de commande et décrémenter le stock
                     for item in items:
-                        produit = item['produit']
-                        quantite = item['quantite']
-                        
                         # Vérifier le stock disponible
-                        if produit.stock < quantite:
+                        if item.produit.stock < item.quantite:
                             raise Exception(
-                                f"Stock insuffisant pour {produit.nom}. "
-                                f"Stock disponible: {produit.stock}"
+                                f"Stock insuffisant pour {item.produit.nom}. "
+                                f"Stock disponible: {item.produit.stock}"
                             )
                         
                         # Créer la ligne de commande
                         LigneCommande.objects.create(
                             commande=commande,
-                            produit=produit,
-                            nom_produit=produit.nom,
-                            prix_unitaire=produit.get_prix_final(),
-                            quantite=quantite
+                            produit=item.produit,
+                            nom_produit=item.produit.nom,
+                            prix_unitaire=item.produit.get_prix_final(),
+                            quantite=item.quantite
                         )
                         
                         # Décrémenter le stock
-                        produit.stock -= quantite
-                        produit.nombre_ventes += quantite
-                        produit.save()
-                        
-                        print(f"  ✅ Ligne créée: {produit.nom}")
+                        item.produit.stock -= item.quantite
+                        item.produit.nombre_ventes += item.quantite
+                        item.produit.save()
                     
                     commandes_creees.append(commande)
                 
+                # Vider le panier après création des commandes
+                panier.items.all().delete()
+                
                 # Sérialiser toutes les commandes créées
                 serializer = CommandeSerializer(commandes_creees, many=True)
-                
-                print(f"✅ {len(commandes_creees)} commande(s) créée(s) avec succès")
-                print("=" * 60)
                 
                 return Response({
                     'message': f'{len(commandes_creees)} commande(s) créée(s) avec succès',
@@ -295,8 +284,6 @@ class CommandeViewSet(viewsets.ModelViewSet):
                 }, status=status.HTTP_201_CREATED)
                 
         except Exception as e:
-            print(f"❌ ERREUR TRANSACTION: {str(e)}")
-            print("=" * 60)
             return Response(
                 {'error': str(e)},
                 status=status.HTTP_400_BAD_REQUEST

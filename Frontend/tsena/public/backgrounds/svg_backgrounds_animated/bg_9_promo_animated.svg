@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 400" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="promoBannerAnimGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#3b82f6">
+        <animate attributeName="stop-color" 
+                 values="#3b82f6;#2563eb;#3b82f6" 
+                 dur="4s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" style="stop-color:#2563eb">
+        <animate attributeName="stop-color" 
+                 values="#2563eb;#1d4ed8;#2563eb" 
+                 dur="4s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+    
+    <pattern id="diagonalLinesAnim" x="0" y="0" width="60" height="400" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="400" stroke="#ffffff" stroke-width="2" opacity="0.1">
+        <animate attributeName="x1" values="0;60;0" dur="3s" repeatCount="indefinite"/>
+        <animate attributeName="x2" values="0;60;0" dur="3s" repeatCount="indefinite"/>
+      </line>
+    </pattern>
+    
+    <filter id="promoGlow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <rect width="1920" height="400" fill="url(#promoBannerAnimGrad)"/>
+  <rect width="1920" height="400" fill="url(#diagonalLinesAnim)"/>
+  
+  <!-- Étoiles/sparkles animés -->
+  <circle cx="300" cy="100" r="4" fill="#ffffff" opacity="0" filter="url(#promoGlow)">
+    <animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite"/>
+    <animate attributeName="r" values="2;6;2" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  
+  <circle cx="800" cy="250" r="3" fill="#ffffff" opacity="0" filter="url(#promoGlow)">
+    <animate attributeName="opacity" values="0;0.8;0" dur="2.5s" begin="0.5s" repeatCount="indefinite"/>
+    <animate attributeName="r" values="2;5;2" dur="2.5s" begin="0.5s" repeatCount="indefinite"/>
+  </circle>
+  
+  <circle cx="1300" cy="150" r="4" fill="#ffffff" opacity="0" filter="url(#promoGlow)">
+    <animate attributeName="opacity" values="0;0.9;0" dur="2.2s" begin="1s" repeatCount="indefinite"/>
+    <animate attributeName="r" values="2;6;2" dur="2.2s" begin="1s" repeatCount="indefinite"/>
+  </circle>
+  
+  <circle cx="1600" cy="300" r="3" fill="#ffffff" opacity="0" filter="url(#promoGlow)">
+    <animate attributeName="opacity" values="0;1;0" dur="2.8s" begin="1.5s" repeatCount="indefinite"/>
+    <animate attributeName="r" values="2;5;2" dur="2.8s" begin="1.5s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Ligne de scan -->
+  <rect x="0" y="0" width="100" height="400" fill="#ffffff" opacity="0">
+    <animate attributeName="x" values="-100;1920" dur="5s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;0.1;0" dur="5s" repeatCount="indefinite"/>
+  </rect>
+</svg>

@@ -1,0 +1,221 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="regGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10b981;stop-opacity:0.1">
+        <animate attributeName="stop-color" 
+                 values="#10b981;#059669;#10b981" 
+                 dur="10s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="50%" style="stop-color:#3b82f6;stop-opacity:0.08">
+        <animate attributeName="stop-color" 
+                 values="#3b82f6;#2563eb;#3b82f6" 
+                 dur="12s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:0.06">
+        <animate attributeName="stop-color" 
+                 values="#8b5cf6;#7c3aed;#8b5cf6" 
+                 dur="14s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+    
+    <radialGradient id="regRadial1" cx="20%" cy="30%" r="50%">
+      <stop offset="0%" stop-color="#10b981" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    
+    <radialGradient id="regRadial2" cx="80%" cy="70%" r="50%">
+      <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    
+    <!-- Filters -->
+    <filter id="regGlow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Base -->
+  <rect width="1920" height="1080" fill="#f0fdf4"/>
+  <rect width="1920" height="1080" fill="url(#regGrad1)"/>
+  <circle cx="400" cy="300" r="600" fill="url(#regRadial1)"/>
+  <circle cx="1500" cy="800" r="600" fill="url(#regRadial2)"/>
+  
+  <!-- Growth tree animation -->
+  <g opacity="0.2">
+    <!-- Main trunk -->
+    <line x1="200" y1="1080" x2="200" y2="700" stroke="#10b981" stroke-width="15" stroke-linecap="round" opacity="0">
+      <animate attributeName="opacity" values="0;1" dur="2s" fill="freeze"/>
+      <animate attributeName="y2" values="1080;700" dur="2s" fill="freeze"/>
+    </line>
+    
+    <!-- Branches -->
+    <path d="M200,900 Q250,850 300,800" stroke="#10b981" stroke-width="8" fill="none" stroke-linecap="round" opacity="0">
+      <animate attributeName="opacity" values="0;1" dur="1.5s" begin="1s" fill="freeze"/>
+    </path>
+    
+    <path d="M200,900 Q150,850 100,800" stroke="#10b981" stroke-width="8" fill="none" stroke-linecap="round" opacity="0">
+      <animate attributeName="opacity" values="0;1" dur="1.5s" begin="1.2s" fill="freeze"/>
+    </path>
+    
+    <path d="M200,800 Q270,750 340,700" stroke="#10b981" stroke-width="6" fill="none" stroke-linecap="round" opacity="0">
+      <animate attributeName="opacity" values="0;1" dur="1.5s" begin="1.5s" fill="freeze"/>
+    </path>
+    
+    <!-- Leaves (circles pulsing) -->
+    <circle cx="300" cy="800" r="8" fill="#10b981" filter="url(#regGlow)" opacity="0">
+      <animate attributeName="opacity" values="0;1" dur="0.5s" begin="2.5s" fill="freeze"/>
+      <animate attributeName="r" values="8;12;8" dur="3s" begin="3s" repeatCount="indefinite"/>
+    </circle>
+    
+    <circle cx="100" cy="800" r="8" fill="#059669" filter="url(#regGlow)" opacity="0">
+      <animate attributeName="opacity" values="0;1" dur="0.5s" begin="2.7s" fill="freeze"/>
+      <animate attributeName="r" values="8;12;8" dur="3.2s" begin="3.2s" repeatCount="indefinite"/>
+    </circle>
+    
+    <circle cx="340" cy="700" r="6" fill="#10b981" filter="url(#regGlow)" opacity="0">
+      <animate attributeName="opacity" values="0;1" dur="0.5s" begin="3s" fill="freeze"/>
+      <animate attributeName="r" values="6;10;6" dur="3.5s" begin="3.5s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- Success checkmarks floating up -->
+  <g opacity="0.3">
+    <g transform="translate(1600, 900)">
+      <path d="M0,0 L15,20 L40,-10" stroke="#10b981" stroke-width="4" fill="none" stroke-linecap="round" filter="url(#regGlow)">
+        <animateTransform attributeName="transform" type="translate"
+                          values="0,0; -50,-800"
+                          dur="15s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.5;1;0" dur="15s" repeatCount="indefinite"/>
+      </path>
+    </g>
+    
+    <g transform="translate(1700, 950)">
+      <path d="M0,0 L15,20 L40,-10" stroke="#3b82f6" stroke-width="4" fill="none" stroke-linecap="round" filter="url(#regGlow)">
+        <animateTransform attributeName="transform" type="translate"
+                          values="0,0; -80,-850"
+                          dur="18s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.4;1;0" dur="18s" repeatCount="indefinite"/>
+      </path>
+    </g>
+    
+    <g transform="translate(1650, 1000)">
+      <path d="M0,0 L15,20 L40,-10" stroke="#8b5cf6" stroke-width="4" fill="none" stroke-linecap="round" filter="url(#regGlow)">
+        <animateTransform attributeName="transform" type="translate"
+                          values="0,0; -60,-900"
+                          dur="20s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.6;1;0" dur="20s" repeatCount="indefinite"/>
+      </path>
+    </g>
+  </g>
+  
+  <!-- Hexagonal grid pattern -->
+  <g opacity="0.1" stroke="#10b981" stroke-width="1" fill="none">
+    <polygon points="800,200 850,225 850,275 800,300 750,275 750,225">
+      <animate attributeName="opacity" values="0.1;0.3;0.1" dur="5s" repeatCount="indefinite"/>
+    </polygon>
+    
+    <polygon points="1000,300 1050,325 1050,375 1000,400 950,375 950,325">
+      <animate attributeName="opacity" values="0.1;0.3;0.1" dur="6s" repeatCount="indefinite"/>
+    </polygon>
+    
+    <polygon points="1200,200 1250,225 1250,275 1200,300 1150,275 1150,225">
+      <animate attributeName="opacity" values="0.1;0.3;0.1" dur="5.5s" repeatCount="indefinite"/>
+    </polygon>
+  </g>
+  
+  <!-- Sparkles -->
+  <g filter="url(#regGlow)">
+    <!-- Sparkle 1 -->
+    <g transform="translate(500, 400)">
+      <line x1="-15" y1="0" x2="15" y2="0" stroke="#10b981" stroke-width="2" opacity="0">
+        <animate attributeName="opacity" values="0;1;0" dur="3s" repeatCount="indefinite"/>
+      </line>
+      <line x1="0" y1="-15" x2="0" y2="15" stroke="#10b981" stroke-width="2" opacity="0">
+        <animate attributeName="opacity" values="0;1;0" dur="3s" repeatCount="indefinite"/>
+      </line>
+      <line x1="-10" y1="-10" x2="10" y2="10" stroke="#10b981" stroke-width="2" opacity="0">
+        <animate attributeName="opacity" values="0;1;0" dur="3s" repeatCount="indefinite"/>
+      </line>
+      <line x1="-10" y1="10" x2="10" y2="-10" stroke="#10b981" stroke-width="2" opacity="0">
+        <animate attributeName="opacity" values="0;1;0" dur="3s" repeatCount="indefinite"/>
+      </line>
+    </g>
+    
+    <!-- Sparkle 2 -->
+    <g transform="translate(1400, 300)">
+      <line x1="-12" y1="0" x2="12" y2="0" stroke="#3b82f6" stroke-width="2" opacity="0">
+        <animate attributeName="opacity" values="0;1;0" dur="4s" begin="1s" repeatCount="indefinite"/>
+      </line>
+      <line x1="0" y1="-12" x2="0" y2="12" stroke="#3b82f6" stroke-width="2" opacity="0">
+        <animate attributeName="opacity" values="0;1;0" dur="4s" begin="1s" repeatCount="indefinite"/>
+      </line>
+    </g>
+    
+    <!-- Sparkle 3 -->
+    <g transform="translate(700, 700)">
+      <line x1="-10" y1="0" x2="10" y2="0" stroke="#8b5cf6" stroke-width="2" opacity="0">
+        <animate attributeName="opacity" values="0;1;0" dur="3.5s" begin="2s" repeatCount="indefinite"/>
+      </line>
+      <line x1="0" y1="-10" x2="0" y2="10" stroke="#8b5cf6" stroke-width="2" opacity="0">
+        <animate attributeName="opacity" values="0;1;0" dur="3.5s" begin="2s" repeatCount="indefinite"/>
+      </line>
+    </g>
+  </g>
+  
+  <!-- Rising bubbles -->
+  <g opacity="0.25">
+    <circle cx="300" cy="1080" r="30" fill="#10b981" filter="url(#regGlow)">
+      <animate attributeName="cy" values="1080;-100" dur="20s" repeatCount="indefinite"/>
+      <animate attributeName="r" values="30;40;30" dur="5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.3;0.6;0" dur="20s" repeatCount="indefinite"/>
+    </circle>
+    
+    <circle cx="1600" cy="1080" r="40" fill="#3b82f6" filter="url(#regGlow)">
+      <animate attributeName="cy" values="1080;-100" dur="25s" repeatCount="indefinite"/>
+      <animate attributeName="r" values="40;50;40" dur="6s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.2;0.5;0" dur="25s" repeatCount="indefinite"/>
+    </circle>
+    
+    <circle cx="900" cy="1080" r="25" fill="#8b5cf6" filter="url(#regGlow)">
+      <animate attributeName="cy" values="1080;-100" dur="22s" repeatCount="indefinite"/>
+      <animate attributeName="r" values="25;35;25" dur="5.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.25;0.55;0" dur="22s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- Confetti particles -->
+  <g opacity="0.4">
+    <rect x="600" y="-50" width="8" height="20" fill="#10b981" rx="2">
+      <animateTransform attributeName="transform" type="rotate"
+                        values="0 604 -40; 720 604 1120"
+                        dur="12s" repeatCount="indefinite"/>
+      <animate attributeName="y" values="-50;1120" dur="12s" repeatCount="indefinite"/>
+    </rect>
+    
+    <circle cx="1000" cy="-50" r="5" fill="#3b82f6">
+      <animate attributeName="cy" values="-50;1120" dur="15s" repeatCount="indefinite"/>
+      <animate attributeName="cx" values="1000;1100;1000" dur="15s" repeatCount="indefinite"/>
+    </circle>
+    
+    <polygon points="1300,-50 1310,-30 1300,-10 1290,-30" fill="#8b5cf6">
+      <animate attributeName="points" 
+               values="1300,-50 1310,-30 1300,-10 1290,-30; 1300,1120 1310,1140 1300,1160 1290,1140"
+               dur="18s" repeatCount="indefinite"/>
+    </polygon>
+  </g>
+  
+  <!-- Bottom wave -->
+  <path d="M0,950 Q480,900 960,950 T1920,950 L1920,1080 L0,1080 Z" 
+        fill="#d1fae5" opacity="0.4">
+    <animate attributeName="d" 
+             values="M0,950 Q480,900 960,950 T1920,950 L1920,1080 L0,1080 Z;
+                     M0,970 Q480,920 960,970 T1920,970 L1920,1080 L0,1080 Z;
+                     M0,950 Q480,900 960,950 T1920,950 L1920,1080 L0,1080 Z"
+             dur="10s" repeatCount="indefinite"/>
+  </path>
+</svg>
