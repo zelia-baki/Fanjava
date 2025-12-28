@@ -3,7 +3,7 @@ import axios from 'axios';
 // Définir l'URL de l'API selon l'environnement
 const API_URL =
   process.env.NODE_ENV === 'production'
-    ? 'https://api.fanjava.mg/api' // Remplace par ton URL prod réelle
+    ? 'https://fanjava.mg/api' // Remplace par ton URL prod réelle
     : 'http://localhost:8000/api';
 
 const api = axios.create({
