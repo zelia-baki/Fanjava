@@ -4,6 +4,8 @@ import MainLayout from '@/layouts/MainLayout';
 import ProductCard from '@/components/products/ProductCard';
 import { productService } from '@/services/productService';
 import { Loader2, Search, Filter } from 'lucide-react';
+import NewYearCountdownCard from '@/components/ui/NewYearCountdownCard';
+
 
 export default function ProductList() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -79,7 +81,7 @@ export default function ProductList() {
   return (
     <MainLayout>
       {/* 🎨 BACKGROUND ANIMÉ */}
-      <div 
+      <div
         className="min-h-screen"
         style={{
           backgroundImage: 'url(/backgrounds/svg_backgrounds_animated/bg_2_product_animated.svg)',
@@ -89,6 +91,10 @@ export default function ProductList() {
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+          {/* 🎆 Compte à rebours Nouvel An */}
+          <NewYearCountdownCard />
+
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Nos Produits</h1>

@@ -49,8 +49,6 @@ class AvisSerializer(serializers.ModelSerializer):
     client_nom = serializers.CharField(source='client.user.username', read_only=True)
     client_prenom = serializers.CharField(source='client.user.first_name', read_only=True)
     produit_nom = serializers.CharField(source='produit.nom', read_only=True)
-    # ✅ AJOUT : Détails du produit avec image
-    produit_details = serializers.SerializerMethodField()
     peut_modifier = serializers.SerializerMethodField()
     
     class Meta:
@@ -59,7 +57,6 @@ class AvisSerializer(serializers.ModelSerializer):
             'id',
             'produit',
             'produit_nom',
-            'produit_details',  # ✅ NOUVEAU
             'client',
             'client_nom',
             'client_prenom',
@@ -72,32 +69,6 @@ class AvisSerializer(serializers.ModelSerializer):
             'peut_modifier'
         ]
         read_only_fields = ['client', 'approuve', 'created_at', 'updated_at']
-    
-    def get_produit_details(self, obj):
-        """Récupérer les détails du produit avec image"""
-        produit = obj.produit
-        if not produit:
-            return None
-        
-        # Récupérer l'image principale
-        image = produit.images.filter(est_principale=True).first()
-        if not image:
-            image = produit.images.first()
-        
-        image_url = None
-        if image:
-            request = self.context.get('request')
-            if request:
-                image_url = request.build_absolute_uri(image.image.url)
-        
-        return {
-            'id': produit.id,
-            'nom': produit.nom,
-            'slug': produit.slug,
-            'image': image_url,
-            'prix': str(produit.prix),
-            'prix_final': str(produit.get_prix_final())
-        }
     
     def get_peut_modifier(self, obj):
         """Vérifier si l'utilisateur connecté peut modifier cet avis"""
@@ -120,7 +91,7 @@ class AvisSerializer(serializers.ModelSerializer):
                 "Le commentaire doit contenir au moins 10 caractères"
             )
         return value
-    
+
 
 class AvisCreateSerializer(serializers.ModelSerializer):
     """Serializer pour créer un avis"""

@@ -51,33 +51,7 @@ class PanierSerializer(serializers.ModelSerializer):
         read_only_fields = ['client', 'created_at', 'updated_at']
 
 
-# ✅ SERIALIZER POUR AFFICHER LES DÉTAILS DU PRODUIT DANS LA LIGNE
-class ProduitMinimalSerializer(serializers.Serializer):
-    """Serializer minimal pour afficher l'image du produit dans les commandes"""
-    id = serializers.IntegerField()
-    nom = serializers.CharField()
-    slug = serializers.CharField()
-    image_principale = serializers.SerializerMethodField()
-    
-    def get_image_principale(self, obj):
-        """Retourner l'URL de l'image principale"""
-        if hasattr(obj, 'image_principale') and obj.image_principale:
-            return obj.image_principale.url
-        # Sinon chercher dans les images liées
-        image = obj.images.filter(est_principale=True).first()
-        if image:
-            return image.image.url
-        # Sinon première image disponible
-        image = obj.images.first()
-        if image:
-            return image.image.url
-        return None
-
-
 class LigneCommandeSerializer(serializers.ModelSerializer):
-    # ✅ AJOUT : Inclure les détails du produit avec l'image
-    produit = ProduitMinimalSerializer(read_only=True)
-    
     class Meta:
         model = LigneCommande
         fields = [
@@ -122,25 +96,17 @@ class CommandeSerializer(serializers.ModelSerializer):
         read_only_fields = [
             'numero_commande',
             'montant_final',
-            'client',
-            'entreprise',
-            'montant_total',
+            'client',              # ← AJOUTE ICI
+            'entreprise',          # ← AJOUTE ICI
+            'montant_total',       # ← AJOUTE ICI
             'frais_livraison', 
             'created_at',
             'updated_at'
         ]
 
 
-# ✅ SERIALIZER POUR ACCEPTER LES ITEMS DU PANIER
-class CartItemSerializer(serializers.Serializer):
-    """Serializer pour un item du panier frontend"""
-    produit_id = serializers.IntegerField()
-    quantite = serializers.IntegerField(min_value=1)
-
-
 class CommandeCreateSerializer(serializers.Serializer):
     """Serializer pour créer une commande depuis le panier"""
-    # Adresse de livraison
     adresse_livraison = serializers.CharField(max_length=500)
     ville_livraison = serializers.CharField(max_length=100)
     code_postal_livraison = serializers.CharField(max_length=10)
@@ -152,6 +118,3 @@ class CommandeCreateSerializer(serializers.Serializer):
         decimal_places=2, 
         default=0.00
     )
-    
-    # Items du panier
-    items = CartItemSerializer(many=True)
