@@ -28,8 +28,8 @@ export default function Footer() {
         }}
       />
       
-      {/* Overlay pour meilleure lisibilité */}
-      <div className="absolute inset-0 bg-gradient-to-b from-gray-900/95 to-gray-950/98 backdrop-blur-sm z-0"></div>
+      {/* Overlay pour meilleure lisibilité - Tons chauds */}
+      <div className="absolute inset-0 bg-gradient-to-b from-gray-900/95 via-emerald-950/20 to-gray-950/98 backdrop-blur-sm z-0"></div>
 
       {/* Contenu du footer */}
       <div className="relative z-10">
@@ -40,10 +40,10 @@ export default function Footer() {
             {/* Colonne 1 - À propos */}
             <div>
               <Link to="/" className="inline-block mb-4">
-                <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+                <h3 className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-emerald-600 bg-clip-text text-transparent">
                   FanJava
                 </h3>
-                <p className="text-xs text-blue-400 font-semibold">.mg</p>
+                <p className="text-xs text-emerald-400 font-semibold">.mg</p>
               </Link>
               <p className="text-gray-300 text-sm mb-4 leading-relaxed">
                 Votre marketplace multi-vendeurs de confiance à Madagascar. 
@@ -56,7 +56,7 @@ export default function Footer() {
                   href="https://facebook.com" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="w-10 h-10 bg-gray-800/50 border border-gray-700 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-400 hover:border-blue-500 hover:bg-gray-800 transition-all hover:scale-110"
+                  className="w-10 h-10 bg-gray-800/50 border border-gray-700 rounded-lg flex items-center justify-center text-gray-400 hover:text-emerald-400 hover:border-emerald-500 hover:bg-gray-800 transition-all hover:scale-110"
                 >
                   <Facebook className="w-5 h-5" />
                 </a>
@@ -64,7 +64,7 @@ export default function Footer() {
                   href="https://twitter.com" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="w-10 h-10 bg-gray-800/50 border border-gray-700 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-400 hover:border-blue-500 hover:bg-gray-800 transition-all hover:scale-110"
+                  className="w-10 h-10 bg-gray-800/50 border border-gray-700 rounded-lg flex items-center justify-center text-gray-400 hover:text-emerald-400 hover:border-emerald-500 hover:bg-gray-800 transition-all hover:scale-110"
                 >
                   <Twitter className="w-5 h-5" />
                 </a>
@@ -80,7 +80,7 @@ export default function Footer() {
                   href="https://linkedin.com" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="w-10 h-10 bg-gray-800/50 border border-gray-700 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-400 hover:border-blue-500 hover:bg-gray-800 transition-all hover:scale-110"
+                  className="w-10 h-10 bg-gray-800/50 border border-gray-700 rounded-lg flex items-center justify-center text-gray-400 hover:text-emerald-400 hover:border-emerald-500 hover:bg-gray-800 transition-all hover:scale-110"
                 >
                   <Linkedin className="w-5 h-5" />
                 </a>
@@ -90,52 +90,52 @@ export default function Footer() {
             {/* Colonne 2 - Liens rapides */}
             <div>
               <h4 className="text-white font-semibold mb-4 flex items-center">
-                <ShoppingBag className="w-4 h-4 mr-2 text-blue-400" />
+                <ShoppingBag className="w-4 h-4 mr-2 text-emerald-400" />
                 Liens rapides
               </h4>
               <ul className="space-y-2">
                 <li>
                   <Link 
                     to="/" 
-                    className="text-gray-400 hover:text-blue-400 transition-colors text-sm flex items-center group"
+                    className="text-gray-400 hover:text-orange-400 transition-colors text-sm flex items-center group"
                   >
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    <span className="w-1.5 h-1.5 bg-orange-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     Accueil
                   </Link>
                 </li>
                 <li>
                   <Link 
                     to="/products" 
-                    className="text-gray-400 hover:text-blue-400 transition-colors text-sm flex items-center group"
+                    className="text-gray-400 hover:text-orange-400 transition-colors text-sm flex items-center group"
                   >
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    <span className="w-1.5 h-1.5 bg-orange-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     Produits
                   </Link>
                 </li>
                 <li>
                   <Link 
                     to="/about" 
-                    className="text-gray-400 hover:text-blue-400 transition-colors text-sm flex items-center group"
+                    className="text-gray-400 hover:text-orange-400 transition-colors text-sm flex items-center group"
                   >
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    <span className="w-1.5 h-1.5 bg-orange-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     À propos
                   </Link>
                 </li>
                 <li>
                   <Link 
                     to="/contact" 
-                    className="text-gray-400 hover:text-blue-400 transition-colors text-sm flex items-center group"
+                    className="text-gray-400 hover:text-orange-400 transition-colors text-sm flex items-center group"
                   >
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    <span className="w-1.5 h-1.5 bg-orange-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     Contact
                   </Link>
                 </li>
                 <li>
                   <Link 
                     to="/register/entreprise" 
-                    className="text-gray-400 hover:text-blue-400 transition-colors text-sm flex items-center group"
+                    className="text-gray-400 hover:text-orange-400 transition-colors text-sm flex items-center group"
                   >
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    <span className="w-1.5 h-1.5 bg-orange-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     Devenir vendeur
                   </Link>
                 </li>
@@ -145,52 +145,52 @@ export default function Footer() {
             {/* Colonne 3 - Informations */}
             <div>
               <h4 className="text-white font-semibold mb-4 flex items-center">
-                <Heart className="w-4 h-4 mr-2 text-blue-400" />
+                <Heart className="w-4 h-4 mr-2 text-emerald-400" />
                 Informations
               </h4>
               <ul className="space-y-2">
                 <li>
                   <Link 
                     to="/terms" 
-                    className="text-gray-400 hover:text-blue-400 transition-colors text-sm flex items-center group"
+                    className="text-gray-400 hover:text-orange-400 transition-colors text-sm flex items-center group"
                   >
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    <span className="w-1.5 h-1.5 bg-orange-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     Conditions d'utilisation
                   </Link>
                 </li>
                 <li>
                   <Link 
                     to="/privacy" 
-                    className="text-gray-400 hover:text-blue-400 transition-colors text-sm flex items-center group"
+                    className="text-gray-400 hover:text-orange-400 transition-colors text-sm flex items-center group"
                   >
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    <span className="w-1.5 h-1.5 bg-orange-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     Politique de confidentialité
                   </Link>
                 </li>
                 <li>
                   <Link 
                     to="/shipping" 
-                    className="text-gray-400 hover:text-blue-400 transition-colors text-sm flex items-center group"
+                    className="text-gray-400 hover:text-orange-400 transition-colors text-sm flex items-center group"
                   >
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    <span className="w-1.5 h-1.5 bg-orange-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     Livraison
                   </Link>
                 </li>
                 <li>
                   <Link 
                     to="/returns" 
-                    className="text-gray-400 hover:text-blue-400 transition-colors text-sm flex items-center group"
+                    className="text-gray-400 hover:text-orange-400 transition-colors text-sm flex items-center group"
                   >
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    <span className="w-1.5 h-1.5 bg-orange-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     Retours et remboursements
                   </Link>
                 </li>
                 <li>
                   <Link 
                     to="/faq" 
-                    className="text-gray-400 hover:text-blue-400 transition-colors text-sm flex items-center group"
+                    className="text-gray-400 hover:text-orange-400 transition-colors text-sm flex items-center group"
                   >
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    <span className="w-1.5 h-1.5 bg-orange-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     FAQ
                   </Link>
                 </li>
@@ -200,36 +200,36 @@ export default function Footer() {
             {/* Colonne 4 - Contact */}
             <div>
               <h4 className="text-white font-semibold mb-4 flex items-center">
-                <Phone className="w-4 h-4 mr-2 text-blue-400" />
+                <Phone className="w-4 h-4 mr-2 text-emerald-400" />
                 Contact
               </h4>
               <ul className="space-y-3">
                 <li className="flex items-start text-sm">
-                  <Mail className="w-4 h-4 text-blue-400 mr-3 mt-0.5 flex-shrink-0" />
+                  <Mail className="w-4 h-4 text-emerald-400 mr-3 mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="text-gray-500 text-xs mb-0.5">Email</p>
                     <a 
                       href="mailto:contact@fanjava.mg" 
-                      className="text-gray-300 hover:text-blue-400 transition-colors"
+                      className="text-gray-300 hover:text-orange-400 transition-colors"
                     >
                       contact@fanjava.mg
                     </a>
                   </div>
                 </li>
                 <li className="flex items-start text-sm">
-                  <Phone className="w-4 h-4 text-blue-400 mr-3 mt-0.5 flex-shrink-0" />
+                  <Phone className="w-4 h-4 text-emerald-400 mr-3 mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="text-gray-500 text-xs mb-0.5">Téléphone</p>
                     <a 
                       href="tel:+261000000000" 
-                      className="text-gray-300 hover:text-blue-400 transition-colors"
+                      className="text-gray-300 hover:text-orange-400 transition-colors"
                     >
                       +261 XX XX XXX XX
                     </a>
                   </div>
                 </li>
                 <li className="flex items-start text-sm">
-                  <MapPin className="w-4 h-4 text-blue-400 mr-3 mt-0.5 flex-shrink-0" />
+                  <MapPin className="w-4 h-4 text-emerald-400 mr-3 mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="text-gray-500 text-xs mb-0.5">Adresse</p>
                     <p className="text-gray-300">
@@ -246,9 +246,9 @@ export default function Footer() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               
               {/* Avantage 1 */}
-              <div className="flex items-start space-x-3 bg-gray-800/30 backdrop-blur-sm rounded-lg p-4 border border-gray-700/50 hover:border-blue-500/50 transition-all hover:scale-105">
-                <div className="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Truck className="w-5 h-5 text-blue-400" />
+              <div className="flex items-start space-x-3 bg-gray-800/30 backdrop-blur-sm rounded-lg p-4 border border-gray-700/50 hover:border-orange-500/50 transition-all hover:scale-105">
+                <div className="w-10 h-10 bg-orange-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Truck className="w-5 h-5 text-orange-400" />
                 </div>
                 <div>
                   <h5 className="text-white font-semibold text-sm mb-1">Livraison rapide</h5>
@@ -257,9 +257,9 @@ export default function Footer() {
               </div>
 
               {/* Avantage 2 */}
-              <div className="flex items-start space-x-3 bg-gray-800/30 backdrop-blur-sm rounded-lg p-4 border border-gray-700/50 hover:border-blue-500/50 transition-all hover:scale-105">
-                <div className="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Shield className="w-5 h-5 text-blue-400" />
+              <div className="flex items-start space-x-3 bg-gray-800/30 backdrop-blur-sm rounded-lg p-4 border border-gray-700/50 hover:border-emerald-500/50 transition-all hover:scale-105">
+                <div className="w-10 h-10 bg-emerald-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Shield className="w-5 h-5 text-emerald-400" />
                 </div>
                 <div>
                   <h5 className="text-white font-semibold text-sm mb-1">Paiement sécurisé</h5>
@@ -268,9 +268,9 @@ export default function Footer() {
               </div>
 
               {/* Avantage 3 */}
-              <div className="flex items-start space-x-3 bg-gray-800/30 backdrop-blur-sm rounded-lg p-4 border border-gray-700/50 hover:border-blue-500/50 transition-all hover:scale-105">
-                <div className="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Heart className="w-5 h-5 text-blue-400" />
+              <div className="flex items-start space-x-3 bg-gray-800/30 backdrop-blur-sm rounded-lg p-4 border border-gray-700/50 hover:border-orange-500/50 transition-all hover:scale-105">
+                <div className="w-10 h-10 bg-orange-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Heart className="w-5 h-5 text-orange-400" />
                 </div>
                 <div>
                   <h5 className="text-white font-semibold text-sm mb-1">Support 24/7</h5>
@@ -279,9 +279,9 @@ export default function Footer() {
               </div>
 
               {/* Avantage 4 */}
-              <div className="flex items-start space-x-3 bg-gray-800/30 backdrop-blur-sm rounded-lg p-4 border border-gray-700/50 hover:border-blue-500/50 transition-all hover:scale-105">
-                <div className="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <ShoppingBag className="w-5 h-5 text-blue-400" />
+              <div className="flex items-start space-x-3 bg-gray-800/30 backdrop-blur-sm rounded-lg p-4 border border-gray-700/50 hover:border-emerald-500/50 transition-all hover:scale-105">
+                <div className="w-10 h-10 bg-emerald-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <ShoppingBag className="w-5 h-5 text-emerald-400" />
                 </div>
                 <div>
                   <h5 className="text-white font-semibold text-sm mb-1">Produits variés</h5>
@@ -294,32 +294,32 @@ export default function Footer() {
 
         {/* Ligne de séparation avec effet lumineux */}
         <div className="relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500/20 to-transparent h-px"></div>
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-400/40 to-transparent h-px blur-sm"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent h-px"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-400/40 to-transparent h-px blur-sm"></div>
         </div>
 
         {/* Section copyright */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
             <p className="text-gray-400 text-sm text-center sm:text-left">
-              © {currentYear} <span className="font-semibold text-blue-400">FanJava.mg</span>. Tous droits réservés.
+              © {currentYear} <span className="font-semibold text-emerald-400">FanJava.mg</span>. Tous droits réservés.
             </p>
             <div className="flex items-center space-x-6">
               <Link 
                 to="/terms" 
-                className="text-gray-400 hover:text-blue-400 text-xs transition-colors"
+                className="text-gray-400 hover:text-orange-400 text-xs transition-colors"
               >
                 Mentions légales
               </Link>
               <Link 
                 to="/privacy" 
-                className="text-gray-400 hover:text-blue-400 text-xs transition-colors"
+                className="text-gray-400 hover:text-orange-400 text-xs transition-colors"
               >
                 Confidentialité
               </Link>
               <Link 
                 to="/cookies" 
-                className="text-gray-400 hover:text-blue-400 text-xs transition-colors"
+                className="text-gray-400 hover:text-orange-400 text-xs transition-colors"
               >
                 Cookies
               </Link>
