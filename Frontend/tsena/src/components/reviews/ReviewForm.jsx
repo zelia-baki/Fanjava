@@ -12,46 +12,46 @@ export default function ReviewForm({ produitId, onSuccess, onCancel }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  
-  if (!formData.commentaire.trim() || formData.commentaire.length < 10) {
-    setError('Le commentaire doit contenir au moins 10 caractères');
-    return;
-  }
-
-  try {
-    setSubmitting(true);
-    setError(null);
-
-    const dataToSend = {
-      produit: produitId,
-      note: formData.note,
-      titre: formData.titre,
-      commentaire: formData.commentaire
-    };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     
-    console.log('📤 Données envoyées:', dataToSend);  // ← DEBUG
+    if (!formData.commentaire.trim() || formData.commentaire.length < 10) {
+      setError('Le commentaire doit contenir au moins 10 caractères');
+      return;
+    }
 
-    const response = await api.post('/products/avis/', dataToSend);
-    
-    console.log('✅ Réponse:', response.data);  // ← DEBUG
+    try {
+      setSubmitting(true);
+      setError(null);
 
-    alert('Votre avis a été soumis avec succès !');
-    if (onSuccess) onSuccess();
-  } catch (err) {
-    console.error('❌ Erreur complète:', err);
-    console.error('❌ Réponse serveur:', err.response?.data);  // ← IMPORTANT
-    setError(
-      err.response?.data?.error || 
-      err.response?.data?.detail ||
-      JSON.stringify(err.response?.data) ||  // ← Affiche toutes les erreurs
-      'Erreur lors de la soumission de votre avis'
-    );
-  } finally {
-    setSubmitting(false);
-  }
-};
+      const dataToSend = {
+        produit: produitId,
+        note: formData.note,
+        titre: formData.titre,
+        commentaire: formData.commentaire
+      };
+      
+      console.log('📤 Données envoyées:', dataToSend);
+
+      const response = await api.post('/products/avis/', dataToSend);
+      
+      console.log('✅ Réponse:', response.data);
+
+      alert('Votre avis a été soumis avec succès !');
+      if (onSuccess) onSuccess();
+    } catch (err) {
+      console.error('❌ Erreur complète:', err);
+      console.error('❌ Réponse serveur:', err.response?.data);
+      setError(
+        err.response?.data?.error || 
+        err.response?.data?.detail ||
+        JSON.stringify(err.response?.data) ||
+        'Erreur lors de la soumission de votre avis'
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -60,16 +60,16 @@ const handleSubmit = async (e) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <h3 className="text-xl font-bold text-gray-900 mb-4">Laisser un avis</h3>
+    <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+      <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">Laisser un avis</h3>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Note avec étoiles */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Votre note *
+            Votre note <span className="text-red-500">*</span>
           </label>
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center gap-1">
             {[1, 2, 3, 4, 5].map((star) => (
               <button
                 key={star}
@@ -77,10 +77,10 @@ const handleSubmit = async (e) => {
                 onClick={() => setFormData(prev => ({ ...prev, note: star }))}
                 onMouseEnter={() => setHoveredStar(star)}
                 onMouseLeave={() => setHoveredStar(0)}
-                className="focus:outline-none"
+                className="focus:outline-none transition-transform hover:scale-110"
               >
                 <Star
-                  className={`w-8 h-8 transition-colors ${
+                  className={`w-7 h-7 sm:w-8 sm:h-8 transition-colors ${
                     star <= (hoveredStar || formData.note)
                       ? 'fill-yellow-400 text-yellow-400'
                       : 'text-gray-300'
@@ -88,7 +88,7 @@ const handleSubmit = async (e) => {
                 />
               </button>
             ))}
-            <span className="ml-3 text-sm text-gray-600">
+            <span className="ml-3 text-sm text-gray-600 font-medium">
               {formData.note} sur 5
             </span>
           </div>
@@ -106,14 +106,17 @@ const handleSubmit = async (e) => {
             onChange={handleChange}
             maxLength={100}
             placeholder="Ex: Excellent produit !"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
           />
+          <p className="mt-1 text-xs text-gray-500">
+            {formData.titre.length}/100 caractères
+          </p>
         </div>
 
         {/* Commentaire */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Votre commentaire * (minimum 10 caractères)
+            Votre commentaire <span className="text-red-500">*</span> (minimum 10 caractères)
           </label>
           <textarea
             name="commentaire"
@@ -121,28 +124,28 @@ const handleSubmit = async (e) => {
             onChange={handleChange}
             rows={5}
             placeholder="Partagez votre expérience avec ce produit..."
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors resize-none"
           />
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-xs sm:text-sm text-gray-500">
             {formData.commentaire.length} caractères
           </p>
         </div>
 
         {/* Erreur */}
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
             {error}
           </div>
         )}
 
         {/* Boutons */}
-        <div className="flex items-center justify-end space-x-3 pt-4">
+        <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-4">
           {onCancel && (
             <button
               type="button"
               onClick={onCancel}
               disabled={submitting}
-              className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+              className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
             >
               Annuler
             </button>
@@ -150,7 +153,7 @@ const handleSubmit = async (e) => {
           <button
             type="submit"
             disabled={submitting}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center"
+            className="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center font-medium transition-colors"
           >
             {submitting ? (
               <>

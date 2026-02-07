@@ -16,7 +16,6 @@ export default function EntrepriseReviews() {
   const fetchReviews = async () => {
     try {
       setLoading(true);
-      // Récupérer tous les avis des produits de l'entreprise
       const response = await api.get('/products/avis/');
       setReviews(response.data.results || response.data);
     } catch (err) {
@@ -58,7 +57,7 @@ export default function EntrepriseReviews() {
 
   const renderStars = (note) => {
     return (
-      <div className="flex items-center space-x-1">
+      <div className="flex items-center gap-1">
         {[1, 2, 3, 4, 5].map((star) => (
           <Star
             key={star}
@@ -91,9 +90,11 @@ export default function EntrepriseReviews() {
   if (loading) {
     return (
       <MainLayout>
-        <div className="max-w-7xl mx-auto px-4 py-16 flex justify-center items-center">
-          <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
-          <span className="ml-3">Chargement...</span>
+        <div className="min-h-screen bg-white flex justify-center items-center">
+          <div className="flex items-center gap-3">
+            <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+            <span className="text-gray-600">Chargement...</span>
+          </div>
         </div>
       </MainLayout>
     );
@@ -101,158 +102,162 @@ export default function EntrepriseReviews() {
 
   return (
     <MainLayout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Gestion des Avis</h1>
-          <p className="text-gray-600 mt-1">
-            Gérez les avis de vos produits
-          </p>
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
-            <p className="text-sm text-gray-600 mb-1">Total avis</p>
-            <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
-          </div>
-          <div className="bg-white rounded-lg shadow-sm p-4 border border-green-200">
-            <p className="text-sm text-gray-600 mb-1">Approuvés</p>
-            <p className="text-2xl font-bold text-green-600">{stats.approved}</p>
-          </div>
-          <div className="bg-white rounded-lg shadow-sm p-4 border border-yellow-200">
-            <p className="text-sm text-gray-600 mb-1">En attente</p>
-            <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
-          </div>
-          <div className="bg-white rounded-lg shadow-sm p-4 border border-blue-200">
-            <p className="text-sm text-gray-600 mb-1">Note moyenne</p>
-            <div className="flex items-center">
-              <p className="text-2xl font-bold text-blue-600 mr-2">{stats.avgRating}</p>
-              <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-            </div>
-          </div>
-        </div>
-
-        {/* Filtre */}
-        <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-          <div className="flex items-center space-x-4">
-            <Filter className="w-5 h-5 text-gray-400" />
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="all">Tous les avis</option>
-              <option value="approved">Approuvés</option>
-              <option value="pending">En attente</option>
-            </select>
-            <span className="text-sm text-gray-600">
-              {filteredReviews.length} avis
-            </span>
-          </div>
-        </div>
-
-        {/* Liste des avis */}
-        {filteredReviews.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-sm p-12 text-center">
-            <Star className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              Aucun avis
-            </h3>
-            <p className="text-gray-600">
-              {filterStatus === 'all' 
-                ? 'Aucun avis pour vos produits pour le moment'
-                : 'Aucun avis dans cette catégorie'}
+      <div className="min-h-screen bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Gestion des Avis</h1>
+            <p className="text-gray-600 mt-1 text-sm sm:text-base">
+              Gérez les avis de vos produits
             </p>
           </div>
-        ) : (
-          <div className="space-y-4">
-            {filteredReviews.map((review) => (
-              <div
-                key={review.id}
-                className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    {/* Produit */}
-                    <Link
-                      to={`/products/${review.produit}`}
-                      className="text-lg font-semibold text-gray-900 hover:text-blue-600 mb-2 block"
-                    >
-                      {review.produit_nom}
-                    </Link>
 
-                    {/* Client & Date */}
-                    <div className="flex items-center space-x-4 text-sm text-gray-600 mb-3">
-                      <span>
-                        Par {review.client_prenom || review.client_nom || 'Client'}
-                      </span>
-                      <span>•</span>
-                      <span>
-                        {new Date(review.created_at).toLocaleDateString('fr-FR')}
-                      </span>
+          {/* Stats */}
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+            <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4">
+              <p className="text-xs sm:text-sm text-gray-600 mb-1">Total</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{stats.total}</p>
+            </div>
+            <div className="bg-white rounded-lg border border-green-200 p-3 sm:p-4">
+              <p className="text-xs sm:text-sm text-gray-600 mb-1">Approuvés</p>
+              <p className="text-xl sm:text-2xl font-bold text-green-600">{stats.approved}</p>
+            </div>
+            <div className="bg-white rounded-lg border border-yellow-200 p-3 sm:p-4">
+              <p className="text-xs sm:text-sm text-gray-600 mb-1">Attente</p>
+              <p className="text-xl sm:text-2xl font-bold text-yellow-600">{stats.pending}</p>
+            </div>
+            <div className="bg-white rounded-lg border border-orange-200 p-3 sm:p-4">
+              <p className="text-xs sm:text-sm text-gray-600 mb-1">Note moyenne</p>
+              <div className="flex items-center">
+                <p className="text-xl sm:text-2xl font-bold text-orange-600 mr-2">{stats.avgRating}</p>
+                <Star className="w-4 h-4 sm:w-5 sm:h-5 fill-yellow-400 text-yellow-400" />
+              </div>
+            </div>
+          </div>
+
+          {/* Filtre */}
+          <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+              <Filter className="w-5 h-5 text-gray-400 hidden sm:block" />
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="w-full sm:w-auto px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+              >
+                <option value="all">Tous les avis</option>
+                <option value="approved">Approuvés</option>
+                <option value="pending">En attente</option>
+              </select>
+              <span className="text-xs sm:text-sm text-gray-600">
+                {filteredReviews.length} avis
+              </span>
+            </div>
+          </div>
+
+          {/* Liste des avis */}
+          {filteredReviews.length === 0 ? (
+            <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Star className="h-8 w-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
+                Aucun avis
+              </h3>
+              <p className="text-sm sm:text-base text-gray-600">
+                {filterStatus === 'all' 
+                  ? 'Aucun avis pour vos produits'
+                  : 'Aucun avis dans cette catégorie'}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {filteredReviews.map((review) => (
+                <div
+                  key={review.id}
+                  className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6"
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
+                    <div className="flex-1 min-w-0">
+                      {/* Produit */}
+                      <Link
+                        to={`/products/${review.produit}`}
+                        className="text-base sm:text-lg font-semibold text-gray-900 hover:text-orange-600 mb-2 block truncate transition-colors"
+                      >
+                        {review.produit_nom}
+                      </Link>
+
+                      {/* Client & Date */}
+                      <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600 mb-3">
+                        <span>
+                          Par {review.client_prenom || review.client_nom || 'Client'}
+                        </span>
+                        <span className="hidden sm:inline">•</span>
+                        <span>
+                          {new Date(review.created_at).toLocaleDateString('fr-FR')}
+                        </span>
+                      </div>
+
+                      {/* Note */}
+                      {renderStars(review.note)}
                     </div>
 
-                    {/* Note */}
-                    {renderStars(review.note)}
+                    {/* Badge statut */}
+                    {review.approuve ? (
+                      <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full self-start">
+                        ✓ Approuvé
+                      </span>
+                    ) : (
+                      <span className="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs font-semibold rounded-full self-start">
+                        ⏳ En attente
+                      </span>
+                    )}
                   </div>
 
-                  {/* Badge statut */}
-                  {review.approuve ? (
-                    <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
-                      ✓ Approuvé
-                    </span>
-                  ) : (
-                    <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-semibold rounded-full">
-                      ⏳ En attente
-                    </span>
+                  {/* Titre */}
+                  {review.titre && (
+                    <h4 className="font-semibold text-gray-900 mb-2 text-sm sm:text-base">
+                      {review.titre}
+                    </h4>
                   )}
-                </div>
 
-                {/* Titre */}
-                {review.titre && (
-                  <h4 className="font-semibold text-gray-900 mb-2">
-                    {review.titre}
-                  </h4>
-                )}
+                  {/* Commentaire */}
+                  <p className="text-gray-700 mb-4 text-sm sm:text-base leading-relaxed">
+                    {review.commentaire}
+                  </p>
 
-                {/* Commentaire */}
-                <p className="text-gray-700 mb-4">
-                  {review.commentaire}
-                </p>
-
-                {/* Actions */}
-                <div className="flex items-center space-x-3 pt-3 border-t">
-                  {!review.approuve && (
-                    <button
-                      onClick={() => handleApprove(review.id)}
-                      className="text-green-600 hover:text-green-700 text-sm font-medium flex items-center"
+                  {/* Actions */}
+                  <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-gray-200">
+                    {!review.approuve && (
+                      <button
+                        onClick={() => handleApprove(review.id)}
+                        className="text-green-600 hover:text-green-700 text-sm font-medium flex items-center transition-colors"
+                      >
+                        <CheckCircle className="w-4 h-4 mr-1" />
+                        Approuver
+                      </button>
+                    )}
+                    {review.approuve && (
+                      <button
+                        onClick={() => handleReject(review.id)}
+                        className="text-red-600 hover:text-red-700 text-sm font-medium flex items-center transition-colors"
+                      >
+                        <XCircle className="w-4 h-4 mr-1" />
+                        Rejeter
+                      </button>
+                    )}
+                    <Link
+                      to={`/products/${review.produit}`}
+                      className="text-orange-600 hover:text-orange-700 text-sm font-medium flex items-center transition-colors"
                     >
-                      <CheckCircle className="w-4 h-4 mr-1" />
-                      Approuver
-                    </button>
-                  )}
-                  {review.approuve && (
-                    <button
-                      onClick={() => handleReject(review.id)}
-                      className="text-red-600 hover:text-red-700 text-sm font-medium flex items-center"
-                    >
-                      <XCircle className="w-4 h-4 mr-1" />
-                      Rejeter
-                    </button>
-                  )}
-                  <Link
-                    to={`/products/${review.produit}`}
-                    className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center"
-                  >
-                    <Eye className="w-4 h-4 mr-1" />
-                    Voir le produit
-                  </Link>
+                      <Eye className="w-4 h-4 mr-1" />
+                      Voir le produit
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </MainLayout>
   );

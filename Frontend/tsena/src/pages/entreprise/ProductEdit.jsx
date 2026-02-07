@@ -179,9 +179,11 @@ export default function ProductEdit() {
   if (loading) {
     return (
       <MainLayout>
-        <div className="max-w-7xl mx-auto px-4 py-16 flex justify-center items-center">
-          <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
-          <span className="ml-3">Chargement...</span>
+        <div className="min-h-screen bg-white flex justify-center items-center">
+          <div className="flex items-center gap-3">
+            <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+            <span className="text-gray-600">Chargement...</span>
+          </div>
         </div>
       </MainLayout>
     );
@@ -189,45 +191,37 @@ export default function ProductEdit() {
 
   return (
     <MainLayout>
-      {/* 🎨 BACKGROUND ANIMÉ */}
-      <div 
-        className="min-h-screen"
-        style={{
-          backgroundImage: 'url(/backgrounds/svg_backgrounds_animated/bg_8_contact_animated.svg)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundAttachment: 'fixed'
-        }}
-      >
+      <div className="min-h-screen bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="mb-6">
+          {/* Header */}
+          <div className="mb-8">
             <button
               onClick={() => navigate(-1)}
-              className="flex items-center text-blue-600 hover:text-blue-700 mb-4 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-lg"
+              className="flex items-center text-gray-600 hover:text-orange-600 mb-4 transition-colors"
             >
               <ArrowLeft className="w-5 h-5 mr-2" />
-              Retour
+              <span className="text-sm">Retour</span>
             </button>
-            <h1 className="text-3xl font-bold text-gray-900">Modifier le produit</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Modifier le produit</h1>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Informations principales */}
-            <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-6 border border-gray-200">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Informations principales</h2>
+            <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">Informations principales</h2>
 
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nom du produit *
+                    Nom du produit <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     name="nom"
                     value={formData.nom}
                     onChange={handleChange}
-                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
-                      errors.nom ? 'border-red-500' : 'border-gray-300'
+                    className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors ${
+                      errors.nom ? 'border-red-500 bg-red-50' : 'border-gray-300'
                     }`}
                   />
                   {errors.nom && <p className="mt-1 text-sm text-red-600">{errors.nom}</p>}
@@ -243,21 +237,24 @@ export default function ProductEdit() {
                     value={formData.description_courte}
                     onChange={handleChange}
                     maxLength={200}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
                   />
+                  <p className="mt-1 text-xs sm:text-sm text-gray-500">
+                    {formData.description_courte.length}/200 caractères
+                  </p>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Description *
+                    Description <span className="text-red-500">*</span>
                   </label>
                   <textarea
                     name="description"
                     value={formData.description}
                     onChange={handleChange}
                     rows={6}
-                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
-                      errors.description ? 'border-red-500' : 'border-gray-300'
+                    className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors resize-none ${
+                      errors.description ? 'border-red-500 bg-red-50' : 'border-gray-300'
                     }`}
                   />
                   {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description}</p>}
@@ -265,14 +262,14 @@ export default function ProductEdit() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Catégorie *
+                    Catégorie <span className="text-red-500">*</span>
                   </label>
                   <select
                     name="categorie"
                     value={formData.categorie}
                     onChange={handleChange}
-                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
-                      errors.categorie ? 'border-red-500' : 'border-gray-300'
+                    className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors ${
+                      errors.categorie ? 'border-red-500 bg-red-50' : 'border-gray-300'
                     }`}
                   >
                     <option value="">Sélectionner une catégorie</option>
@@ -286,13 +283,13 @@ export default function ProductEdit() {
             </div>
 
             {/* Prix et stock */}
-            <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-6 border border-gray-200">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Prix et stock</h2>
+            <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">Prix et stock</h2>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Prix (Ar) *
+                    Prix (Ar) <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="number"
@@ -301,8 +298,8 @@ export default function ProductEdit() {
                     onChange={handleChange}
                     min="0"
                     step="0.01"
-                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
-                      errors.prix ? 'border-red-500' : 'border-gray-300'
+                    className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors ${
+                      errors.prix ? 'border-red-500 bg-red-50' : 'border-gray-300'
                     }`}
                   />
                   {errors.prix && <p className="mt-1 text-sm text-red-600">{errors.prix}</p>}
@@ -319,8 +316,8 @@ export default function ProductEdit() {
                     onChange={handleChange}
                     min="0"
                     step="0.01"
-                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
-                      errors.prix_promo ? 'border-red-500' : 'border-gray-300'
+                    className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors ${
+                      errors.prix_promo ? 'border-red-500 bg-red-50' : 'border-gray-300'
                     }`}
                   />
                   {errors.prix_promo && (
@@ -330,7 +327,7 @@ export default function ProductEdit() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Stock *
+                    Stock <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="number"
@@ -338,8 +335,8 @@ export default function ProductEdit() {
                     value={formData.stock}
                     onChange={handleChange}
                     min="0"
-                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
-                      errors.stock ? 'border-red-500' : 'border-gray-300'
+                    className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors ${
+                      errors.stock ? 'border-red-500 bg-red-50' : 'border-gray-300'
                     }`}
                   />
                   {errors.stock && <p className="mt-1 text-sm text-red-600">{errors.stock}</p>}
@@ -355,7 +352,7 @@ export default function ProductEdit() {
                     value={formData.seuil_alerte_stock}
                     onChange={handleChange}
                     min="0"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
                   />
                 </div>
 
@@ -370,7 +367,7 @@ export default function ProductEdit() {
                     onChange={handleChange}
                     min="0"
                     step="0.01"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
                   />
                 </div>
 
@@ -382,7 +379,7 @@ export default function ProductEdit() {
                     name="status"
                     value={formData.status}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
                   >
                     <option value="active">Actif</option>
                     <option value="draft">Brouillon</option>
@@ -395,23 +392,28 @@ export default function ProductEdit() {
 
             {/* Images existantes */}
             {existingImages.length > 0 && (
-              <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-6 border border-gray-200">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">Images existantes</h2>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {existingImages.map((image) => (
+              <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">Images existantes</h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  {existingImages.map((image, index) => (
                     <div key={image.id} className="relative group">
                       <img
                         src={image.image}
                         alt={image.alt_text || 'Image produit'}
-                        className="w-full h-32 object-cover rounded-lg"
+                        className="w-full h-32 object-cover rounded-lg border border-gray-200"
                       />
                       <button
                         type="button"
                         onClick={() => removeExistingImage(image.id)}
-                        className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <X className="w-4 h-4" />
                       </button>
+                      {index === 0 && (
+                        <div className="absolute bottom-2 left-2 bg-orange-500 text-white text-xs px-2 py-1 rounded">
+                          Principale
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -419,14 +421,15 @@ export default function ProductEdit() {
             )}
 
             {/* Ajouter nouvelles images */}
-            <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-6 border border-gray-200">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Ajouter des images</h2>
+            <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">Ajouter des images</h2>
 
               <div className="mb-4">
-                <label className="flex items-center justify-center w-full h-32 px-4 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors">
+                <label className="flex items-center justify-center w-full h-32 px-4 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-orange-500 hover:bg-orange-50 transition-colors">
                   <div className="text-center">
                     <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
                     <p className="text-sm text-gray-600">Ajouter des images</p>
+                    <p className="text-xs text-gray-500 mt-1">PNG, JPG jusqu'à 10MB</p>
                   </div>
                   <input
                     type="file"
@@ -439,21 +442,24 @@ export default function ProductEdit() {
               </div>
 
               {newImagePreviews.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                   {newImagePreviews.map((preview, index) => (
                     <div key={index} className="relative group">
                       <img
                         src={preview}
                         alt={`Nouveau ${index + 1}`}
-                        className="w-full h-32 object-cover rounded-lg"
+                        className="w-full h-32 object-cover rounded-lg border border-gray-200"
                       />
                       <button
                         type="button"
                         onClick={() => removeNewImage(index)}
-                        className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <X className="w-4 h-4" />
                       </button>
+                      <div className="absolute bottom-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded">
+                        Nouvelle
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -461,39 +467,39 @@ export default function ProductEdit() {
             </div>
 
             {/* Options */}
-            <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-6 border border-gray-200">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Options</h2>
+            <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">Options</h2>
 
               <div className="space-y-3">
-                <label className="flex items-center">
+                <label className="flex items-start cursor-pointer">
                   <input
                     type="checkbox"
                     name="en_vedette"
                     checked={formData.en_vedette}
                     onChange={handleChange}
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    className="w-4 h-4 mt-0.5 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
                   />
                   <span className="ml-2 text-sm text-gray-700">Produit en vedette</span>
                 </label>
 
-                <label className="flex items-center">
+                <label className="flex items-center cursor-pointer">
                   <input
                     type="checkbox"
                     name="en_promotion"
                     checked={formData.en_promotion}
                     onChange={handleChange}
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    className="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
                   />
                   <span className="ml-2 text-sm text-gray-700">En promotion</span>
                 </label>
 
-                <label className="flex items-center">
+                <label className="flex items-center cursor-pointer">
                   <input
                     type="checkbox"
                     name="actif"
                     checked={formData.actif}
                     onChange={handleChange}
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    className="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
                   />
                   <span className="ml-2 text-sm text-gray-700">Produit actif</span>
                 </label>
@@ -501,11 +507,11 @@ export default function ProductEdit() {
             </div>
 
             {/* Boutons */}
-            <div className="flex items-center justify-end space-x-4 bg-white/90 backdrop-blur-sm rounded-lg p-4 shadow-lg border border-gray-200">
+            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 sm:gap-4">
               <button
                 type="button"
                 onClick={() => navigate(-1)}
-                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
                 disabled={saving}
               >
                 Annuler
@@ -513,7 +519,7 @@ export default function ProductEdit() {
               <button
                 type="submit"
                 disabled={saving}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center"
+                className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center font-medium transition-colors"
               >
                 {saving ? (
                   <>

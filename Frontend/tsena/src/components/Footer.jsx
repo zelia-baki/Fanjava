@@ -40,10 +40,11 @@ export default function Footer() {
             {/* Colonne 1 - À propos */}
             <div>
               <Link to="/" className="inline-block mb-4">
-                <h3 className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-emerald-600 bg-clip-text text-transparent">
-                  FanJava
-                </h3>
-                <p className="text-xs text-emerald-400 font-semibold">.mg</p>
+                <img 
+                  src="/Fanja.png" 
+                  alt="FanJava.mg" 
+                  className="h-16 w-auto hover:scale-105 transition-transform"
+                />
               </Link>
               <p className="text-gray-300 text-sm mb-4 leading-relaxed">
                 Votre marketplace multi-vendeurs de confiance à Madagascar. 
@@ -301,8 +302,14 @@ export default function Footer() {
         {/* Section copyright */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
-            <p className="text-gray-400 text-sm text-center sm:text-left">
-              © {currentYear} <span className="font-semibold text-emerald-400">FanJava.mg</span>. Tous droits réservés.
+            <p className="text-gray-400 text-sm text-center sm:text-left flex items-center space-x-2">
+              <span>© {currentYear}</span>
+              <img 
+                src="/Fanja.png" 
+                alt="FanJava.mg" 
+                className="h-6 w-auto inline-block"
+              />
+              <span>Tous droits réservés.</span>
             </p>
             <div className="flex items-center space-x-6">
               <Link 
