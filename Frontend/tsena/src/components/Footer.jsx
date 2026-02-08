@@ -17,67 +17,10 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <>
-      {/* Styles d'animation */}
-      <style>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-        
-        @keyframes slideUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        @keyframes pulseSlow {
-          0%, 100% {
-            opacity: 0.3;
-          }
-          50% {
-            opacity: 0.5;
-          }
-        }
-        
-        .animate-fadeIn {
-          animation: fadeIn 0.6s ease-out forwards;
-          opacity: 0;
-        }
-        
-        .animate-slideUp {
-          animation: slideUp 0.7s ease-out forwards;
-          opacity: 0;
-        }
-        
-        .animate-pulse-slow {
-          animation: pulseSlow 8s ease-in-out infinite;
-        }
-        
-        /* Désactiver les animations complexes sur mobile pour les performances */
-        @media (prefers-reduced-motion: reduce) {
-          .animate-fadeIn,
-          .animate-slideUp {
-            animation: none;
-            opacity: 1;
-            transform: none;
-          }
-        }
-      `}</style>
-      
-    <footer className="relative mt-auto overflow-hidden animate-fadeIn">
+    <footer className="relative mt-auto overflow-hidden">
       {/* 🎨 BACKGROUND ANIMÉ TECH */}
       <div 
-        className="absolute inset-0 z-0 animate-pulse-slow"
+        className="absolute inset-0 z-0"
         style={{
           backgroundImage: 'url(/backgrounds/footer_tech_animated.svg)',
           backgroundSize: 'cover',
@@ -85,8 +28,8 @@ export default function Footer() {
         }}
       />
       
-      {/* Overlay pour meilleure lisibilité */}
-      <div className="absolute inset-0 bg-gradient-to-b from-gray-900/95 to-gray-950/98 backdrop-blur-sm z-0"></div>
+      {/* Overlay pour meilleure lisibilité - Tons chauds */}
+      <div className="absolute inset-0 bg-gradient-to-b from-gray-900/95 via-emerald-950/20 to-gray-950/98 backdrop-blur-sm z-0"></div>
 
       {/* Contenu du footer */}
       <div className="relative z-10">
@@ -95,12 +38,13 @@ export default function Footer() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             
             {/* Colonne 1 - À propos */}
-            <div className="animate-slideUp" style={{ animationDelay: '0.1s' }}>
+            <div>
               <Link to="/" className="inline-block mb-4">
-                <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
-                  FanJava
-                </h3>
-                <p className="text-xs text-blue-400 font-semibold">.mg</p>
+                <img 
+                  src="/Fanja.png" 
+                  alt="FanJava.mg" 
+                  className="h-16 w-auto hover:scale-105 transition-transform"
+                />
               </Link>
               <p className="text-gray-300 text-sm mb-4 leading-relaxed">
                 Votre marketplace multi-vendeurs de confiance à Madagascar. 
@@ -113,8 +57,7 @@ export default function Footer() {
                   href="https://facebook.com" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="w-10 h-10 bg-gray-800/50 border border-gray-700 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-400 hover:border-blue-500 hover:bg-gray-800 transition-all hover:scale-110 hover:-translate-y-1 animate-fadeIn"
-                  style={{ animationDelay: '0.2s' }}
+                  className="w-10 h-10 bg-gray-800/50 border border-gray-700 rounded-lg flex items-center justify-center text-gray-400 hover:text-emerald-400 hover:border-emerald-500 hover:bg-gray-800 transition-all hover:scale-110"
                 >
                   <Facebook className="w-5 h-5" />
                 </a>
@@ -122,8 +65,7 @@ export default function Footer() {
                   href="https://twitter.com" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="w-10 h-10 bg-gray-800/50 border border-gray-700 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-400 hover:border-blue-500 hover:bg-gray-800 transition-all hover:scale-110 hover:-translate-y-1 animate-fadeIn"
-                  style={{ animationDelay: '0.3s' }}
+                  className="w-10 h-10 bg-gray-800/50 border border-gray-700 rounded-lg flex items-center justify-center text-gray-400 hover:text-emerald-400 hover:border-emerald-500 hover:bg-gray-800 transition-all hover:scale-110"
                 >
                   <Twitter className="w-5 h-5" />
                 </a>
@@ -131,8 +73,7 @@ export default function Footer() {
                   href="https://instagram.com" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="w-10 h-10 bg-gray-800/50 border border-gray-700 rounded-lg flex items-center justify-center text-gray-400 hover:text-pink-400 hover:border-pink-500 hover:bg-gray-800 transition-all hover:scale-110 hover:-translate-y-1 animate-fadeIn"
-                  style={{ animationDelay: '0.4s' }}
+                  className="w-10 h-10 bg-gray-800/50 border border-gray-700 rounded-lg flex items-center justify-center text-gray-400 hover:text-pink-400 hover:border-pink-500 hover:bg-gray-800 transition-all hover:scale-110"
                 >
                   <Instagram className="w-5 h-5" />
                 </a>
@@ -140,8 +81,7 @@ export default function Footer() {
                   href="https://linkedin.com" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="w-10 h-10 bg-gray-800/50 border border-gray-700 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-400 hover:border-blue-500 hover:bg-gray-800 transition-all hover:scale-110 hover:-translate-y-1 animate-fadeIn"
-                  style={{ animationDelay: '0.5s' }}
+                  className="w-10 h-10 bg-gray-800/50 border border-gray-700 rounded-lg flex items-center justify-center text-gray-400 hover:text-emerald-400 hover:border-emerald-500 hover:bg-gray-800 transition-all hover:scale-110"
                 >
                   <Linkedin className="w-5 h-5" />
                 </a>
@@ -149,54 +89,54 @@ export default function Footer() {
             </div>
 
             {/* Colonne 2 - Liens rapides */}
-            <div className="animate-slideUp" style={{ animationDelay: '0.2s' }}>
+            <div>
               <h4 className="text-white font-semibold mb-4 flex items-center">
-                <ShoppingBag className="w-4 h-4 mr-2 text-blue-400" />
+                <ShoppingBag className="w-4 h-4 mr-2 text-emerald-400" />
                 Liens rapides
               </h4>
               <ul className="space-y-2">
                 <li>
                   <Link 
                     to="/" 
-                    className="text-gray-400 hover:text-blue-400 transition-colors text-sm flex items-center group"
+                    className="text-gray-400 hover:text-orange-400 transition-colors text-sm flex items-center group"
                   >
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    <span className="w-1.5 h-1.5 bg-orange-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     Accueil
                   </Link>
                 </li>
                 <li>
                   <Link 
                     to="/products" 
-                    className="text-gray-400 hover:text-blue-400 transition-colors text-sm flex items-center group"
+                    className="text-gray-400 hover:text-orange-400 transition-colors text-sm flex items-center group"
                   >
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    <span className="w-1.5 h-1.5 bg-orange-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     Produits
                   </Link>
                 </li>
                 <li>
                   <Link 
                     to="/about" 
-                    className="text-gray-400 hover:text-blue-400 transition-colors text-sm flex items-center group"
+                    className="text-gray-400 hover:text-orange-400 transition-colors text-sm flex items-center group"
                   >
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    <span className="w-1.5 h-1.5 bg-orange-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     À propos
                   </Link>
                 </li>
                 <li>
                   <Link 
                     to="/contact" 
-                    className="text-gray-400 hover:text-blue-400 transition-colors text-sm flex items-center group"
+                    className="text-gray-400 hover:text-orange-400 transition-colors text-sm flex items-center group"
                   >
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    <span className="w-1.5 h-1.5 bg-orange-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     Contact
                   </Link>
                 </li>
                 <li>
                   <Link 
                     to="/register/entreprise" 
-                    className="text-gray-400 hover:text-blue-400 transition-colors text-sm flex items-center group"
+                    className="text-gray-400 hover:text-orange-400 transition-colors text-sm flex items-center group"
                   >
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    <span className="w-1.5 h-1.5 bg-orange-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     Devenir vendeur
                   </Link>
                 </li>
@@ -204,54 +144,54 @@ export default function Footer() {
             </div>
 
             {/* Colonne 3 - Informations */}
-            <div className="animate-slideUp" style={{ animationDelay: '0.3s' }}>
+            <div>
               <h4 className="text-white font-semibold mb-4 flex items-center">
-                <Heart className="w-4 h-4 mr-2 text-blue-400" />
+                <Heart className="w-4 h-4 mr-2 text-emerald-400" />
                 Informations
               </h4>
               <ul className="space-y-2">
                 <li>
                   <Link 
                     to="/terms" 
-                    className="text-gray-400 hover:text-blue-400 transition-colors text-sm flex items-center group"
+                    className="text-gray-400 hover:text-orange-400 transition-colors text-sm flex items-center group"
                   >
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    <span className="w-1.5 h-1.5 bg-orange-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     Conditions d'utilisation
                   </Link>
                 </li>
                 <li>
                   <Link 
                     to="/privacy" 
-                    className="text-gray-400 hover:text-blue-400 transition-colors text-sm flex items-center group"
+                    className="text-gray-400 hover:text-orange-400 transition-colors text-sm flex items-center group"
                   >
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    <span className="w-1.5 h-1.5 bg-orange-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     Politique de confidentialité
                   </Link>
                 </li>
                 <li>
                   <Link 
                     to="/shipping" 
-                    className="text-gray-400 hover:text-blue-400 transition-colors text-sm flex items-center group"
+                    className="text-gray-400 hover:text-orange-400 transition-colors text-sm flex items-center group"
                   >
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    <span className="w-1.5 h-1.5 bg-orange-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     Livraison
                   </Link>
                 </li>
                 <li>
                   <Link 
                     to="/returns" 
-                    className="text-gray-400 hover:text-blue-400 transition-colors text-sm flex items-center group"
+                    className="text-gray-400 hover:text-orange-400 transition-colors text-sm flex items-center group"
                   >
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    <span className="w-1.5 h-1.5 bg-orange-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     Retours et remboursements
                   </Link>
                 </li>
                 <li>
                   <Link 
                     to="/faq" 
-                    className="text-gray-400 hover:text-blue-400 transition-colors text-sm flex items-center group"
+                    className="text-gray-400 hover:text-orange-400 transition-colors text-sm flex items-center group"
                   >
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    <span className="w-1.5 h-1.5 bg-orange-400 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     FAQ
                   </Link>
                 </li>
@@ -259,38 +199,38 @@ export default function Footer() {
             </div>
 
             {/* Colonne 4 - Contact */}
-            <div className="animate-slideUp" style={{ animationDelay: '0.4s' }}>
+            <div>
               <h4 className="text-white font-semibold mb-4 flex items-center">
-                <Phone className="w-4 h-4 mr-2 text-blue-400" />
+                <Phone className="w-4 h-4 mr-2 text-emerald-400" />
                 Contact
               </h4>
               <ul className="space-y-3">
                 <li className="flex items-start text-sm">
-                  <Mail className="w-4 h-4 text-blue-400 mr-3 mt-0.5 flex-shrink-0" />
+                  <Mail className="w-4 h-4 text-emerald-400 mr-3 mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="text-gray-500 text-xs mb-0.5">Email</p>
                     <a 
                       href="mailto:contact@fanjava.mg" 
-                      className="text-gray-300 hover:text-blue-400 transition-colors"
+                      className="text-gray-300 hover:text-orange-400 transition-colors"
                     >
                       contact@fanjava.mg
                     </a>
                   </div>
                 </li>
                 <li className="flex items-start text-sm">
-                  <Phone className="w-4 h-4 text-blue-400 mr-3 mt-0.5 flex-shrink-0" />
+                  <Phone className="w-4 h-4 text-emerald-400 mr-3 mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="text-gray-500 text-xs mb-0.5">Téléphone</p>
                     <a 
                       href="tel:+261000000000" 
-                      className="text-gray-300 hover:text-blue-400 transition-colors"
+                      className="text-gray-300 hover:text-orange-400 transition-colors"
                     >
                       +261 XX XX XXX XX
                     </a>
                   </div>
                 </li>
                 <li className="flex items-start text-sm">
-                  <MapPin className="w-4 h-4 text-blue-400 mr-3 mt-0.5 flex-shrink-0" />
+                  <MapPin className="w-4 h-4 text-emerald-400 mr-3 mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="text-gray-500 text-xs mb-0.5">Adresse</p>
                     <p className="text-gray-300">
@@ -303,13 +243,13 @@ export default function Footer() {
           </div>
 
           {/* Section avantages */}
-          <div className="mt-12 pt-8 border-t border-gray-800 animate-slideUp" style={{ animationDelay: '0.5s' }}>
+          <div className="mt-12 pt-8 border-t border-gray-800">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               
               {/* Avantage 1 */}
-              <div className="flex items-start space-x-3 bg-gray-800/30 backdrop-blur-sm rounded-lg p-4 border border-gray-700/50 hover:border-blue-500/50 transition-all hover:scale-105 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/20 animate-fadeIn" style={{ animationDelay: '0.6s' }}>
-                <div className="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Truck className="w-5 h-5 text-blue-400" />
+              <div className="flex items-start space-x-3 bg-gray-800/30 backdrop-blur-sm rounded-lg p-4 border border-gray-700/50 hover:border-orange-500/50 transition-all hover:scale-105">
+                <div className="w-10 h-10 bg-orange-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Truck className="w-5 h-5 text-orange-400" />
                 </div>
                 <div>
                   <h5 className="text-white font-semibold text-sm mb-1">Livraison rapide</h5>
@@ -318,9 +258,9 @@ export default function Footer() {
               </div>
 
               {/* Avantage 2 */}
-              <div className="flex items-start space-x-3 bg-gray-800/30 backdrop-blur-sm rounded-lg p-4 border border-gray-700/50 hover:border-blue-500/50 transition-all hover:scale-105 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/20 animate-fadeIn" style={{ animationDelay: '0.7s' }}>
-                <div className="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Shield className="w-5 h-5 text-blue-400" />
+              <div className="flex items-start space-x-3 bg-gray-800/30 backdrop-blur-sm rounded-lg p-4 border border-gray-700/50 hover:border-emerald-500/50 transition-all hover:scale-105">
+                <div className="w-10 h-10 bg-emerald-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Shield className="w-5 h-5 text-emerald-400" />
                 </div>
                 <div>
                   <h5 className="text-white font-semibold text-sm mb-1">Paiement sécurisé</h5>
@@ -329,9 +269,9 @@ export default function Footer() {
               </div>
 
               {/* Avantage 3 */}
-              <div className="flex items-start space-x-3 bg-gray-800/30 backdrop-blur-sm rounded-lg p-4 border border-gray-700/50 hover:border-blue-500/50 transition-all hover:scale-105 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/20 animate-fadeIn" style={{ animationDelay: '0.8s' }}>
-                <div className="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Heart className="w-5 h-5 text-blue-400" />
+              <div className="flex items-start space-x-3 bg-gray-800/30 backdrop-blur-sm rounded-lg p-4 border border-gray-700/50 hover:border-orange-500/50 transition-all hover:scale-105">
+                <div className="w-10 h-10 bg-orange-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Heart className="w-5 h-5 text-orange-400" />
                 </div>
                 <div>
                   <h5 className="text-white font-semibold text-sm mb-1">Support 24/7</h5>
@@ -340,9 +280,9 @@ export default function Footer() {
               </div>
 
               {/* Avantage 4 */}
-              <div className="flex items-start space-x-3 bg-gray-800/30 backdrop-blur-sm rounded-lg p-4 border border-gray-700/50 hover:border-blue-500/50 transition-all hover:scale-105 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/20 animate-fadeIn" style={{ animationDelay: '0.9s' }}>
-                <div className="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <ShoppingBag className="w-5 h-5 text-blue-400" />
+              <div className="flex items-start space-x-3 bg-gray-800/30 backdrop-blur-sm rounded-lg p-4 border border-gray-700/50 hover:border-emerald-500/50 transition-all hover:scale-105">
+                <div className="w-10 h-10 bg-emerald-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <ShoppingBag className="w-5 h-5 text-emerald-400" />
                 </div>
                 <div>
                   <h5 className="text-white font-semibold text-sm mb-1">Produits variés</h5>
@@ -355,32 +295,38 @@ export default function Footer() {
 
         {/* Ligne de séparation avec effet lumineux */}
         <div className="relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500/20 to-transparent h-px"></div>
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-400/40 to-transparent h-px blur-sm"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent h-px"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-400/40 to-transparent h-px blur-sm"></div>
         </div>
 
         {/* Section copyright */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
-            <p className="text-gray-400 text-sm text-center sm:text-left">
-              © {currentYear} <span className="font-semibold text-blue-400">FanJava.mg</span>. Tous droits réservés.
+            <p className="text-gray-400 text-sm text-center sm:text-left flex items-center space-x-2">
+              <span>© {currentYear}</span>
+              <img 
+                src="/Fanja.png" 
+                alt="FanJava.mg" 
+                className="h-6 w-auto inline-block"
+              />
+              <span>Tous droits réservés.</span>
             </p>
             <div className="flex items-center space-x-6">
               <Link 
                 to="/terms" 
-                className="text-gray-400 hover:text-blue-400 text-xs transition-colors"
+                className="text-gray-400 hover:text-orange-400 text-xs transition-colors"
               >
                 Mentions légales
               </Link>
               <Link 
                 to="/privacy" 
-                className="text-gray-400 hover:text-blue-400 text-xs transition-colors"
+                className="text-gray-400 hover:text-orange-400 text-xs transition-colors"
               >
                 Confidentialité
               </Link>
               <Link 
                 to="/cookies" 
-                className="text-gray-400 hover:text-blue-400 text-xs transition-colors"
+                className="text-gray-400 hover:text-orange-400 text-xs transition-colors"
               >
                 Cookies
               </Link>
@@ -399,6 +345,5 @@ export default function Footer() {
         </div>
       </div>
     </footer>
-    </>
   );
 }

@@ -4,7 +4,6 @@ import MainLayout from '@/layouts/MainLayout';
 import ProductCard from '@/components/products/ProductCard';
 import { productService } from '@/services/productService';
 import { Loader2, Search, Filter } from 'lucide-react';
-import NewYearCountdownCard from '@/components/ui/NewYearCountdownCard';
 
 
 export default function ProductList() {
@@ -80,146 +79,128 @@ export default function ProductList() {
 
   return (
     <MainLayout>
-      {/* 🎨 BACKGROUND ANIMÉ */}
-      <div
-        className="min-h-screen"
-        style={{
-          backgroundImage: 'url(/backgrounds/svg_backgrounds_animated/bg_2_product_animated.svg)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundAttachment: 'fixed'
-        }}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
-          {/* 🎆 Compte à rebours Nouvel An */}
-          <NewYearCountdownCard />
-
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Nos Produits</h1>
-            <p className="text-gray-600">
-              Découvrez notre sélection de produits de qualité
-            </p>
-          </div>
-
-          {/* Barre de recherche et filtres */}
-          <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-sm p-4 mb-6 border border-gray-200">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-              {/* Recherche */}
-              <div className="lg:col-span-2">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <input
-                    type="text"
-                    name="search"
-                    value={filters.search}
-                    onChange={handleFilterChange}
-                    placeholder="Rechercher un produit..."
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-              </div>
-
-              {/* Prix min */}
-              <div>
+      {/* 🎨 FOND BLANC PROPRE */}
+      <div className="min-h-screen bg-white">
+        
+        {/* 🔍 HERO SEARCH - Style Amazon */}
+        <div className="bg-white border-b border-gray-200 py-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-4xl mx-auto">
+              {/* Grande barre de recherche */}
+              <div className="relative">
                 <input
-                  type="number"
-                  name="prix_min"
-                  value={filters.prix_min}
+                  type="text"
+                  name="search"
+                  value={filters.search}
                   onChange={handleFilterChange}
-                  placeholder="Prix min"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Rechercher parmi des milliers de produits..."
+                  className="w-full pl-6 pr-14 py-4 text-base border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none transition-colors"
                 />
-              </div>
-
-              {/* Prix max */}
-              <div>
-                <input
-                  type="number"
-                  name="prix_max"
-                  value={filters.prix_max}
-                  onChange={handleFilterChange}
-                  placeholder="Prix max"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-
-              {/* Promotions */}
-              <div className="flex items-center">
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    name="en_promotion"
-                    checked={filters.en_promotion === 'true'}
-                    onChange={handleFilterChange}
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                  />
-                  <span className="ml-2 text-sm text-gray-700">En promotion</span>
-                </label>
+                <button className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2 rounded-md transition-colors">
+                  <Search className="w-5 h-5" />
+                </button>
               </div>
             </div>
+          </div>
+        </div>
 
-            {/* Bouton réinitialiser */}
+        {/* CONTENU PRINCIPAL */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          
+          {/* Filtres horizontaux discrets */}
+          <div className="flex flex-wrap items-center gap-3 mb-6">
+            {/* Prix */}
+            <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-md border border-gray-200">
+              <input
+                type="number"
+                name="prix_min"
+                value={filters.prix_min}
+                onChange={handleFilterChange}
+                placeholder="Min"
+                className="w-20 text-sm border-0 focus:ring-0 p-0"
+              />
+              <span className="text-gray-300">—</span>
+              <input
+                type="number"
+                name="prix_max"
+                value={filters.prix_max}
+                onChange={handleFilterChange}
+                placeholder="Max"
+                className="w-20 text-sm border-0 focus:ring-0 p-0"
+              />
+            </div>
+
+            {/* Promo */}
+            <label className="flex items-center gap-2 bg-white px-4 py-2 rounded-md border border-gray-200 cursor-pointer hover:border-orange-400 transition-colors">
+              <input
+                type="checkbox"
+                name="en_promotion"
+                checked={filters.en_promotion === 'true'}
+                onChange={handleFilterChange}
+                className="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-0"
+              />
+              <span className="text-sm text-gray-700">En promotion</span>
+            </label>
+
+            {/* Reset */}
             {(filters.search || filters.en_promotion || filters.prix_min || filters.prix_max) && (
               <button
                 onClick={clearFilters}
-                className="mt-4 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                className="text-sm text-emerald-600 hover:text-emerald-700 underline"
               >
-                Réinitialiser les filtres
+                Effacer les filtres
               </button>
             )}
           </div>
 
           {/* Erreur */}
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+            <div className="bg-red-50 text-red-600 px-4 py-3 rounded-md mb-6 text-sm">
               {error}
             </div>
           )}
 
-          {/* Liste des produits */}
-          <div className="relative">
-            {loading && products.length === 0 ? (
-              <div className="flex justify-center items-center py-16 bg-white/80 backdrop-blur-sm rounded-lg">
-                <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
-                <span className="ml-3 text-gray-600">Chargement des produits...</span>
-              </div>
-            ) : products.length === 0 ? (
-              <div className="text-center py-16 bg-white/90 backdrop-blur-sm rounded-lg shadow-sm">
-                <Filter className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                  Aucun produit trouvé
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  Essayez de modifier vos critères de recherche
+          {/* Résultats */}
+          {loading && products.length === 0 ? (
+            <div className="flex justify-center items-center py-20">
+              <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
+            </div>
+          ) : products.length === 0 ? (
+            <div className="text-center py-20">
+              <Filter className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-xl font-medium text-gray-900 mb-2">
+                Aucun résultat
+              </h3>
+              <p className="text-gray-500 mb-6">
+                Essayez d'autres termes de recherche
+              </p>
+              <button
+                onClick={clearFilters}
+                className="text-emerald-600 hover:text-emerald-700 underline"
+              >
+                Effacer les filtres
+              </button>
+            </div>
+          ) : (
+            <>
+              {/* Compteur simple */}
+              <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200">
+                <p className="text-sm text-gray-600">
+                  {products.length} résultat{products.length > 1 ? 's' : ''}
                 </p>
-                <button
-                  onClick={clearFilters}
-                  className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
-                >
-                  Voir tous les produits
-                </button>
-              </div>
-            ) : (
-              <>
                 {loading && (
-                  <div className="absolute top-0 right-0 bg-white/80 px-3 py-1 rounded-lg shadow-sm z-10">
-                    <Loader2 className="w-4 h-4 text-blue-600 animate-spin inline" />
-                    <span className="ml-2 text-sm text-gray-600">Recherche...</span>
-                  </div>
+                  <Loader2 className="w-4 h-4 text-emerald-500 animate-spin" />
                 )}
-                <p className="text-gray-900 font-medium mb-4 bg-white/80 backdrop-blur-sm px-3 py-2 rounded-lg inline-block">
-                  {products.length} produit{products.length > 1 ? 's' : ''} trouvé{products.length > 1 ? 's' : ''}
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {products.map((product) => (
-                    <ProductCard key={product.id} product={product} />
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
+              </div>
+
+              {/* Grille produits épurée */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                {products.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </MainLayout>
