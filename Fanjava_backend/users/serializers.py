@@ -10,9 +10,12 @@ class ClientSerializer(serializers.ModelSerializer):
 class EntrepriseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Entreprise
-        fields = ['nom_entreprise', 'description', 'logo', 'siret', 'adresse', 
-                  'ville', 'code_postal', 'pays', 'telephone', 'email_entreprise', 
-                  'whatsapp', 'status', 'verified']
+        fields = [
+            'id',  # ✅ AJOUTER CETTE LIGNE
+            'nom_entreprise', 'description', 'logo', 'siret', 'adresse', 
+            'ville', 'code_postal', 'pays', 'telephone', 'email_entreprise', 
+            'whatsapp', 'status', 'verified'
+        ]
         read_only_fields = ['status', 'verified']
 
 # users/serializers.py

@@ -23,7 +23,10 @@ import {
   AlertCircle,
   Eye,
   Star,
-  FileText
+  FileText,
+  CheckCircle,
+  XCircle,
+  PauseCircle
 } from 'lucide-react';
 
 export default function UserDetail() {
@@ -44,12 +47,12 @@ export default function UserDetail() {
       setLoading(true);
       setError(null);
 
-      // 1. Récupérer les infos de l'utilisateur
       const userResponse = await api.get(`/users/admin/users/${id}/`);
       const userData = userResponse.data;
+      console.log('entreprise data:', userData.entreprise); // ← AJOUTE ÇA
+
       setUser(userData);
 
-      // 2. Récupérer les stats selon le type d'utilisateur
       if (userData.user_type === 'client') {
         await fetchClientStats(userData);
       } else if (userData.user_type === 'entreprise') {
@@ -66,13 +69,11 @@ export default function UserDetail() {
 
   const fetchClientStats = async (userData) => {
     try {
-      // Récupérer les commandes du client
       const ordersResponse = await api.get('/orders/commandes/', {
         params: { client_id: userData.id }
       });
       const orders = ordersResponse.data.results || ordersResponse.data || [];
 
-      // Récupérer les avis du client
       let reviews = [];
       try {
         const reviewsResponse = await api.get('/reviews/avis/', {
@@ -99,19 +100,17 @@ export default function UserDetail() {
 
   const fetchEntrepriseStats = async (userData) => {
     try {
-      // Récupérer les produits de l'entreprise
       const productsResponse = await api.get('/products/produits/', {
         params: { entreprise_id: userData.entreprise?.id }
       });
       const products = productsResponse.data.results || productsResponse.data || [];
 
-      // Récupérer les commandes contenant les produits de l'entreprise
       let orders = [];
       try {
         const ordersResponse = await api.get('/orders/commandes/');
         const allOrders = ordersResponse.data.results || ordersResponse.data || [];
         const productIds = products.map(p => p.id);
-        
+
         orders = allOrders.filter(order => {
           if (order.lignes && Array.isArray(order.lignes)) {
             return order.lignes.some(ligne => productIds.includes(ligne.produit || ligne.produit_id));
@@ -150,6 +149,24 @@ export default function UserDetail() {
     }
   };
 
+  // ✅ NOUVEAU : Gestion des actions sur l'entreprise
+  const handleEntrepriseAction = async (action) => {
+    const labels = { approve: 'approuver', reject: 'rejeter', suspend: 'suspendre' };
+    if (!window.confirm(`Voulez-vous vraiment ${labels[action]} cette entreprise ?`)) return;
+
+    try {
+      setActionLoading(true);
+      await api.post(`/users/admin/entreprises/${user.entreprise.id}/${action}/`);
+      await fetchUserDetails();
+      alert(`Entreprise ${action === 'approve' ? 'approuvée' : action === 'reject' ? 'rejetée' : 'suspendue'} avec succès`);
+    } catch (err) {
+      console.error(`Erreur action ${action}:`, err);
+      alert('Erreur lors de l\'action');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const handleToggleActive = async () => {
     if (!window.confirm(`Voulez-vous vraiment ${user.is_active ? 'désactiver' : 'activer'} ce compte ?`)) {
       return;
@@ -160,10 +177,9 @@ export default function UserDetail() {
       await api.patch(`/users/admin/users/${id}/`, {
         is_active: !user.is_active
       });
-      
-      // Recharger les données
+
       await fetchUserDetails();
-      
+
       alert(`Compte ${user.is_active ? 'désactivé' : 'activé'} avec succès`);
     } catch (err) {
       console.error('Erreur toggle active:', err);
@@ -255,11 +271,10 @@ export default function UserDetail() {
             <button
               onClick={handleToggleActive}
               disabled={actionLoading}
-              className={`px-4 py-2 rounded-lg font-medium flex items-center space-x-2 ${
-                user.is_active
+              className={`px-4 py-2 rounded-lg font-medium flex items-center space-x-2 ${user.is_active
                   ? 'bg-red-600 text-white hover:bg-red-700'
                   : 'bg-green-600 text-white hover:bg-green-700'
-              } ${actionLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                } ${actionLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {actionLoading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -305,12 +320,11 @@ export default function UserDetail() {
 
             {user.user_type === 'entreprise' && user.entreprise && (
               <div className="text-right">
-                <div className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
-                  user.entreprise.status === 'approved' ? 'bg-green-100 text-green-800' :
-                  user.entreprise.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                  user.entreprise.status === 'rejected' ? 'bg-red-100 text-red-800' :
-                  'bg-gray-100 text-gray-800'
-                }`}>
+                <div className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${user.entreprise.status === 'approved' ? 'bg-green-100 text-green-800' :
+                    user.entreprise.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                      user.entreprise.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                        'bg-gray-100 text-gray-800'
+                  }`}>
                   {user.entreprise.status === 'approved' && '✓ Approuvé'}
                   {user.entreprise.status === 'pending' && '⏳ En attente'}
                   {user.entreprise.status === 'rejected' && '✗ Rejeté'}
@@ -324,7 +338,6 @@ export default function UserDetail() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Email */}
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                 <Mail className="w-5 h-5 text-blue-600" />
@@ -335,7 +348,6 @@ export default function UserDetail() {
               </div>
             </div>
 
-            {/* Téléphone */}
             {user.phone && (
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
@@ -348,7 +360,6 @@ export default function UserDetail() {
               </div>
             )}
 
-            {/* Date d'inscription */}
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
                 <Calendar className="w-5 h-5 text-purple-600" />
@@ -366,7 +377,6 @@ export default function UserDetail() {
         {/* Informations spécifiques CLIENT */}
         {user.user_type === 'client' && user.client && (
           <>
-            {/* Stats Client */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
               <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
                 <div className="flex items-center justify-between">
@@ -411,7 +421,6 @@ export default function UserDetail() {
               </div>
             </div>
 
-            {/* Adresse Client */}
             {(user.client.adresse_livraison || user.client.ville) && (
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
                 <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
@@ -429,7 +438,6 @@ export default function UserDetail() {
               </div>
             )}
 
-            {/* Commandes récentes */}
             {stats.recentOrders && stats.recentOrders.length > 0 && (
               <div className="bg-white rounded-lg shadow-sm border border-gray-200">
                 <div className="px-6 py-4 border-b border-gray-200">
@@ -467,6 +475,52 @@ export default function UserDetail() {
         {/* Informations spécifiques ENTREPRISE */}
         {user.user_type === 'entreprise' && user.entreprise && (
           <>
+            {/* ✅ NOUVEAU : Panneau d'actions pour le statut de l'entreprise */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Gestion du statut</h3>
+              <div className="flex items-center space-x-3 flex-wrap gap-y-2">
+                <button
+                  onClick={() => handleEntrepriseAction('approve')}
+                  disabled={actionLoading || user.entreprise.status === 'approved'}
+                  className={`px-4 py-2 rounded-lg font-medium flex items-center space-x-2 bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed`}
+                >
+                  {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                  <span>Approuver</span>
+                </button>
+
+                <button
+                  onClick={() => handleEntrepriseAction('reject')}
+                  disabled={actionLoading || user.entreprise.status === 'rejected'}
+                  className={`px-4 py-2 rounded-lg font-medium flex items-center space-x-2 bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed`}
+                >
+                  {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
+                  <span>Rejeter</span>
+                </button>
+
+                <button
+                  onClick={() => handleEntrepriseAction('suspend')}
+                  disabled={actionLoading || user.entreprise.status === 'suspended'}
+                  className={`px-4 py-2 rounded-lg font-medium flex items-center space-x-2 bg-orange-500 text-white hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed`}
+                >
+                  {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <PauseCircle className="w-4 h-4" />}
+                  <span>Suspendre</span>
+                </button>
+
+                <span className={`ml-4 px-3 py-1 rounded-full text-sm font-semibold ${user.entreprise.status === 'approved' ? 'bg-green-100 text-green-800' :
+                    user.entreprise.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                      user.entreprise.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                        'bg-gray-100 text-gray-800'
+                  }`}>
+                  Statut actuel : {
+                    user.entreprise.status === 'approved' ? '✓ Approuvé' :
+                      user.entreprise.status === 'pending' ? '⏳ En attente' :
+                        user.entreprise.status === 'rejected' ? '✗ Rejeté' :
+                          '⏸ Suspendu'
+                  }
+                </span>
+              </div>
+            </div>
+
             {/* Infos Entreprise */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
               <div className="flex items-start justify-between mb-4">
@@ -502,7 +556,6 @@ export default function UserDetail() {
               )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Contact entreprise */}
                 <div>
                   <h4 className="font-semibold text-gray-900 mb-2">Contact</h4>
                   <div className="space-y-2 text-sm">
@@ -523,7 +576,6 @@ export default function UserDetail() {
                   </div>
                 </div>
 
-                {/* Adresse entreprise */}
                 <div>
                   <h4 className="font-semibold text-gray-900 mb-2">Adresse</h4>
                   <div className="text-sm text-gray-700">
@@ -585,7 +637,6 @@ export default function UserDetail() {
               </div>
             </div>
 
-            {/* Produits récents */}
             {stats.recentProducts && stats.recentProducts.length > 0 && (
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
                 <div className="px-6 py-4 border-b border-gray-200">
@@ -617,11 +668,10 @@ export default function UserDetail() {
                       </div>
                       <div className="text-right">
                         <p className="text-sm text-gray-600">{product.nombre_ventes} ventes</p>
-                        <span className={`inline-block px-2 py-1 rounded-full text-xs font-semibold mt-1 ${
-                          product.status === 'active' ? 'bg-green-100 text-green-800' :
-                          product.status === 'draft' ? 'bg-gray-100 text-gray-800' :
-                          'bg-red-100 text-red-800'
-                        }`}>
+                        <span className={`inline-block px-2 py-1 rounded-full text-xs font-semibold mt-1 ${product.status === 'active' ? 'bg-green-100 text-green-800' :
+                            product.status === 'draft' ? 'bg-gray-100 text-gray-800' :
+                              'bg-red-100 text-red-800'
+                          }`}>
                           {product.status}
                         </span>
                       </div>
@@ -646,18 +696,10 @@ export default function UserDetail() {
               </div>
             </div>
             <div className="bg-white rounded-lg p-4 space-y-2">
-              <p className="text-sm text-gray-700 flex items-center">
-                ✓ Gestion des utilisateurs
-              </p>
-              <p className="text-sm text-gray-700 flex items-center">
-                ✓ Gestion des produits et catégories
-              </p>
-              <p className="text-sm text-gray-700 flex items-center">
-                ✓ Gestion des commandes et avis
-              </p>
-              <p className="text-sm text-gray-700 flex items-center">
-                ✓ Notifications système
-              </p>
+              <p className="text-sm text-gray-700 flex items-center">✓ Gestion des utilisateurs</p>
+              <p className="text-sm text-gray-700 flex items-center">✓ Gestion des produits et catégories</p>
+              <p className="text-sm text-gray-700 flex items-center">✓ Gestion des commandes et avis</p>
+              <p className="text-sm text-gray-700 flex items-center">✓ Notifications système</p>
             </div>
           </div>
         )}

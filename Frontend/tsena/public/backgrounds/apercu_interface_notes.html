@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>Aperçu Saisie de Notes</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 20px; }
+  .container { width: 600px; margin: auto; }
+  .header { margin-bottom: 20px; }
+  label { font-weight: bold; }
+  input { padding: 6px; width: 300px; }
+  button { padding: 8px 16px; margin-left: 10px; cursor: pointer; }
+  table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+  th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
+  tr:hover { background: #f2f2f2; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <label>Matière :</label>
+    <input type="text" placeholder="Entrez la matière" />
+    <button>Ajouter</button>
+  </div>
+
+  <table>
+    <tr>
+      <th>Matière</th>
+      <th>Note</th>
+      <th>Coefficient</th>
+    </tr>
+    <tr>
+      <td>Maths</td>
+      <td contenteditable="true">15</td>
+      <td contenteditable="true">2</td>
+    </tr>
+    <tr>
+      <td>Physique</td>
+      <td contenteditable="true">12</td>
+      <td contenteditable="true">3</td>
+    </tr>
+  </table>
+</div>
+</body>
+</html>
