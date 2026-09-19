@@ -8,15 +8,23 @@ class ClientSerializer(serializers.ModelSerializer):
         fields = ['adresse_livraison', 'ville', 'code_postal', 'pays', 'newsletter']
 
 class EntrepriseSerializer(serializers.ModelSerializer):
+    has_logo = serializers.SerializerMethodField()
+
     class Meta:
         model = Entreprise
         fields = [
             'id',  # ✅ AJOUTER CETTE LIGNE
-            'nom_entreprise', 'description', 'logo', 'siret', 'adresse', 
+            'nom_entreprise', 'description', 'logo', 'has_logo', 'siret', 'adresse', 
             'ville', 'code_postal', 'pays', 'telephone', 'email_entreprise', 
             'whatsapp', 'status', 'verified'
         ]
         read_only_fields = ['status', 'verified']
+        # Le logo n'est jamais renvoyé sous forme d'URL : il se récupère
+        # en binaire via GET /api/users/entreprises/<id>/logo/
+        extra_kwargs = {'logo': {'write_only': True}}
+
+    def get_has_logo(self, obj):
+        return bool(obj.logo)
 
 # users/serializers.py
 

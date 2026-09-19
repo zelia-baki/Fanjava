@@ -13,6 +13,7 @@ import {
   Eye
 } from 'lucide-react';
 import api from '@/services/api';
+import BlobImage from '@/components/ui/BlobImage';
 
 export default function EntrepriseDashboard() {
   const { user } = useAuth();
@@ -404,9 +405,9 @@ export default function EntrepriseDashboard() {
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3 flex-1 min-w-0">
                           <div className="w-10 h-10 bg-gray-100 rounded border border-gray-200 flex-shrink-0 overflow-hidden">
-                            {product.image_principale ? (
-                              <img
-                                src={product.image_principale}
+                            {product.image_principale_id ? (
+                              <BlobImage
+                                imageId={product.image_principale_id}
                                 alt={product.nom}
                                 className="w-full h-full object-cover"
                               />
@@ -450,9 +451,9 @@ export default function EntrepriseDashboard() {
                   <div key={product.id} className="px-4 sm:px-6 py-4 text-center">
                     <div className="text-xl sm:text-2xl font-bold text-orange-600 mb-1">#{index + 1}</div>
                     <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto bg-gray-100 rounded-lg mb-2 overflow-hidden border border-gray-200">
-                      {product.image_principale ? (
-                        <img
-                          src={product.image_principale}
+                      {product.image_principale_id ? (
+                        <BlobImage
+                          imageId={product.image_principale_id}
                           alt={product.nom}
                           className="w-full h-full object-cover"
                         />

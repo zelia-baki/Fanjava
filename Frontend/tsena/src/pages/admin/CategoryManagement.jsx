@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import MainLayout from '@/layouts/MainLayout';
 import { Plus, Edit, Trash2, Loader2, Search, Tag, AlertCircle, Package } from 'lucide-react';
 import api from '@/services/api';
+import BlobImage from '@/components/ui/BlobImage';
 
 export default function CategoryManagement() {
   const [categories, setCategories] = useState([]);
@@ -396,9 +397,9 @@ export default function CategoryManagement() {
                     {categoryProducts.produits && categoryProducts.produits.map((product) => (
                       <div key={product.id} className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
                         <div className="w-12 h-12 bg-gray-200 rounded overflow-hidden flex-shrink-0">
-                          {product.image_principale ? (
-                            <img
-                              src={product.image_principale}
+                          {product.image_principale_id ? (
+                            <BlobImage
+                              imageId={product.image_principale_id}
                               alt={product.nom}
                               className="w-full h-full object-cover"
                             />

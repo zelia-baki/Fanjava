@@ -2,8 +2,22 @@ from rest_framework import serializers
 from .models import Categorie, Produit, ImageProduit, Avis
 
 
+def get_image_principale_id(produit):
+    """ID de l'image principale (ou de la première image) d'un produit.
+
+    Le contenu binaire s'obtient via GET /api/products/images/<id>/blob/.
+    """
+    # Utilise le prefetch 'images' quand il est présent (évite une requête par produit)
+    images = list(produit.images.all())
+    if not images:
+        return None
+    principale = next((img for img in images if img.est_principale), images[0])
+    return principale.id
+
+
 class CategorieSerializer(serializers.ModelSerializer):
     sous_categories = serializers.SerializerMethodField()
+    has_image = serializers.SerializerMethodField()
     
     class Meta:
         model = Categorie
@@ -13,6 +27,7 @@ class CategorieSerializer(serializers.ModelSerializer):
             'slug',
             'description',
             'image',
+            'has_image',
             'parent',
             'ordre',
             'active',
@@ -22,11 +37,15 @@ class CategorieSerializer(serializers.ModelSerializer):
         read_only_fields = ['slug', 'created_at']  # Le slug est généré automatiquement
         extra_kwargs = {
             'description': {'required': False, 'allow_blank': True},
-            'image': {'required': False, 'allow_null': True},
+            'image': {'required': False, 'allow_null': True, 'write_only': True},
             'parent': {'required': False, 'allow_null': True},
             'ordre': {'required': False, 'default': 0},
         }
     
+    def get_has_image(self, obj):
+        """Indique si l'image existe (contenu via /products/categories/<slug>/image/)"""
+        return bool(obj.image)
+
     def get_sous_categories(self, obj):
         """Récupérer les sous-catégories actives"""
         if hasattr(obj, 'sous_categories') and obj.sous_categories.exists():
@@ -43,6 +62,9 @@ class ImageProduitSerializer(serializers.ModelSerializer):
         model = ImageProduit
         fields = ['id', 'image', 'alt_text', 'est_principale', 'ordre', 'created_at']
         read_only_fields = ['created_at']
+        # Le fichier n'est jamais renvoyé sous forme d'URL : il se récupère
+        # en binaire via GET /api/products/images/<id>/blob/
+        extra_kwargs = {'image': {'write_only': True}}
 
 
 class AvisSerializer(serializers.ModelSerializer):
@@ -157,7 +179,7 @@ class ProduitListSerializer(serializers.ModelSerializer):
         read_only=True,
         source='get_prix_final'
     )
-    image_principale = serializers.SerializerMethodField()
+    image_principale_id = serializers.SerializerMethodField()
     
     class Meta:
         model = Produit
@@ -172,7 +194,7 @@ class ProduitListSerializer(serializers.ModelSerializer):
             'stock',
             'categorie_nom',
             'entreprise_nom',
-            'image_principale',
+            'image_principale_id',
             'note_moyenne',
             'en_vedette',
             'en_promotion',
@@ -180,17 +202,8 @@ class ProduitListSerializer(serializers.ModelSerializer):
             'actif'
         ]
     
-    def get_image_principale(self, obj):
-        """Récupérer l'image principale du produit"""
-        image = obj.images.filter(est_principale=True).first()
-        if not image:
-            image = obj.images.first()
-        
-        if image:
-            request = self.context.get('request')
-            if request:
-                return request.build_absolute_uri(image.image.url)
-        return None
+    def get_image_principale_id(self, obj):
+        return get_image_principale_id(obj)
 
 
 class ProduitDetailSerializer(serializers.ModelSerializer):
@@ -208,6 +221,7 @@ class ProduitDetailSerializer(serializers.ModelSerializer):
     note_moyenne = serializers.FloatField(source='get_note_moyenne', read_only=True)
     nombre_avis = serializers.IntegerField(source='get_nombre_avis', read_only=True)
     avis = AvisSerializer(many=True, read_only=True)
+    image_principale_id = serializers.SerializerMethodField()
     
     class Meta:
         model = Produit
@@ -231,6 +245,7 @@ class ProduitDetailSerializer(serializers.ModelSerializer):
             'en_promotion',
             'actif',
             'images',
+            'image_principale_id',
             'note_moyenne',
             'nombre_avis',
             'nombre_vues',
@@ -249,6 +264,9 @@ class ProduitDetailSerializer(serializers.ModelSerializer):
             'updated_at'
         ]
 
+    def get_image_principale_id(self, obj):
+        return get_image_principale_id(obj)
+
 
 class ProduitSerializer(serializers.ModelSerializer):
     """Serializer standard pour un produit"""
@@ -263,6 +281,7 @@ class ProduitSerializer(serializers.ModelSerializer):
     )
     note_moyenne = serializers.FloatField(source='get_note_moyenne', read_only=True)
     nombre_avis = serializers.IntegerField(source='get_nombre_avis', read_only=True)
+    image_principale_id = serializers.SerializerMethodField()
     
     class Meta:
         model = Produit
@@ -283,6 +302,7 @@ class ProduitSerializer(serializers.ModelSerializer):
             'en_vedette',
             'actif',
             'images',
+            'image_principale_id',
             'note_moyenne',
             'nombre_avis',
             'created_at',
@@ -296,6 +316,9 @@ class ProduitSerializer(serializers.ModelSerializer):
             'note_moyenne',
             'nombre_avis'
         ]
+
+    def get_image_principale_id(self, obj):
+        return get_image_principale_id(obj)
     
     def validate_prix_promo(self, value):
         """Vérifier que le prix promo est inférieur au prix normal"""

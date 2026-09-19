@@ -3,7 +3,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView  # ← AJOUTER
-from .views import RegisterView, UserProfileView
+from .views import RegisterView, UserProfileView, EntrepriseLogoView
 from .admin_views import AdminUserViewSet, AdminClientViewSet, AdminEntrepriseViewSet
 
 # Router pour les endpoints admin
@@ -18,6 +18,7 @@ urlpatterns = [
     path('login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('profile/', UserProfileView.as_view(), name='user-profile'),
+    path('entreprises/<int:pk>/logo/', EntrepriseLogoView.as_view(), name='entreprise-logo'),
     
     # Admin endpoints
     path('admin/', include(admin_router.urls)),

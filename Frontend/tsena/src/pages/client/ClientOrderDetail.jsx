@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import MainLayout from '@/layouts/MainLayout';
+import BlobImage from '@/components/ui/BlobImage';
 import { 
   ArrowLeft,
   Package,
@@ -185,21 +186,16 @@ export default function ClientOrderDetail() {
                     <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
                       {/* Image du produit */}
                       <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gray-100 rounded flex-shrink-0 overflow-hidden border border-gray-200">
-                        {ligne.produit?.image_principale ? (
-                          <img
-                            src={`http://localhost:8000${ligne.produit.image_principale}`}
-                            alt={ligne.nom_produit}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              e.target.style.display = 'none';
-                              e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center text-gray-400 text-xs">Pas d\'image</div>';
-                            }}
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
-                            Pas d'image
-                          </div>
-                        )}
+                        <BlobImage
+                          imageId={ligne.produit?.image_principale_id}
+                          alt={ligne.nom_produit}
+                          className="w-full h-full object-cover"
+                          fallback={
+                            <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+                              Pas d'image
+                            </div>
+                          }
+                        />
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="font-semibold text-gray-900 text-sm sm:text-base truncate">{ligne.nom_produit}</p>

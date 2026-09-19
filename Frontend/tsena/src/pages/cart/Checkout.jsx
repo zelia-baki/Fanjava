@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { orderService } from '@/services/orderService';
 import MainLayout from '@/layouts/MainLayout';
 import { ArrowLeft, CreditCard, MapPin, Phone, Loader2, Info, Lock } from 'lucide-react';
+import BlobImage from '@/components/ui/BlobImage';
 
 export default function Checkout() {
   const navigate = useNavigate();
@@ -309,9 +310,9 @@ export default function Checkout() {
                     return (
                       <div key={item.id} className="flex items-center gap-3">
                         <div className="w-12 h-12 bg-white border border-gray-200 rounded overflow-hidden flex-shrink-0">
-                          {product.image_principale ? (
-                            <img
-                              src={product.image_principale}
+                          {product.image_principale_id ? (
+                            <BlobImage
+                              imageId={product.image_principale_id}
                               alt={product.nom}
                               className="w-full h-full object-cover"
                             />

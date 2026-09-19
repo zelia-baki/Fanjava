@@ -16,6 +16,7 @@ import {
   XCircle
 } from 'lucide-react';
 import api from '@/services/api';
+import BlobImage from '@/components/ui/BlobImage';
 
 export default function ProductsManagement() {
   const [products, setProducts] = useState([]);
@@ -249,9 +250,9 @@ export default function ProductsManagement() {
                       <td className="px-6 py-4">
                         <div className="flex items-center">
                           <div className="w-12 h-12 bg-gray-200 rounded flex-shrink-0 overflow-hidden">
-                            {product.image_principale ? (
-                              <img
-                                src={product.image_principale}
+                            {product.image_principale_id ? (
+                              <BlobImage
+                                imageId={product.image_principale_id}
                                 alt={product.nom}
                                 className="w-full h-full object-cover"
                               />

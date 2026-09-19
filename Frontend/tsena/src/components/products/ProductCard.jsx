@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { ShoppingCart, Star } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useState } from 'react';
+import BlobImage from '@/components/ui/BlobImage';
 
 export default function ProductCard({ product }) {
   const { addToCart } = useCart();
@@ -33,9 +34,9 @@ export default function ProductCard({ product }) {
     >
       {/* Image */}
       <div className="relative aspect-square bg-gray-50 overflow-hidden">
-        {product.image_principale ? (
-          <img
-            src={product.image_principale}
+        {product.image_principale_id ? (
+          <BlobImage
+            imageId={product.image_principale_id}
             alt={product.nom}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />

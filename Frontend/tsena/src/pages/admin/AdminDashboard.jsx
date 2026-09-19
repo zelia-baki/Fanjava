@@ -19,6 +19,7 @@ import {
   Clock
 } from 'lucide-react';
 import { statsService } from '@/services/statsService';
+import BlobImage from '@/components/ui/BlobImage';
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -375,9 +376,9 @@ export default function AdminDashboard() {
                         #{index + 1}
                       </div>
                       <div className="w-12 h-12 bg-gray-200 rounded flex-shrink-0 overflow-hidden">
-                        {product.image_principale ? (
-                          <img
-                            src={product.image_principale}
+                        {product.image_principale_id ? (
+                          <BlobImage
+                            imageId={product.image_principale_id}
                             alt={product.nom}
                             className="w-full h-full object-cover"
                           />

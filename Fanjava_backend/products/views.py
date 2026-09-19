@@ -3,11 +3,13 @@
 from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from django.db.models import Q, Count
 from django_filters.rest_framework import DjangoFilterBackend
+
+from .image_response import image_file_response
 
 from .models import Categorie, Produit, ImageProduit, Avis
 from .serializers import (
@@ -57,6 +59,18 @@ class CategorieViewSet(viewsets.ModelViewSet):
         
         return queryset.filter(active=True)
     
+    @action(
+        detail=True,
+        methods=['get'],
+        url_path='image',
+        permission_classes=[AllowAny],
+        authentication_classes=[],
+    )
+    def image(self, request, slug=None):
+        """Renvoie l'image de la catégorie en binaire"""
+        categorie = self.get_object()
+        return image_file_response(categorie.image)
+
     def destroy(self, request, *args, **kwargs):
         """
         ✅ NOUVELLE MÉTHODE: Empêcher la suppression si la catégorie contient des produits
@@ -123,6 +137,18 @@ class ImageProduitViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         """Associer l'image au produit"""
         serializer.save()
+
+    @action(
+        detail=True,
+        methods=['get'],
+        url_path='blob',
+        permission_classes=[AllowAny],
+        authentication_classes=[],
+    )
+    def blob(self, request, pk=None):
+        """Renvoie le contenu binaire de l'image (pas d'URL vers /media/)"""
+        image = self.get_object()
+        return image_file_response(image.image)
 
 
 class ProduitViewSet(viewsets.ModelViewSet):

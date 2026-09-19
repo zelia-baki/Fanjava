@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import MainLayout from '@/layouts/MainLayout';
 import { ArrowLeft, Upload, X, Loader2, Save } from 'lucide-react';
 import api from '@/services/api';
+import BlobImage from '@/components/ui/BlobImage';
 
 export default function ProductEdit() {
   const { slug } = useParams();
@@ -397,8 +398,8 @@ export default function ProductEdit() {
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                   {existingImages.map((image, index) => (
                     <div key={image.id} className="relative group">
-                      <img
-                        src={image.image}
+                      <BlobImage
+                        imageId={image.id}
                         alt={image.alt_text || 'Image produit'}
                         className="w-full h-32 object-cover rounded-lg border border-gray-200"
                       />

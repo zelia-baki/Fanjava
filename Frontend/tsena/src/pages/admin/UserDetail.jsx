@@ -28,6 +28,8 @@ import {
   XCircle,
   PauseCircle
 } from 'lucide-react';
+import BlobImage from '@/components/ui/BlobImage';
+import { imageService } from '@/services/imageService';
 
 export default function UserDetail() {
   const { id } = useParams();
@@ -525,9 +527,9 @@ export default function UserDetail() {
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center space-x-4">
-                  {user.entreprise.logo && (
-                    <img
-                      src={user.entreprise.logo}
+                  {user.entreprise.has_logo && (
+                    <BlobImage
+                      path={imageService.entrepriseLogoPath(user.entreprise.id)}
                       alt={user.entreprise.nom_entreprise}
                       className="w-16 h-16 object-cover rounded-lg"
                     />
@@ -647,9 +649,9 @@ export default function UserDetail() {
                     <div key={product.id} className="px-6 py-4 hover:bg-gray-50 flex items-center justify-between">
                       <div className="flex items-center space-x-4">
                         <div className="w-12 h-12 bg-gray-200 rounded overflow-hidden">
-                          {product.image_principale ? (
-                            <img
-                              src={product.image_principale}
+                          {product.image_principale_id ? (
+                            <BlobImage
+                              imageId={product.image_principale_id}
                               alt={product.nom}
                               className="w-full h-full object-cover"
                             />

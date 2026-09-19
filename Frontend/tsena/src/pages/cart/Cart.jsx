@@ -3,6 +3,7 @@ import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import MainLayout from '@/layouts/MainLayout';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, Loader2 } from 'lucide-react';
+import BlobImage from '@/components/ui/BlobImage';
 
 export default function Cart() {
   const { cart, loading, error, removeFromCart, updateQuantity, getTotal } = useCart();
@@ -76,9 +77,9 @@ export default function Cart() {
                         to={`/products/${product.slug}`}
                         className="w-20 h-20 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0 border border-gray-200"
                       >
-                        {product.image_principale ? (
-                          <img
-                            src={product.image_principale}
+                        {product.image_principale_id ? (
+                          <BlobImage
+                            imageId={product.image_principale_id}
                             alt={product.nom}
                             className="w-full h-full object-cover"
                           />

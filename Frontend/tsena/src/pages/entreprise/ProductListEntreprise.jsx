@@ -12,6 +12,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import api from '@/services/api';
+import BlobImage from '@/components/ui/BlobImage';
 
 export default function ProductListEntreprise() {
   const [products, setProducts] = useState([]);
@@ -197,9 +198,9 @@ export default function ProductListEntreprise() {
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="flex items-center gap-3">
                                 <div className="w-12 h-12 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
-                                  {product.image_principale ? (
-                                    <img
-                                      src={product.image_principale}
+                                  {product.image_principale_id ? (
+                                    <BlobImage
+                                      imageId={product.image_principale_id}
                                       alt={product.nom}
                                       className="w-full h-full object-cover"
                                     />
@@ -297,9 +298,9 @@ export default function ProductListEntreprise() {
                       {/* Header avec image + nom + badge */}
                       <div className="flex items-start gap-3 mb-4">
                         <div className="w-16 h-16 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
-                          {product.image_principale ? (
-                            <img
-                              src={product.image_principale}
+                          {product.image_principale_id ? (
+                            <BlobImage
+                              imageId={product.image_principale_id}
                               alt={product.nom}
                               className="w-full h-full object-cover"
                             />

@@ -4,6 +4,7 @@ import MainLayout from '@/layouts/MainLayout';
 import { productService } from '@/services/productService';
 import { useCart } from '@/context/CartContext';
 import ReviewSection from '@/components/reviews/ReviewSection';
+import BlobImage from '@/components/ui/BlobImage';
 import {
   ShoppingCart,
   Star,
@@ -39,7 +40,7 @@ export default function ProductDetail() {
       setError(null);
       const data = await productService.getProductBySlug(slug);
       setProduct(data);
-      setSelectedImage(data.images?.[0]?.image || data.image_principale);
+      setSelectedImage(data.images?.[0]?.id ?? data.image_principale_id);
     } catch (err) {
       console.error('Erreur chargement produit:', err);
       setError('Produit non trouvé');
@@ -125,8 +126,8 @@ export default function ProductDetail() {
               {/* Image principale */}
               <div className="bg-gray-50 rounded-xl overflow-hidden mb-4 aspect-square border border-gray-200">
                 {selectedImage ? (
-                  <img
-                    src={selectedImage}
+                  <BlobImage
+                    imageId={selectedImage}
                     alt={product.nom}
                     className="w-full h-full object-cover"
                   />
@@ -143,15 +144,15 @@ export default function ProductDetail() {
                   {product.images.map((image) => (
                     <button
                       key={image.id}
-                      onClick={() => setSelectedImage(image.image)}
+                      onClick={() => setSelectedImage(image.id)}
                       className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${
-                        selectedImage === image.image
+                        selectedImage === image.id
                           ? 'border-emerald-500 scale-105'
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
                     >
-                      <img
-                        src={image.image}
+                      <BlobImage
+                        imageId={image.id}
                         alt={image.alt_text || product.nom}
                         className="w-full h-full object-cover"
                       />
