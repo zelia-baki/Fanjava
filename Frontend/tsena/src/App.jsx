@@ -16,6 +16,9 @@ import FAQ from '@/pages/static/FAQ';
 import Login from '@/pages/auth/Login';
 import RegisterClient from '@/pages/auth/RegisterClient';
 import RegisterEntreprise from '@/pages/auth/RegisterEntreprise';
+import ForgotPassword from '@/pages/auth/ForgotPassword';
+import ResetPassword from '@/pages/auth/ResetPassword';
+import VerifyEmail from '@/pages/auth/VerifyEmail';
 
 // Public - Products
 import ProductList from '@/pages/products/ProductList';
@@ -66,6 +69,9 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register/client" element={<RegisterClient />} />
             <Route path="/register/entreprise" element={<RegisterEntreprise />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password/:uid/:token" element={<ResetPassword />} />
+            <Route path="/verify-email/:uid/:token" element={<VerifyEmail />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
@@ -219,6 +225,14 @@ function App() {
               element={
                 <ProtectedRoute userType="admin">
                   <ProductsManagement />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/orders/:id"
+              element={
+                <ProtectedRoute userType="admin">
+                  <OrderDetail />
                 </ProtectedRoute>
               }
             />

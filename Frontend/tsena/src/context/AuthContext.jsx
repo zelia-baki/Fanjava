@@ -33,13 +33,15 @@ export const AuthProvider = ({ children }) => {
     await authService.register(userData);
   };
 
+  const updateUser = (userData) => setUser(userData);
+
   const logout = () => {
     authService.logout();
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, register, logout, updateUser, loading }}>
       {children}
     </AuthContext.Provider>
   );

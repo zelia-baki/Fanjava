@@ -78,7 +78,7 @@ export default function UserDetail() {
 
       let reviews = [];
       try {
-        const reviewsResponse = await api.get('/reviews/avis/', {
+        const reviewsResponse = await api.get('/products/avis/', {
           params: { client_id: userData.client?.id }
         });
         reviews = reviewsResponse.data.results || reviewsResponse.data || [];

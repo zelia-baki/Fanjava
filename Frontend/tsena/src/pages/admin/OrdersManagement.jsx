@@ -42,14 +42,15 @@ export default function OrdersManagement() {
     try {
       await api.patch(`/orders/commandes/${orderId}/`, { status: newStatus });
       
-      setOrders(orders.map(order => 
-        order.id === orderId ? { ...order, status: newStatus } : order
-      ));
+      const response = await api.get(`/orders/commandes/${orderId}/`);
+      setOrders(orders.map(order => (order.id === orderId ? response.data : order)));
       
       alert('Statut mis à jour avec succès');
     } catch (err) {
       console.error('Erreur mise à jour statut:', err);
-      alert('Erreur lors de la mise à jour du statut');
+      const detail = err.response?.data?.status || err.response?.data?.error;
+      alert(detail ? [].concat(detail).join(' ') : 'Erreur lors de la mise à jour du statut');
+      fetchOrders();
     }
   };
 
@@ -276,13 +277,19 @@ export default function OrdersManagement() {
                           onChange={(e) => handleStatusChange(order.id, e.target.value)}
                           className={`px-2 py-1 rounded-full text-xs font-semibold border-0 focus:ring-2 focus:ring-blue-500 ${getStatusColor(order.status)}`}
                         >
-                          <option value="pending">En attente</option>
-                          <option value="confirmed">Confirmée</option>
-                          <option value="processing">En préparation</option>
-                          <option value="shipped">Expédiée</option>
-                          <option value="delivered">Livrée</option>
-                          <option value="cancelled">Annulée</option>
-                          <option value="refunded">Remboursée</option>
+                          {[
+                            ['pending', 'En attente'],
+                            ['confirmed', 'Confirmée'],
+                            ['processing', 'En préparation'],
+                            ['shipped', 'Expédiée'],
+                            ['delivered', 'Livrée'],
+                            ['cancelled', 'Annulée'],
+                            ['refunded', 'Remboursée'],
+                          ]
+                            .filter(([valeur]) => valeur === order.status || (order.statuts_suivants || []).includes(valeur))
+                            .map(([valeur, libelle]) => (
+                              <option key={valeur} value={valeur}>{libelle}</option>
+                            ))}
                         </select>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">

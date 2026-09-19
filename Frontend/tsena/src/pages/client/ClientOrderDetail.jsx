@@ -21,6 +21,7 @@ export default function ClientOrderDetail() {
   const navigate = useNavigate();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
     fetchOrder();
@@ -37,6 +38,19 @@ export default function ClientOrderDetail() {
       navigate('/profile/orders');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCancel = async () => {
+    if (!window.confirm('Annuler cette commande ?')) return;
+    try {
+      setCancelling(true);
+      const response = await api.post(`/orders/commandes/${id}/cancel/`);
+      setOrder(response.data);
+    } catch (err) {
+      alert(err.response?.data?.error || "Impossible d'annuler la commande");
+    } finally {
+      setCancelling(false);
     }
   };
 
@@ -77,6 +91,12 @@ export default function ClientOrderDetail() {
         color: 'bg-red-100 text-red-700 border-red-200',
         icon: XCircle,
         description: 'Cette commande a été annulée'
+      },
+      refunded: {
+        label: 'Remboursée',
+        color: 'bg-gray-100 text-gray-700 border-gray-200',
+        icon: XCircle,
+        description: 'Cette commande a été remboursée'
       },
     };
     return statusMap[status] || statusMap.pending;
@@ -187,7 +207,7 @@ export default function ClientOrderDetail() {
                       {/* Image du produit */}
                       <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gray-100 rounded flex-shrink-0 overflow-hidden border border-gray-200">
                         <BlobImage
-                          imageId={ligne.produit?.image_principale_id}
+                          imageId={ligne.image_principale_id}
                           alt={ligne.nom_produit}
                           className="w-full h-full object-cover"
                           fallback={
@@ -295,6 +315,23 @@ export default function ClientOrderDetail() {
                 )}
               </div>
             </div>
+
+            {/* Annulation */}
+            {order.peut_annuler && (
+              <div className="bg-white rounded-lg border border-red-200 p-4 sm:p-6">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">Annuler la commande</h2>
+                <p className="text-sm text-gray-600 mb-4">
+                  Vous pouvez annuler cette commande tant que le vendeur ne l'a pas mise en préparation.
+                </p>
+                <button
+                  onClick={handleCancel}
+                  disabled={cancelling}
+                  className="px-5 py-2.5 border border-red-300 text-red-600 hover:bg-red-50 rounded-lg text-sm font-medium disabled:opacity-50 transition-colors"
+                >
+                  {cancelling ? 'Annulation...' : 'Annuler ma commande'}
+                </button>
+              </div>
+            )}
 
             {/* Besoin d'aide */}
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">

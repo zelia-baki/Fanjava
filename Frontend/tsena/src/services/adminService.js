@@ -5,11 +5,6 @@ import api from './api';
 export const adminService = {
   // ========== STATISTIQUES GLOBALES ==========
   
-  async getGlobalStats() {
-    const response = await api.get('/admin/stats/');
-    return response.data;
-  },
-
   // ========== GESTION DES UTILISATEURS ==========
   
   async getAllUsers(params = {}) {

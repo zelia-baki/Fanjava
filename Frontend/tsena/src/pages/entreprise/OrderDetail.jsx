@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import MainLayout from '@/layouts/MainLayout';
 import { 
   ArrowLeft,
@@ -18,11 +18,15 @@ import api from '@/services/api';
 export default function OrderDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  // Cette page sert aux entreprises (/entreprise/orders/:id) et aux admins (/admin/orders/:id)
+  const ordersPath = location.pathname.startsWith('/admin') ? '/admin/orders' : '/entreprise/orders';
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [newStatus, setNewStatus] = useState('');
   const [numeroSuivi, setNumeroSuivi] = useState('');
+  const [fraisLivraison, setFraisLivraison] = useState('');
 
   useEffect(() => {
     fetchOrder();
@@ -35,10 +39,11 @@ export default function OrderDetail() {
       setOrder(response.data);
       setNewStatus(response.data.status);
       setNumeroSuivi(response.data.numero_suivi || '');
+      setFraisLivraison(response.data.frais_livraison ?? '');
     } catch (err) {
       console.error('Erreur chargement commande:', err);
       alert('Erreur lors du chargement de la commande');
-      navigate('/entreprise/orders');
+      navigate(ordersPath);
     } finally {
       setLoading(false);
     }
@@ -47,19 +52,27 @@ export default function OrderDetail() {
   const handleUpdateStatus = async () => {
     try {
       setUpdating(true);
-      await api.patch(`/orders/commandes/${id}/`, {
-        status: newStatus,
-        numero_suivi: numeroSuivi || null
-      });
+      const payload = { status: newStatus, numero_suivi: numeroSuivi || null };
+      if (fraisModifiable && String(fraisLivraison) !== String(order.frais_livraison)) {
+        payload.frais_livraison = fraisLivraison;
+      }
+      await api.patch(`/orders/commandes/${id}/`, payload);
       alert('Commande mise à jour avec succès !');
       fetchOrder();
     } catch (err) {
       console.error('Erreur mise à jour:', err);
-      alert('Erreur lors de la mise à jour');
+      const data = err.response?.data;
+      const details = data && typeof data === 'object'
+        ? Object.values(data).flat().filter((v) => typeof v === 'string').join(' ')
+        : '';
+      alert(details || 'Erreur lors de la mise à jour');
     } finally {
       setUpdating(false);
     }
   };
+
+  // Les frais de livraison se fixent avec le client tant que la commande n'est pas expédiée
+  const fraisModifiable = !!order && ['pending', 'confirmed', 'processing'].includes(order.status);
 
   const statusOptions = [
     { value: 'pending', label: 'En attente', color: 'yellow' },
@@ -68,6 +81,7 @@ export default function OrderDetail() {
     { value: 'shipped', label: 'Expédiée', color: 'indigo' },
     { value: 'delivered', label: 'Livrée', color: 'green' },
     { value: 'cancelled', label: 'Annulée', color: 'red' },
+    { value: 'refunded', label: 'Remboursée', color: 'gray' },
   ];
 
   const getStatusColor = (status) => {
@@ -78,6 +92,7 @@ export default function OrderDetail() {
       shipped: 'bg-indigo-100 text-indigo-700',
       delivered: 'bg-green-100 text-green-700',
       cancelled: 'bg-red-100 text-red-700',
+      refunded: 'bg-gray-100 text-gray-700',
     };
     return colors[status] || colors.pending;
   };
@@ -102,7 +117,7 @@ export default function OrderDetail() {
           <div className="text-center">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Commande non trouvée</h2>
             <button
-              onClick={() => navigate('/entreprise/orders')}
+              onClick={() => navigate(ordersPath)}
               className="text-orange-600 hover:text-orange-700 underline"
             >
               Retour aux commandes
@@ -266,13 +281,35 @@ export default function OrderDetail() {
                       onChange={(e) => setNewStatus(e.target.value)}
                       className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
                     >
-                      {statusOptions.map(option => (
+                      {statusOptions
+                        .filter(option => option.value === order.status || (order.statuts_suivants || []).includes(option.value))
+                        .map(option => (
                         <option key={option.value} value={option.value}>
                           {option.label}
                         </option>
                       ))}
                     </select>
                   </div>
+
+                  {/* Frais de livraison (convenus avec le client) */}
+                  {fraisModifiable && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Frais de livraison (Ar)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="100"
+                        value={fraisLivraison}
+                        onChange={(e) => setFraisLivraison(e.target.value)}
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        À convenir avec le client. Le total de la commande est recalculé.
+                      </p>
+                    </div>
+                  )}
 
                   {/* Numéro de suivi */}
                   {(newStatus === 'shipped' || newStatus === 'delivered') && (
@@ -293,7 +330,7 @@ export default function OrderDetail() {
                   {/* Bouton sauvegarder */}
                   <button
                     onClick={handleUpdateStatus}
-                    disabled={updating || newStatus === order.status}
+                    disabled={updating || (newStatus === order.status && numeroSuivi === (order.numero_suivi || '') && String(fraisLivraison) === String(order.frais_livraison))}
                     className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2.5 rounded-lg disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center font-medium transition-colors"
                   >
                     {updating ? (

@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/layouts/MainLayout';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/services/api';
+import { authService } from '@/services/authService';
+import ChangePasswordForm from '@/components/auth/ChangePasswordForm';
 import { User, Mail, Phone, MapPin, Loader2, Save } from 'lucide-react';
 
 export default function ProfileEdit() {
@@ -11,6 +13,7 @@ export default function ProfileEdit() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
+    const [verificationEnvoyee, setVerificationEnvoyee] = useState(false);
 
     const [formData, setFormData] = useState({
         first_name: '',
@@ -49,6 +52,15 @@ export default function ProfileEdit() {
         }));
     };
 
+    const renvoyerVerification = async () => {
+        try {
+            await authService.resendVerification();
+            setVerificationEnvoyee(true);
+        } catch {
+            setError("Impossible d'envoyer l'e-mail de confirmation");
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -83,7 +95,11 @@ export default function ProfileEdit() {
 
         } catch (err) {
             console.error('Erreur mise à jour profil:', err);
-            setError(err.response?.data?.message || 'Erreur lors de la mise à jour');
+            const data = err.response?.data;
+            const details = data && typeof data === 'object'
+                ? Object.values(data).flat().filter((v) => typeof v === 'string').join(' ')
+                : '';
+            setError(data?.message || details || 'Erreur lors de la mise à jour');
         } finally {
             setLoading(false);
         }
@@ -98,6 +114,20 @@ export default function ProfileEdit() {
                         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Modifier mon profil</h1>
                         <p className="text-gray-600 mt-2 text-sm sm:text-base">Mettez à jour vos informations personnelles</p>
                     </div>
+
+                    {/* E-mail non vérifié */}
+                    {user && user.email_verified === false && (
+                        <div className="mb-6 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-lg text-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                            <span>Votre adresse e-mail n'est pas encore confirmée.</span>
+                            {verificationEnvoyee ? (
+                                <span className="font-medium">E-mail envoyé, vérifiez votre boîte de réception.</span>
+                            ) : (
+                                <button type="button" onClick={renvoyerVerification} className="font-medium underline">
+                                    Renvoyer l'e-mail de confirmation
+                                </button>
+                            )}
+                        </div>
+                    )}
 
                     {/* Messages */}
                     {error && (
@@ -313,6 +343,8 @@ export default function ProfileEdit() {
                             </button>
                         </div>
                     </form>
+
+                    <ChangePasswordForm />
                 </div>
             </div>
         </MainLayout>

@@ -34,7 +34,7 @@ export default function ProductsManagement() {
     try {
       setLoading(true);
       const [productsRes, categoriesRes] = await Promise.all([
-        api.get('/products/produits/'),
+        api.get('/products/produits/', { params: { include_inactive: 'true' } }),
         api.get('/products/categories/')
       ]);
       

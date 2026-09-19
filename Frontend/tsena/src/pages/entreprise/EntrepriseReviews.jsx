@@ -16,7 +16,7 @@ export default function EntrepriseReviews() {
   const fetchReviews = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/products/avis/');
+      const response = await api.get('/products/avis/', { params: { mes_produits: 'true' } });
       setReviews(response.data.results || response.data);
     } catch (err) {
       console.error('Erreur chargement avis:', err);

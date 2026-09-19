@@ -169,6 +169,12 @@ export default function ProductEdit() {
       console.error('Erreur mise à jour produit:', err);
       if (err.response?.data) {
         setErrors(err.response.data);
+        const data = err.response.data;
+        const message = data.detail || Object.entries(data)
+          .filter(([cle]) => cle.startsWith('image_'))
+          .map(([, valeur]) => [].concat(valeur).join(' '))
+          .join('\n');
+        if (message) alert(message);
       } else {
         alert('Erreur lors de la mise à jour du produit');
       }

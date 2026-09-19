@@ -29,6 +29,38 @@ export const authService = {
     return response.data;
   },
 
+  async changePassword(oldPassword, newPassword) {
+    const response = await api.post('/users/change-password/', {
+      old_password: oldPassword,
+      new_password: newPassword,
+    });
+    return response.data;
+  },
+
+  async requestPasswordReset(email) {
+    const response = await api.post('/users/password-reset/', { email });
+    return response.data;
+  },
+
+  async confirmPasswordReset(uid, token, newPassword) {
+    const response = await api.post('/users/password-reset/confirm/', {
+      uid,
+      token,
+      new_password: newPassword,
+    });
+    return response.data;
+  },
+
+  async verifyEmail(uid, token) {
+    const response = await api.post('/users/verify-email/', { uid, token });
+    return response.data;
+  },
+
+  async resendVerification() {
+    const response = await api.post('/users/resend-verification/');
+    return response.data;
+  },
+
   logout() {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
