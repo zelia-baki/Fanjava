@@ -133,3 +133,12 @@ migrations/
 !migrations/versions/
 *.pyc
 *.pyo
+
+# Secrets (ne jamais commiter)
+.env
+*.env
+!.env.example
+privatekey
+certificate
+*.pem
+*.key
