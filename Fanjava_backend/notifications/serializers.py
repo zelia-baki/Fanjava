@@ -77,6 +77,12 @@ class NotificationCreateSerializer(serializers.ModelSerializer):
             'specific_recipients'
         ]
     
+    def validate_recipient_type(self, value):
+        # 'user' est réservé aux notifications automatiques du système
+        if value == 'user':
+            raise serializers.ValidationError("Type de destinataire non autorisé.")
+        return value
+
     def validate(self, data):
         # Si envoi spécifique, vérifier que specific_recipients est fourni
         if data.get('recipient_type') == 'specific':

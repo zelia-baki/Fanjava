@@ -2,6 +2,14 @@
 
 import os
 import django
+import sys
+
+# ATTENTION : ce script SUPPRIME toutes les notifications et peut supprimer des tables.
+# Il demande une confirmation explicite avant de faire quoi que ce soit.
+if input('Tapez RESET pour supprimer TOUTES les notifications : ').strip() != 'RESET':
+    print('Annulé.')
+    sys.exit(1)
+
 
 # Setup Django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Fanjava_backend.settings')

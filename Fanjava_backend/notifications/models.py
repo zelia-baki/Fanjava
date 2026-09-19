@@ -26,6 +26,7 @@ class Notification(models.Model):
         ('clients', _('Clients uniquement')),
         ('entreprises', _('Entreprises uniquement')),
         ('specific', _('Utilisateurs spécifiques')),
+        ('user', _('Un utilisateur (notification automatique)')),
     )
     
     # Créateur de la notification (généralement admin)
@@ -74,6 +75,16 @@ class Notification(models.Model):
         help_text=_("Liste des IDs utilisateurs pour envoi spécifique")
     )
     
+    # Destinataire unique (notifications automatiques : commande, stock, avis...)
+    destinataire = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='notifications_ciblees',
+        verbose_name=_("Destinataire (notification ciblée)")
+    )
+
     # Statut
     active = models.BooleanField(
         default=True,
@@ -113,7 +124,9 @@ class Notification(models.Model):
             return user.user_type == 'entreprise'
         elif self.recipient_type == 'specific':
             return user.id in (self.specific_recipients or [])
-        
+        elif self.recipient_type == 'user':
+            return self.destinataire_id == user.id
+
         return False
     
     def get_recipient_count(self):
@@ -126,6 +139,8 @@ class Notification(models.Model):
             count = CustomUser.objects.filter(user_type='entreprise').count()
         elif self.recipient_type == 'specific':
             count = len(self.specific_recipients or [])
+        elif self.recipient_type == 'user':
+            count = 1
         else:
             count = 0
         return count

@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Categorie, Produit, ImageProduit, Avis
+from .validators import valider_image
 
 
 def get_image_principale_id(produit):
@@ -18,6 +19,7 @@ def get_image_principale_id(produit):
 class CategorieSerializer(serializers.ModelSerializer):
     sous_categories = serializers.SerializerMethodField()
     has_image = serializers.SerializerMethodField()
+    nombre_produits = serializers.IntegerField(read_only=True, default=0)
     
     class Meta:
         model = Categorie
@@ -28,6 +30,7 @@ class CategorieSerializer(serializers.ModelSerializer):
             'description',
             'image',
             'has_image',
+            'nombre_produits',
             'parent',
             'ordre',
             'active',
@@ -37,7 +40,7 @@ class CategorieSerializer(serializers.ModelSerializer):
         read_only_fields = ['slug', 'created_at']  # Le slug est généré automatiquement
         extra_kwargs = {
             'description': {'required': False, 'allow_blank': True},
-            'image': {'required': False, 'allow_null': True, 'write_only': True},
+            'image': {'required': False, 'allow_null': True, 'write_only': True, 'validators': [valider_image]},
             'parent': {'required': False, 'allow_null': True},
             'ordre': {'required': False, 'default': 0},
         }
@@ -64,7 +67,7 @@ class ImageProduitSerializer(serializers.ModelSerializer):
         read_only_fields = ['created_at']
         # Le fichier n'est jamais renvoyé sous forme d'URL : il se récupère
         # en binaire via GET /api/products/images/<id>/blob/
-        extra_kwargs = {'image': {'write_only': True}}
+        extra_kwargs = {'image': {'write_only': True, 'validators': [valider_image]}}
 
 
 class AvisSerializer(serializers.ModelSerializer):
@@ -113,6 +116,32 @@ class AvisSerializer(serializers.ModelSerializer):
                 "Le commentaire doit contenir au moins 10 caractères"
             )
         return value
+
+
+class AvisUpdateSerializer(serializers.ModelSerializer):
+    """Modification de son propre avis (le produit et le client ne changent jamais)"""
+
+    class Meta:
+        model = Avis
+        fields = ['note', 'titre', 'commentaire']
+
+    def validate_note(self, value):
+        if value < 1 or value > 5:
+            raise serializers.ValidationError("La note doit être entre 1 et 5")
+        return value
+
+    def validate_commentaire(self, value):
+        if not value or len(value.strip()) < 10:
+            raise serializers.ValidationError("Le commentaire doit contenir au moins 10 caractères")
+        return value
+
+
+class AvisModerationSerializer(serializers.ModelSerializer):
+    """Approbation / rejet d'un avis (administrateur ou entreprise concernée)"""
+
+    class Meta:
+        model = Avis
+        fields = ['approuve']
 
 
 class AvisCreateSerializer(serializers.ModelSerializer):
@@ -220,7 +249,7 @@ class ProduitDetailSerializer(serializers.ModelSerializer):
     )
     note_moyenne = serializers.FloatField(source='get_note_moyenne', read_only=True)
     nombre_avis = serializers.IntegerField(source='get_nombre_avis', read_only=True)
-    avis = AvisSerializer(many=True, read_only=True)
+    avis = serializers.SerializerMethodField()
     image_principale_id = serializers.SerializerMethodField()
     
     class Meta:
@@ -266,6 +295,11 @@ class ProduitDetailSerializer(serializers.ModelSerializer):
 
     def get_image_principale_id(self, obj):
         return get_image_principale_id(obj)
+
+    def get_avis(self, obj):
+        """Seuls les avis approuvés sont publics"""
+        avis = obj.avis.filter(approuve=True).select_related('client__user')
+        return AvisSerializer(avis, many=True, context=self.context).data
 
 
 class ProduitSerializer(serializers.ModelSerializer):
@@ -320,14 +354,6 @@ class ProduitSerializer(serializers.ModelSerializer):
     def get_image_principale_id(self, obj):
         return get_image_principale_id(obj)
     
-    def validate_prix_promo(self, value):
-        """Vérifier que le prix promo est inférieur au prix normal"""
-        if value and value >= self.initial_data.get('prix', 0):
-            raise serializers.ValidationError(
-                "Le prix promotionnel doit être inférieur au prix normal"
-            )
-        return value
-    
     def validate_stock(self, value):
         """Vérifier que le stock est positif"""
         if value < 0:
@@ -358,15 +384,6 @@ class ProduitCreateUpdateSerializer(serializers.ModelSerializer):
             'images'
         ]
     
-    def validate_prix_promo(self, value):
-        """Vérifier que le prix promo est inférieur au prix normal"""
-        prix = self.initial_data.get('prix')
-        if value and prix and value >= float(prix):
-            raise serializers.ValidationError(
-                "Le prix promotionnel doit être inférieur au prix normal"
-            )
-        return value
-    
     def validate_stock(self, value):
         """Vérifier que le stock est positif"""
         if value < 0:
@@ -374,11 +391,24 @@ class ProduitCreateUpdateSerializer(serializers.ModelSerializer):
         return value
     
     def validate(self, data):
-        """Validation globale"""
-        if data.get('en_promotion') and not data.get('prix_promo'):
+        """Cohérence prix / promotion (fonctionne aussi pour les mises à jour partielles)"""
+        instance = self.instance
+        prix = data.get('prix', getattr(instance, 'prix', None))
+        prix_promo = data.get('prix_promo', getattr(instance, 'prix_promo', None))
+
+        if prix_promo is not None and prix is not None and prix_promo >= prix:
             raise serializers.ValidationError(
-                "Un prix promotionnel est requis si le produit est en promotion"
+                {'prix_promo': "Le prix promotionnel doit être inférieur au prix normal"}
             )
+
+        if data.get('en_promotion') and prix_promo is None:
+            raise serializers.ValidationError(
+                {'prix_promo': "Un prix promotionnel est requis si le produit est en promotion"}
+            )
+
+        # « En promotion » découle du prix promo : les deux ne peuvent plus se contredire
+        if 'prix_promo' in data or 'en_promotion' in data:
+            data['en_promotion'] = prix_promo is not None
         return data
     
     def create(self, validated_data):

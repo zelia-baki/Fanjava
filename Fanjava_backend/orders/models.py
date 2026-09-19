@@ -7,6 +7,7 @@ from users.models import Client, Entreprise
 from products.models import Produit
 import random
 import string
+from decimal import Decimal
 
 
 class Panier(models.Model):
@@ -111,6 +112,19 @@ class Commande(models.Model):
         ('refunded', _('Remboursée')),
     )
     
+    # Transitions de statut autorisées (le statut ne peut pas revenir en arrière)
+    TRANSITIONS = {
+        'pending': ['confirmed', 'cancelled'],
+        'confirmed': ['processing', 'cancelled'],
+        'processing': ['shipped', 'cancelled'],
+        'shipped': ['delivered'],
+        'delivered': ['refunded'],
+        'cancelled': [],
+        'refunded': [],
+    }
+    # Statuts dans lesquels le CLIENT peut encore annuler lui-même sa commande
+    STATUTS_ANNULABLES_PAR_CLIENT = ('pending', 'confirmed')
+
     # Relations
     client = models.ForeignKey(
         Client,
@@ -232,6 +246,13 @@ class Commande(models.Model):
     
     def __str__(self):
         return f"Commande #{self.numero_commande}"
+
+    def statuts_suivants(self):
+        """Statuts vers lesquels cette commande peut évoluer"""
+        return self.TRANSITIONS.get(self.status, [])
+
+    def peut_etre_annulee_par_client(self):
+        return self.status in self.STATUTS_ANNULABLES_PAR_CLIENT
     
     def save(self, *args, **kwargs):
         if not self.numero_commande:
@@ -239,7 +260,8 @@ class Commande(models.Model):
             self.numero_commande = self.generer_numero_commande()
         
         # Calculer montant final
-        self.montant_final = self.montant_total + self.frais_livraison
+        # str() : le défaut du champ est un float, or Decimal + float est interdit
+        self.montant_final = Decimal(str(self.montant_total)) + Decimal(str(self.frais_livraison))
         
         super().save(*args, **kwargs)
     

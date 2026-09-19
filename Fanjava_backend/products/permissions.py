@@ -2,50 +2,46 @@
 
 from rest_framework import permissions
 
+from users.permissions import is_admin
 
-class IsEntrepriseOwnerOrReadOnly(permissions.BasePermission):
+
+class IsEntrepriseOwnerOrAdminOrReadOnly(permissions.BasePermission):
     """
-    Permission personnalisée pour autoriser uniquement les entreprises
-    à modifier leurs propres produits.
+    Lecture pour tous. Écriture réservée à l'entreprise propriétaire de l'objet
+    (ou à un administrateur).
     """
 
     def has_permission(self, request, view):
-        # Les requêtes en lecture (GET, HEAD, OPTIONS) sont autorisées pour tous
         if request.method in permissions.SAFE_METHODS:
             return True
-
-        # Les requêtes d'écriture nécessitent une authentification
-        if not request.user.is_authenticated:
+        user = request.user
+        if not user.is_authenticated:
             return False
-
-        # Vérifier que l'utilisateur est une entreprise
-        return hasattr(request.user, 'entreprise')
+        return is_admin(user) or hasattr(user, 'entreprise')
 
     def has_object_permission(self, request, view, obj):
-        # Les requêtes en lecture sont autorisées pour tous
         if request.method in permissions.SAFE_METHODS:
             return True
+        user = request.user
+        if is_admin(user):
+            return True
+        entreprise = getattr(user, 'entreprise', None)
+        return entreprise is not None and obj.entreprise_id == entreprise.id
 
-        # Les requêtes d'écriture nécessitent que l'utilisateur soit le propriétaire
-        if hasattr(request.user, 'entreprise'):
-            return obj.entreprise == request.user.entreprise
 
-        return False
+# Ancien nom conservé pour compatibilité
+IsEntrepriseOwnerOrReadOnly = IsEntrepriseOwnerOrAdminOrReadOnly
 
 
 class IsEntrepriseOwner(permissions.BasePermission):
-    """
-    Permission pour vérifier que l'utilisateur est une entreprise.
-    """
+    """Permission pour vérifier que l'utilisateur est une entreprise."""
 
     def has_permission(self, request, view):
         return request.user.is_authenticated and hasattr(request.user, 'entreprise')
 
 
 class IsClientOwner(permissions.BasePermission):
-    """
-    Permission pour vérifier que l'utilisateur est un client.
-    """
+    """Permission pour vérifier que l'utilisateur est un client."""
 
     def has_permission(self, request, view):
         return request.user.is_authenticated and hasattr(request.user, 'client')
@@ -58,20 +54,11 @@ class IsClientOwner(permissions.BasePermission):
 
 class IsAdminUser(permissions.BasePermission):
     """
-    Permission pour vérifier que l'utilisateur est un administrateur.
-    Les admins peuvent tout faire, les autres peuvent seulement lire.
+    Lecture pour tous, écriture uniquement pour les administrateurs
+    (même définition d'« administrateur » que dans tout le projet).
     """
 
     def has_permission(self, request, view):
-        # Lecture autorisée pour tous
         if request.method in permissions.SAFE_METHODS:
             return True
-        
-        # Écriture uniquement pour les admins
-        return (
-            request.user and 
-            request.user.is_authenticated and
-            (request.user.is_staff or 
-             request.user.is_superuser or 
-             getattr(request.user, 'user_type', None) == 'admin')
-        )
+        return is_admin(request.user)

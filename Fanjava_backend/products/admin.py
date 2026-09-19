@@ -49,9 +49,10 @@ class ProduitAdmin(admin.ModelAdmin):
             'fields': ('prix', 'prix_promo', 'stock', 'seuil_alerte_stock', 'sku', 'poids')
         }),
         ('Paramètres', {
-            'fields': ('status', 'en_vedette')
+            'fields': ('status', 'actif', 'en_vedette', 'en_promotion')
         }),
     )
+    readonly_fields = ['nombre_vues', 'nombre_ventes', 'note_moyenne']
 
 @admin.register(Avis)
 class AvisAdmin(admin.ModelAdmin):

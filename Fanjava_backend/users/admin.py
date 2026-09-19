@@ -28,10 +28,10 @@ class EntrepriseAdmin(admin.ModelAdmin):
             'fields': ('description', 'description_en', 'description_mg', 'description_es', 'description_de')
         }),
         ('Coordonnées', {
-            'fields': ('siret', 'adresse', 'ville', 'code_postal', 'pays', 'telephone', 'email', 'whatsapp')
+            'fields': ('siret', 'adresse', 'ville', 'code_postal', 'pays', 'telephone', 'email_entreprise', 'whatsapp')
         }),
         ('Statut', {
-            'fields': ('status', 'verified', 'verified_at')
+            'fields': ('status', 'verified', 'verification_date')
         }),
         ('Statistiques', {
             'fields': ('note_moyenne', 'nombre_ventes'),

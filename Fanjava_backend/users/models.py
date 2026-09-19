@@ -110,8 +110,9 @@ class Entreprise(models.Model):
     
     # Informations légales
     siret = models.CharField(
-        max_length=50, 
-        unique=True, 
+        max_length=50,
+        unique=True,
+        null=True,
         blank=True,
         verbose_name=_("SIRET")
     )
@@ -201,6 +202,11 @@ class Entreprise(models.Model):
     
     def __str__(self):
         return self.nom_entreprise
+
+    def save(self, *args, **kwargs):
+        # Plusieurs entreprises sans SIRET : NULL (et non '') pour respecter l'unicité
+        self.siret = (self.siret or '').strip() or None
+        super().save(*args, **kwargs)
 
 
 class Client(models.Model):

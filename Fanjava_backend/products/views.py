@@ -1,17 +1,20 @@
-# products/views.py - SECTION CategorieViewSet MODIFIÉE
+# products/views.py
 
+from django.db import transaction
+from django.db.models import Count, Q
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
-from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.exceptions import PermissionDenied, ValidationError
-from django.db.models import Q, Count
-from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.response import Response
+
+from users.permissions import is_admin
 
 from .image_response import image_file_response
-
 from .models import Categorie, Produit, ImageProduit, Avis
+from .permissions import IsEntrepriseOwnerOrAdminOrReadOnly, IsAdminUser
 from .serializers import (
     CategorieSerializer,
     ProduitSerializer,
@@ -19,10 +22,12 @@ from .serializers import (
     ProduitDetailSerializer,
     ProduitCreateUpdateSerializer,
     ImageProduitSerializer,
-    AvisSerializer, 
+    AvisSerializer,
     AvisCreateSerializer,
+    AvisUpdateSerializer,
+    AvisModerationSerializer,
 )
-from .permissions import IsEntrepriseOwner, IsAdminUser
+from .validators import valider_image
 
 
 class CategorieViewSet(viewsets.ModelViewSet):
@@ -32,7 +37,7 @@ class CategorieViewSet(viewsets.ModelViewSet):
     queryset = Categorie.objects.all()
     serializer_class = CategorieSerializer
     lookup_field = 'slug'
-    
+
     def get_permissions(self):
         """
         Les catégories sont publiques en lecture
@@ -43,22 +48,16 @@ class CategorieViewSet(viewsets.ModelViewSet):
         else:
             permission_classes = [IsAdminUser]
         return [permission() for permission in permission_classes]
-    
+
     def get_queryset(self):
         """Filtrer les catégories actives pour les utilisateurs normaux"""
-        queryset = super().get_queryset()
-        
-        # ✅ Ajouter l'annotation du nombre de produits
-        queryset = queryset.annotate(nombre_produits=Count('produits'))
-        
-        if self.request.user.is_authenticated:
-            if (self.request.user.is_staff or 
-                self.request.user.is_superuser or 
-                getattr(self.request.user, 'user_type', None) == 'admin'):
-                return queryset
-        
+        queryset = super().get_queryset().annotate(nombre_produits=Count('produits'))
+
+        if is_admin(self.request.user):
+            return queryset
+
         return queryset.filter(active=True)
-    
+
     @action(
         detail=True,
         methods=['get'],
@@ -72,44 +71,37 @@ class CategorieViewSet(viewsets.ModelViewSet):
         return image_file_response(categorie.image)
 
     def destroy(self, request, *args, **kwargs):
-        """
-        ✅ NOUVELLE MÉTHODE: Empêcher la suppression si la catégorie contient des produits
-        """
+        """Empêcher la suppression si la catégorie contient des produits"""
         categorie = self.get_object()
-        
-        # Compter le nombre de produits dans cette catégorie
+
         nombre_produits = categorie.produits.count()
-        
+
         if nombre_produits > 0:
             return Response(
                 {
                     'error': f'Impossible de supprimer cette catégorie car elle contient {nombre_produits} produit(s).',
-                    'detail': 'Veuillez d\'abord déplacer ou supprimer tous les produits de cette catégorie.',
+                    'detail': "Veuillez d'abord déplacer ou supprimer tous les produits de cette catégorie.",
                     'nombre_produits': nombre_produits
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
-        # Si aucun produit, autoriser la suppression
+
         self.perform_destroy(categorie)
         return Response(
             {'message': 'Catégorie supprimée avec succès'},
             status=status.HTTP_204_NO_CONTENT
         )
-    
+
     @action(detail=True, methods=['get'])
     def produits(self, request, slug=None):
-        """
-        ✅ NOUVELLE ACTION: Récupérer tous les produits d'une catégorie
-        Utile pour voir ce qui bloque la suppression
-        """
+        """Produits d'une catégorie (les brouillons/inactifs ne sont visibles que des admins)"""
         categorie = self.get_object()
-        produits = categorie.produits.all()
-        
-        # Serializer simple pour la liste
-        from .serializers import ProduitListSerializer
+        produits = categorie.produits.prefetch_related('images')
+        if not is_admin(request.user):
+            produits = produits.filter(status='active', actif=True)
+
         serializer = ProduitListSerializer(produits, many=True, context={'request': request})
-        
+
         return Response({
             'categorie': categorie.nom,
             'nombre_produits': produits.count(),
@@ -117,15 +109,15 @@ class CategorieViewSet(viewsets.ModelViewSet):
         })
 
 
-class ImageProduitViewSet(viewsets.ModelViewSet):
+class ImageProduitViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    ViewSet pour gérer les images de produits
+    Lecture des images de produits (les écritures passent par les actions
+    `ajouter_image` / `supprimer_image` du produit, qui vérifient le propriétaire).
     """
     queryset = ImageProduit.objects.all()
     serializer_class = ImageProduitSerializer
     permission_classes = [IsAuthenticated]
-    parser_classes = [MultiPartParser, FormParser]
-    
+
     def get_queryset(self):
         """Filtrer par produit si spécifié"""
         queryset = super().get_queryset()
@@ -133,10 +125,6 @@ class ImageProduitViewSet(viewsets.ModelViewSet):
         if produit_id:
             queryset = queryset.filter(produit_id=produit_id)
         return queryset
-    
-    def perform_create(self, serializer):
-        """Associer l'image au produit"""
-        serializer.save()
 
     @action(
         detail=True,
@@ -151,12 +139,15 @@ class ImageProduitViewSet(viewsets.ModelViewSet):
         return image_file_response(image.image)
 
 
+ACTIONS_PUBLIQUES = {'list', 'retrieve', 'nouveautes', 'promotions', 'vedette', 'avis'}
+
+
 class ProduitViewSet(viewsets.ModelViewSet):
     """
     ViewSet pour gérer les produits avec upload d'images
     """
     queryset = Produit.objects.select_related('categorie', 'entreprise').prefetch_related('images')
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsEntrepriseOwnerOrAdminOrReadOnly]
     lookup_field = 'slug'
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['categorie', 'entreprise', 'status', 'en_promotion', 'en_vedette', 'actif']
@@ -164,7 +155,7 @@ class ProduitViewSet(viewsets.ModelViewSet):
     ordering_fields = ['prix', 'created_at', 'nom', 'note_moyenne', 'nombre_ventes']
     ordering = ['-created_at']
     parser_classes = [MultiPartParser, FormParser, JSONParser]
-    
+
     def get_serializer_class(self):
         """Utiliser des serializers différents selon l'action"""
         if self.action == 'list':
@@ -174,188 +165,200 @@ class ProduitViewSet(viewsets.ModelViewSet):
         elif self.action == 'retrieve':
             return ProduitDetailSerializer
         return ProduitSerializer
-    
+
     def get_queryset(self):
-        """Filtres personnalisés"""
+        """
+        Visibilité :
+        - public : produits actifs uniquement ;
+        - entreprise : `?mes_produits=true` renvoie TOUS ses produits (brouillons, inactifs...),
+          et elle peut ouvrir ses propres produits non actifs ;
+        - admin : voit tout en détail, et en liste avec `?include_inactive=true`.
+        """
         queryset = super().get_queryset()
-        
-        # Filtrer par statut actif par défaut
-        if self.action in ['list', 'retrieve']:
-            queryset = queryset.filter(status='active')
-        
+        user = self.request.user
+        params = self.request.query_params
+
+        if self.action in ACTIONS_PUBLIQUES:
+            entreprise = getattr(user, 'entreprise', None) if user.is_authenticated else None
+
+            if params.get('mes_produits') == 'true' and entreprise is not None:
+                queryset = queryset.filter(entreprise=entreprise)
+            elif is_admin(user) and (params.get('include_inactive') == 'true' or self.action == 'retrieve'):
+                pass
+            else:
+                visible = Q(status='active', actif=True)
+                if entreprise is not None and self.action == 'retrieve':
+                    visible |= Q(entreprise=entreprise)
+                queryset = queryset.filter(visible)
+
         # Filtrer par prix min/max
-        prix_min = self.request.query_params.get('prix_min', None)
-        prix_max = self.request.query_params.get('prix_max', None)
-        
+        prix_min = params.get('prix_min', None)
+        prix_max = params.get('prix_max', None)
+
         if prix_min:
             queryset = queryset.filter(prix__gte=prix_min)
         if prix_max:
             queryset = queryset.filter(prix__lte=prix_max)
-        
+
         # Filtrer par stock disponible
-        en_stock = self.request.query_params.get('en_stock', None)
-        if en_stock == 'true':
+        if params.get('en_stock', None) == 'true':
             queryset = queryset.filter(stock__gt=0)
-        
-        # Filtrer par entreprise (pour le dashboard entreprise)
-        if self.request.user.is_authenticated and hasattr(self.request.user, 'entreprise'):
-            mes_produits = self.request.query_params.get('mes_produits', None)
-            if mes_produits == 'true':
-                queryset = queryset.filter(entreprise=self.request.user.entreprise)
-        
+
         return queryset
-    
+
+    # ---------- Outils internes
+
+    @staticmethod
+    def _exiger_entreprise_approuvee(user, entreprise):
+        """Seules les entreprises approuvées peuvent publier/modifier des produits (sauf admin)"""
+        if is_admin(user):
+            return
+        if entreprise.status != 'approved':
+            raise PermissionDenied(
+                "Votre entreprise doit être approuvée par l'administration pour gérer des produits."
+            )
+
+    @staticmethod
+    def _extraire_images(request):
+        """Récupère et VALIDE les fichiers image_0, image_1... (vrais formats image, 10 Mo max)"""
+        images = []
+        index = 0
+        while f'image_{index}' in request.FILES:
+            fichier = request.FILES[f'image_{index}']
+            try:
+                valider_image(fichier)
+            except ValidationError as exc:
+                raise ValidationError({f'image_{index}': exc.detail})
+            images.append(fichier)
+            index += 1
+        return images
+
+    # ---------- CRUD
+
     def retrieve(self, request, *args, **kwargs):
-        """Incrémenter le nombre de vues lors de la consultation"""
+        """Incrémenter le nombre de vues (sauf pour le propriétaire et les admins)"""
         instance = self.get_object()
-        instance.nombre_vues += 1
-        instance.save(update_fields=['nombre_vues'])
+        entreprise = getattr(request.user, 'entreprise', None) if request.user.is_authenticated else None
+        if not is_admin(request.user) and not (entreprise and entreprise.id == instance.entreprise_id):
+            instance.nombre_vues += 1
+            instance.save(update_fields=['nombre_vues'])
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
-    
+
     def create(self, request, *args, **kwargs):
-        """
-        Créer un produit avec gestion des images multiples
-        """
+        """Créer un produit avec gestion des images multiples"""
         if not hasattr(request.user, 'entreprise'):
             raise PermissionDenied("Seules les entreprises peuvent créer des produits")
-        
-        # Extraire les images du request
-        images = []
-        image_index = 0
-        while f'image_{image_index}' in request.FILES:
-            images.append(request.FILES[f'image_{image_index}'])
-            image_index += 1
-        
-        # Créer le produit
+        entreprise = request.user.entreprise
+        self._exiger_entreprise_approuvee(request.user, entreprise)
+
+        images = self._extraire_images(request)
+
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        produit = serializer.save(entreprise=request.user.entreprise, status='active')
-        
-        # Créer les images
-        for index, image_file in enumerate(images):
-            ImageProduit.objects.create(
-                produit=produit,
-                image=image_file,
-                est_principale=(index == 0),  # La première image est principale
-                ordre=index
-            )
-        
-        # Retourner le produit créé avec les images
-        headers = self.get_success_headers(serializer.data)
-        product_serializer = ProduitDetailSerializer(produit, context={'request': request})
-        return Response(product_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-    
-    def update(self, request, *args, **kwargs):
-        """
-        Mettre à jour un produit avec gestion des nouvelles images
-        """
-        partial = kwargs.pop('partial', False)
-        instance = self.get_object()
-        
-        # Vérifier les permissions
-        if hasattr(request.user, 'entreprise') and instance.entreprise != request.user.entreprise:
-            raise PermissionDenied("Vous ne pouvez pas modifier ce produit")
-        
-        # Extraire les nouvelles images
-        images = []
-        image_index = 0
-        while f'image_{image_index}' in request.FILES:
-            images.append(request.FILES[f'image_{image_index}'])
-            image_index += 1
-        
-        # Mettre à jour le produit
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
-        produit = serializer.save()
-        
-        # Ajouter les nouvelles images
-        if images:
-            # Compter les images existantes pour l'ordre
-            existing_count = produit.images.count()
+
+        with transaction.atomic():
+            produit = serializer.save(entreprise=entreprise, status='active')
             for index, image_file in enumerate(images):
                 ImageProduit.objects.create(
                     produit=produit,
                     image=image_file,
-                    est_principale=(existing_count == 0 and index == 0),
-                    ordre=existing_count + index
+                    est_principale=(index == 0),  # La première image est principale
+                    ordre=index
                 )
-        
-        # Retourner le produit mis à jour
+
+        headers = self.get_success_headers(serializer.data)
+        product_serializer = ProduitDetailSerializer(produit, context={'request': request})
+        return Response(product_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def update(self, request, *args, **kwargs):
+        """Mettre à jour un produit (propriétaire ou admin, vérifié par les permissions)"""
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        self._exiger_entreprise_approuvee(request.user, instance.entreprise)
+
+        images = self._extraire_images(request)
+
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+
+        with transaction.atomic():
+            produit = serializer.save()
+
+            if images:
+                existing_count = produit.images.count()
+                for index, image_file in enumerate(images):
+                    ImageProduit.objects.create(
+                        produit=produit,
+                        image=image_file,
+                        est_principale=(existing_count == 0 and index == 0),
+                        ordre=existing_count + index
+                    )
+
         product_serializer = ProduitDetailSerializer(produit, context={'request': request})
         return Response(product_serializer.data)
-    
+
     def perform_destroy(self, instance):
-        """Vérifier que l'utilisateur est le propriétaire"""
-        if hasattr(self.request.user, 'entreprise') and instance.entreprise != self.request.user.entreprise:
-            raise PermissionDenied("Vous ne pouvez pas supprimer ce produit")
-        instance.delete()
-    
+        """
+        Supprime le produit ; s'il figure dans des commandes, il est seulement
+        désactivé afin de conserver l'historique des commandes.
+        """
+        if instance.lignecommande_set.exists():
+            instance.status = 'inactive'
+            instance.actif = False
+            instance.save(update_fields=['status', 'actif', 'updated_at'])
+        else:
+            instance.delete()
+
     @action(detail=False, methods=['get'])
     def nouveautes(self, request):
         """Récupérer les nouveaux produits (20 derniers)"""
         produits = self.get_queryset().filter(actif=True, status='active')[:20]
         serializer = ProduitListSerializer(produits, many=True, context={'request': request})
         return Response(serializer.data)
-    
+
     @action(detail=False, methods=['get'])
     def promotions(self, request):
         """Récupérer les produits en promotion"""
         produits = self.get_queryset().filter(en_promotion=True, actif=True, status='active')
         serializer = ProduitListSerializer(produits, many=True, context={'request': request})
         return Response(serializer.data)
-    
+
     @action(detail=False, methods=['get'])
     def vedette(self, request):
         """Récupérer les produits en vedette"""
         produits = self.get_queryset().filter(en_vedette=True, actif=True, status='active')
         serializer = ProduitListSerializer(produits, many=True, context={'request': request})
         return Response(serializer.data)
-    
-    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+
+    @action(detail=True, methods=['post'])
     def ajouter_image(self, request, slug=None):
-        """Ajouter une image à un produit"""
-        produit = self.get_object()
-        
-        # Vérifier que l'utilisateur est le propriétaire
-        if not hasattr(request.user, 'entreprise') or produit.entreprise != request.user.entreprise:
-            return Response(
-                {'error': 'Vous ne pouvez pas modifier ce produit'},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        
+        """Ajouter une image à un produit (propriétaire ou admin)"""
+        produit = self.get_object()  # applique la permission « propriétaire »
+        self._exiger_entreprise_approuvee(request.user, produit.entreprise)
+
         serializer = ImageProduitSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(produit=produit)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    @action(detail=True, methods=['delete'], permission_classes=[IsAuthenticated])
+        serializer.is_valid(raise_exception=True)
+        serializer.save(produit=produit)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=['delete'])
     def supprimer_image(self, request, slug=None):
-        """Supprimer une image d'un produit"""
-        produit = self.get_object()
+        """Supprimer une image d'un produit (propriétaire ou admin)"""
+        produit = self.get_object()  # applique la permission « propriétaire »
         image_id = request.data.get('image_id')
-        
-        # Vérifier que l'utilisateur est le propriétaire
-        if not hasattr(request.user, 'entreprise') or produit.entreprise != request.user.entreprise:
-            return Response(
-                {'error': 'Vous ne pouvez pas modifier ce produit'},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        
+
         try:
             image = ImageProduit.objects.get(id=image_id, produit=produit)
-            image.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        except ImageProduit.DoesNotExist:
-            return Response(
-                {'error': 'Image non trouvée'},
-                status=status.HTTP_404_NOT_FOUND
-            )
-    
+        except (ImageProduit.DoesNotExist, ValueError, TypeError):
+            return Response({'error': 'Image non trouvée'}, status=status.HTTP_404_NOT_FOUND)
+
+        image.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     @action(detail=True, methods=['get'])
     def avis(self, request, slug=None):
-        """Récupérer tous les avis d'un produit"""
+        """Récupérer tous les avis approuvés d'un produit"""
         produit = self.get_object()
         avis = produit.avis.filter(approuve=True).select_related('client__user')
         serializer = AvisSerializer(avis, many=True, context={'request': request})
@@ -372,76 +375,98 @@ class AvisViewSet(viewsets.ModelViewSet):
     """
     serializer_class = AvisSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
-    
+
     def get_queryset(self):
-        """Filtrer les avis par produit et ne montrer que les avis approuvés"""
+        """
+        Public : avis approuvés. Un client voit aussi ses propres avis, une entreprise
+        ceux de ses produits (pour les modérer), un admin voit tout.
+        """
+        user = self.request.user
+        params = self.request.query_params
         queryset = Avis.objects.select_related('client__user', 'produit')
-        
-        # Filtrer par produit si demandé
-        produit_id = self.request.query_params.get('produit', None)
-        if produit_id:
-            queryset = queryset.filter(produit_id=produit_id)
-        
-        # Les utilisateurs normaux ne voient que les avis approuvés
-        if not self.request.user.is_staff:
-            queryset = queryset.filter(approuve=True)
-        
-        return queryset
-    
+
+        if params.get('produit'):
+            queryset = queryset.filter(produit_id=params['produit'])
+
+        entreprise = getattr(user, 'entreprise', None) if user.is_authenticated else None
+        client = getattr(user, 'client', None) if user.is_authenticated else None
+
+        if params.get('mes_produits') == 'true' and entreprise is not None:
+            queryset = queryset.filter(produit__entreprise=entreprise)
+        if params.get('client_id') and is_admin(user):
+            queryset = queryset.filter(client_id=params['client_id'])
+
+        if is_admin(user):
+            return queryset
+
+        visible = Q(approuve=True)
+        if client is not None:
+            visible |= Q(client=client)
+        if entreprise is not None:
+            visible |= Q(produit__entreprise=entreprise)
+        return queryset.filter(visible)
+
     def get_serializer_class(self):
-        """Utiliser des serializers différents selon l'action"""
         if self.action == 'create':
             return AvisCreateSerializer
         return AvisSerializer
-    
-def perform_create(self, serializer):
-    
-    # DEBUG
-    print("=" * 60)
-    print("📥 DONNÉES REÇUES:", self.request.data)
-    print("👤 User:", self.request.user)
-    print("🔑 Has client:", hasattr(self.request.user, 'client'))
-    print("=" * 60)
-    
-    if not hasattr(self.request.user, 'client'):
-        raise PermissionDenied("Seuls les clients peuvent laisser des avis")
-    
-    # Tester la validation
-    if not serializer.is_valid():
-        print("❌ ERREURS VALIDATION:", serializer.errors)
-    
-    serializer.save(client=self.request.user.client)
-    print("✅ AVIS CRÉÉ AVEC SUCCÈS")
-    
+
+    def create(self, request, *args, **kwargs):
+        """Un client (ayant acheté et reçu le produit) laisse un avis"""
+        if not hasattr(request.user, 'client'):
+            raise PermissionDenied("Seuls les clients peuvent laisser des avis")
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        avis = serializer.save(client=request.user.client)
+        return Response(AvisSerializer(avis, context={'request': request}).data, status=status.HTTP_201_CREATED)
+
     def update(self, request, *args, **kwargs):
-        """Autoriser seulement la modification de son propre avis"""
+        """
+        - l'auteur modifie note / titre / commentaire ;
+        - l'admin ou l'entreprise du produit approuve / rejette (champ `approuve`).
+        """
+        partial = kwargs.pop('partial', False)
         avis = self.get_object()
-        if not hasattr(request.user, 'client') or avis.client != request.user.client:
+        user = request.user
+
+        client = getattr(user, 'client', None)
+        auteur = client is not None and avis.client_id == client.id
+        entreprise = getattr(user, 'entreprise', None)
+        moderateur = is_admin(user) or (entreprise is not None and avis.produit.entreprise_id == entreprise.id)
+
+        if moderateur and 'approuve' in request.data:
+            serializer = AvisModerationSerializer(avis, data=request.data, partial=True)
+        elif auteur:
+            serializer = AvisUpdateSerializer(avis, data=request.data, partial=partial)
+        else:
             return Response(
                 {'error': 'Vous ne pouvez modifier que vos propres avis'},
                 status=status.HTTP_403_FORBIDDEN
             )
-        return super().update(request, *args, **kwargs)
-    
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(AvisSerializer(avis, context={'request': request}).data)
+
     def destroy(self, request, *args, **kwargs):
-        """Autoriser seulement la suppression de son propre avis"""
+        """Suppression de son propre avis (ou par un admin)"""
         avis = self.get_object()
-        if not hasattr(request.user, 'client') or avis.client != request.user.client:
+        client = getattr(request.user, 'client', None)
+        auteur = client is not None and avis.client_id == client.id
+        if not (auteur or is_admin(request.user)):
             return Response(
                 {'error': 'Vous ne pouvez supprimer que vos propres avis'},
                 status=status.HTTP_403_FORBIDDEN
             )
         return super().destroy(request, *args, **kwargs)
-    
+
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def mes_avis(self, request):
         """Récupérer tous les avis de l'utilisateur connecté"""
         if not hasattr(request.user, 'client'):
-            return Response(
-                {'error': 'Non autorisé'},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        
-        avis = Avis.objects.filter(client=request.user.client)
-        serializer = self.get_serializer(avis, many=True)
+            return Response({'error': 'Non autorisé'}, status=status.HTTP_403_FORBIDDEN)
+
+        avis = Avis.objects.filter(client=request.user.client).select_related('client__user', 'produit')
+        serializer = AvisSerializer(avis, many=True, context={'request': request})
         return Response(serializer.data)

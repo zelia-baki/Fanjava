@@ -5,6 +5,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from users.models import Entreprise, Client
+from .utils import unique_slugify
 
 
 class Categorie(models.Model):
@@ -65,7 +66,7 @@ class Categorie(models.Model):
     
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.nom)
+            self.slug = unique_slugify(self, self.nom)
         super().save(*args, **kwargs)
 
 
@@ -218,7 +219,7 @@ class Produit(models.Model):
     
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.nom)
+            self.slug = unique_slugify(self, self.nom)
         
         # Générer SKU automatiquement si vide
         if not self.sku:

@@ -3,21 +3,26 @@
 from rest_framework.permissions import BasePermission
 
 
+def is_admin(user):
+    """Définition UNIQUE d'un administrateur pour tout le projet."""
+    return bool(
+        user
+        and user.is_authenticated
+        and (
+            user.is_staff
+            or user.is_superuser
+            or getattr(user, 'user_type', None) == 'admin'
+        )
+    )
+
+
 class IsAdminUser(BasePermission):
     """
     Permission pour vérifier que l'utilisateur est un admin
     """
     
     def has_permission(self, request, view):
-        return (
-            request.user and
-            request.user.is_authenticated and
-            (
-                request.user.is_staff or
-                request.user.is_superuser or
-                getattr(request.user, 'user_type', None) == 'admin'
-            )
-        )
+        return is_admin(request.user)
 
 
 class IsEntrepriseOwner(BasePermission):
