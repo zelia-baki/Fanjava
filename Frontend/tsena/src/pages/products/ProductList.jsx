@@ -4,6 +4,7 @@ import axios from 'axios';
 import MainLayout from '@/layouts/MainLayout';
 import ProductCard, { ProductCardSkeleton } from '@/components/products/ProductCard';
 import { productService } from '@/services/productService';
+import { useSeo } from '@/utils/seo';
 import { Loader2, Search, Filter, X } from 'lucide-react';
 
 const DELAI_SAISIE_MS = 350;
@@ -167,6 +168,19 @@ export default function ProductList() {
   );
   const premierChargement = loading && products.length === 0;
 
+  const recherche = searchParams.get('search');
+  const categorieNom = categories.find((c) => String(c.id) === searchParams.get('categorie'))?.nom;
+  useSeo(
+    recherche || categorieNom
+      ? {
+          title: recherche ? `Résultats pour « ${recherche} »` : categorieNom,
+          description: `${recherche ? `Résultats de recherche pour « ${recherche} »` : `Produits de la catégorie ${categorieNom}`} sur FanJava.mg, la marketplace de Madagascar.`,
+          path: '/',
+        }
+      : null,
+    [recherche, categorieNom]
+  );
+
   const pill = 'flex items-center gap-2 bg-white px-3 py-2 rounded-md border border-gray-200 text-sm';
 
   return (
@@ -175,6 +189,9 @@ export default function ProductList() {
         {/* Recherche */}
         <div className="bg-white border-b border-gray-200 py-6 sm:py-8">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h1 className="max-w-4xl mx-auto text-lg sm:text-xl font-semibold text-gray-900 mb-3">
+              Achetez en ligne auprès des vendeurs de Madagascar
+            </h1>
             <form onSubmit={appliquerSaisie} className="max-w-4xl mx-auto relative" role="search">
               <input
                 type="search"

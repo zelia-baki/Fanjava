@@ -1,12 +1,13 @@
 // src/App.jsx - VERSION AVEC ROUTES ADMIN
 
-import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { lazy, Suspense, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from '@/context/AuthContext';
 import { CartProvider } from '@/context/CartContext';
 import { ToastProvider } from '@/context/ToastContext';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import PageLoader from '@/components/ui/PageLoader';
+import { applyRouteSeo } from '@/utils/seo';
 
 // Pages informatives
 const Contact = lazy(() => import('@/pages/static/Contact'));
@@ -62,12 +63,23 @@ const NotificationsSent = lazy(() => import('./pages/admin/NotificationsSent'));
 
 
 
+// Titre, description, canonical et robots par défaut de chaque URL.
+// Placé avant <Routes> : ses effets s'exécutent avant ceux de la page, qui peut les préciser.
+function RouteSeo() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    applyRouteSeo(pathname);
+  }, [pathname]);
+  return null;
+}
+
 function App() {
   return (
     <BrowserRouter>
       <ToastProvider>
       <AuthProvider>
         <CartProvider>
+          <RouteSeo />
           <Suspense fallback={<PageLoader />}>
           <Routes>
             {/* ==================== ROUTES PUBLIQUES ==================== */}

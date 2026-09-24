@@ -55,6 +55,7 @@ export default function Footer() {
               <div className="flex space-x-3">
                 <a 
                   href="https://facebook.com" 
+                  aria-label="FanJava.mg sur Facebook"
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="w-10 h-10 bg-gray-800/50 border border-gray-700 rounded-lg flex items-center justify-center text-gray-400 hover:text-emerald-400 hover:border-emerald-500 hover:bg-gray-800 transition-all hover:scale-110"
@@ -63,6 +64,7 @@ export default function Footer() {
                 </a>
                 <a 
                   href="https://twitter.com" 
+                  aria-label="FanJava.mg sur Twitter"
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="w-10 h-10 bg-gray-800/50 border border-gray-700 rounded-lg flex items-center justify-center text-gray-400 hover:text-emerald-400 hover:border-emerald-500 hover:bg-gray-800 transition-all hover:scale-110"
@@ -71,6 +73,7 @@ export default function Footer() {
                 </a>
                 <a 
                   href="https://instagram.com" 
+                  aria-label="FanJava.mg sur Instagram"
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="w-10 h-10 bg-gray-800/50 border border-gray-700 rounded-lg flex items-center justify-center text-gray-400 hover:text-pink-400 hover:border-pink-500 hover:bg-gray-800 transition-all hover:scale-110"
@@ -79,6 +82,7 @@ export default function Footer() {
                 </a>
                 <a 
                   href="https://linkedin.com" 
+                  aria-label="FanJava.mg sur LinkedIn"
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="w-10 h-10 bg-gray-800/50 border border-gray-700 rounded-lg flex items-center justify-center text-gray-400 hover:text-emerald-400 hover:border-emerald-500 hover:bg-gray-800 transition-all hover:scale-110"

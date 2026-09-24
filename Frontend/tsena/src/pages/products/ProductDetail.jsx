@@ -6,6 +6,8 @@ import { useCart } from '@/context/CartContext';
 import { useToast } from '@/context/ToastContext';
 import ReviewSection from '@/components/reviews/ReviewSection';
 import BlobImage from '@/components/ui/BlobImage';
+import { imageService } from '@/services/imageService';
+import { SITE_URL, useSeo } from '@/utils/seo';
 import {
   ShoppingCart,
   Star,
@@ -64,6 +66,15 @@ export default function ProductDetail() {
       setAdding(false);
     }
   };
+
+  useSeo(
+    product && product.slug === slug
+      ? productSeo(product)
+      : error
+        ? { title: 'Produit introuvable', path: `/products/${slug}`, noindex: true }
+        : null,
+    [product, error, slug]
+  );
 
   const incrementQuantity = () => {
     if (quantity < product.stock) {
@@ -369,4 +380,52 @@ function ProductDetailSkeleton() {
       </div>
     </div>
   );
+}
+
+// Balises SEO et données structurées schema.org/Product (prix, stock, avis) d'une fiche produit
+function productSeo(product) {
+  const path = `/products/${product.slug}`;
+  const images = (product.images?.length ? product.images.map((img) => img.id) : [product.image_principale_id])
+    .filter(Boolean)
+    .map((id) => `${SITE_URL}/api${imageService.productImagePath(id)}`);
+  const description =
+    product.description_courte || product.description || `${product.nom}, vendu par ${product.entreprise_nom} sur FanJava.mg.`;
+  const prix = parseFloat(product.prix_final || product.prix);
+  const nombreAvis = product.nombre_avis || 0;
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.nom,
+    description,
+    url: `${SITE_URL}${path}`,
+    ...(images.length && { image: images }),
+    ...(product.categorie?.nom && { category: product.categorie.nom }),
+    brand: { '@type': 'Brand', name: product.entreprise_nom },
+    offers: {
+      '@type': 'Offer',
+      url: `${SITE_URL}${path}`,
+      priceCurrency: 'MGA',
+      price: prix.toFixed(2),
+      availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      itemCondition: 'https://schema.org/NewCondition',
+      seller: { '@type': 'Organization', name: product.entreprise_nom },
+    },
+    ...(nombreAvis > 0 && {
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: Number(product.note_moyenne).toFixed(1),
+        reviewCount: nombreAvis,
+      },
+    }),
+  };
+
+  return {
+    title: `${product.nom} – ${prix.toLocaleString('fr-FR')} Ar`,
+    description,
+    path,
+    image: images[0],
+    type: 'product',
+    jsonLd,
+  };
 }
