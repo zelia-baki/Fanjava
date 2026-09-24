@@ -1,7 +1,7 @@
 # products/views.py
 
 from django.db import transaction
-from django.db.models import Count, Q
+from django.db.models import Case, Count, F, Q, When
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action
@@ -152,7 +152,7 @@ class ProduitViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['categorie', 'entreprise', 'status', 'en_promotion', 'en_vedette', 'actif']
     search_fields = ['nom', 'description', 'description_courte']
-    ordering_fields = ['prix', 'created_at', 'nom', 'note_moyenne', 'nombre_ventes']
+    ordering_fields = ['prix', 'prix_effectif', 'created_at', 'nom', 'note_moyenne', 'nombre_ventes']
     ordering = ['-created_at']
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
@@ -191,14 +191,25 @@ class ProduitViewSet(viewsets.ModelViewSet):
                     visible |= Q(entreprise=entreprise)
                 queryset = queryset.filter(visible)
 
-        # Filtrer par prix min/max
-        prix_min = params.get('prix_min', None)
-        prix_max = params.get('prix_max', None)
+        # Prix réellement payé (même règle que Produit.get_prix_final),
+        # utilisé pour le filtre prix min/max et le tri par prix
+        queryset = queryset.annotate(
+            prix_effectif=Case(
+                When(prix_promo__isnull=False, prix_promo__lt=F('prix'), then=F('prix_promo')),
+                default=F('prix'),
+            )
+        )
 
-        if prix_min:
-            queryset = queryset.filter(prix__gte=prix_min)
-        if prix_max:
-            queryset = queryset.filter(prix__lte=prix_max)
+        try:
+            prix_min = float(params['prix_min']) if params.get('prix_min') else None
+            prix_max = float(params['prix_max']) if params.get('prix_max') else None
+        except ValueError:
+            raise ValidationError({'prix': 'prix_min et prix_max doivent être des nombres.'})
+
+        if prix_min is not None:
+            queryset = queryset.filter(prix_effectif__gte=prix_min)
+        if prix_max is not None:
+            queryset = queryset.filter(prix_effectif__lte=prix_max)
 
         # Filtrer par stock disponible
         if params.get('en_stock', None) == 'true':

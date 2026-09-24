@@ -1,1 +1,19 @@
 @import "tailwindcss";
+
+/* Apparition des toasts */
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to   { opacity: 1; transform: none; }
+}
+.toast-enter { animation: toast-in 180ms ease-out; }
+
+/* Apparition douce des cartes produit */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+.fade-up { animation: fade-up 220ms ease-out both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .toast-enter, .fade-up { animation: none; }
+}

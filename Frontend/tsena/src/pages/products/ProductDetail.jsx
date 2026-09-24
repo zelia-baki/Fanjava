@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import MainLayout from '@/layouts/MainLayout';
 import { productService } from '@/services/productService';
 import { useCart } from '@/context/CartContext';
+import { useToast } from '@/context/ToastContext';
 import ReviewSection from '@/components/reviews/ReviewSection';
 import BlobImage from '@/components/ui/BlobImage';
 import {
@@ -15,13 +16,13 @@ import {
   Minus,
   Loader2,
   Package,
-  Heart,
 } from 'lucide-react';
 
 export default function ProductDetail() {
   const { slug } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const toast = useToast();
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -38,6 +39,7 @@ export default function ProductDetail() {
     try {
       setLoading(true);
       setError(null);
+      setQuantity(1);
       const data = await productService.getProductBySlug(slug);
       setProduct(data);
       setSelectedImage(data.images?.[0]?.id ?? data.image_principale_id);
@@ -53,9 +55,11 @@ export default function ProductDetail() {
     try {
       setAdding(true);
       await addToCart(product, quantity);
-      alert(`${quantity} × ${product.nom} ajouté${quantity > 1 ? 's' : ''} au panier !`);
+      toast.success(`${quantity} × ${product.nom} ajouté${quantity > 1 ? 's' : ''} au panier`, {
+        action: { label: 'Voir le panier', to: '/cart' },
+      });
     } catch (error) {
-      alert(error.message || 'Erreur lors de l\'ajout au panier');
+      toast.error(error.message || 'Erreur lors de l\'ajout au panier');
     } finally {
       setAdding(false);
     }
@@ -76,10 +80,7 @@ export default function ProductDetail() {
   if (loading) {
     return (
       <MainLayout>
-        <div className="max-w-7xl mx-auto px-4 py-16 flex justify-center items-center">
-          <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
-          <span className="ml-3 text-gray-600">Chargement...</span>
-        </div>
+        <ProductDetailSkeleton />
       </MainLayout>
     );
   }
@@ -104,7 +105,7 @@ export default function ProductDetail() {
 
   const prix = parseFloat(product.prix_final || product.prix);
   const prixOriginal = product.prix_promo ? parseFloat(product.prix) : null;
-  const enPromo = product.en_promotion && prixOriginal;
+  const enPromo = product.en_promotion && prixOriginal && prixOriginal > prix;
 
   return (
     <MainLayout>
@@ -144,6 +145,8 @@ export default function ProductDetail() {
                   {product.images.map((image) => (
                     <button
                       key={image.id}
+                      type="button"
+                      aria-label="Afficher cette image"
                       onClick={() => setSelectedImage(image.id)}
                       className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${
                         selectedImage === image.id
@@ -179,7 +182,7 @@ export default function ProductDetail() {
               </div>
 
               {/* Titre */}
-              <h1 className="text-3xl font-bold text-gray-900 mb-3">{product.nom}</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">{product.nom}</h1>
 
               {/* Vendeur */}
               <p className="text-sm text-gray-600 mb-4">
@@ -210,10 +213,10 @@ export default function ProductDetail() {
               {/* Prix - Grand et visible */}
               <div className="mb-6 pb-6 border-b border-gray-200">
                 <div className="flex items-baseline gap-3">
-                  <p className="text-4xl font-bold text-gray-900">{prix.toLocaleString()} Ar</p>
+                  <p className="text-3xl sm:text-4xl font-bold text-gray-900">{prix.toLocaleString('fr-FR')} Ar</p>
                   {enPromo && (
                     <p className="text-xl text-gray-400 line-through">
-                      {prixOriginal.toLocaleString()} Ar
+                      {prixOriginal.toLocaleString('fr-FR')} Ar
                     </p>
                   )}
                 </div>
@@ -246,6 +249,8 @@ export default function ProductDetail() {
                 </label>
                 <div className="flex items-center gap-3">
                   <button
+                    type="button"
+                    aria-label="Diminuer la quantité"
                     onClick={decrementQuantity}
                     disabled={quantity <= 1}
                     className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
@@ -254,6 +259,8 @@ export default function ProductDetail() {
                   </button>
                   <span className="text-lg font-semibold w-12 text-center">{quantity}</span>
                   <button
+                    type="button"
+                    aria-label="Augmenter la quantité"
                     onClick={incrementQuantity}
                     disabled={quantity >= product.stock}
                     className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
@@ -267,7 +274,7 @@ export default function ProductDetail() {
               <button
                 onClick={handleAddToCart}
                 disabled={adding || product.stock === 0}
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-xl disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-lg font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] mb-4"
+                className="w-full bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-xl disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-lg font-semibold shadow-lg hover:shadow-xl transition-all active:scale-[0.98] mb-4"
               >
                 {adding ? (
                   <>
@@ -279,7 +286,7 @@ export default function ProductDetail() {
                 ) : (
                   <>
                     <ShoppingCart className="w-5 h-5" />
-                    Ajouter au panier · {(prix * quantity).toLocaleString()} Ar
+                    Ajouter au panier · {(prix * quantity).toLocaleString('fr-FR')} Ar
                   </>
                 )}
               </button>
@@ -288,7 +295,7 @@ export default function ProductDetail() {
               <div className="space-y-3 pt-6 border-t border-gray-200">
                 <div className="flex items-center gap-3 text-sm text-gray-600">
                   <Truck className="w-5 h-5 text-emerald-500" />
-                  <span>Livraison à partir de 5 000 Ar</span>
+                  <span>Frais de livraison fixés par le vendeur et confirmés avant paiement</span>
                 </div>
                 <div className="flex items-center gap-3 text-sm text-gray-600">
                   <Shield className="w-5 h-5 text-emerald-500" />
@@ -299,12 +306,14 @@ export default function ProductDetail() {
           </div>
 
           {/* Description complète - Épurée */}
-          <div className="mt-16">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Description</h2>
-            <div className="bg-gray-50 rounded-xl p-8 border border-gray-200">
-              <p className="text-gray-700 whitespace-pre-line leading-relaxed">{product.description}</p>
+          {product.description && (
+            <div className="mt-12 sm:mt-16">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Description</h2>
+              <div className="bg-gray-50 rounded-xl p-5 sm:p-8 border border-gray-200">
+                <p className="text-gray-700 whitespace-pre-line leading-relaxed">{product.description}</p>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Caractéristiques */}
           {product.poids && (
@@ -332,5 +341,32 @@ export default function ProductDetail() {
         </div>
       </div>
     </MainLayout>
+  );
+}
+
+function ProductDetailSkeleton() {
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-pulse" aria-hidden="true">
+      <div className="h-4 w-20 bg-gray-100 rounded mb-8" />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div>
+          <div className="aspect-square bg-gray-100 rounded-xl mb-4" />
+          <div className="grid grid-cols-5 gap-2">
+            {Array.from({ length: 4 }, (_, i) => (
+              <div key={i} className="aspect-square bg-gray-100 rounded-lg" />
+            ))}
+          </div>
+        </div>
+        <div className="space-y-4">
+          <div className="h-8 w-3/4 bg-gray-100 rounded" />
+          <div className="h-4 w-1/3 bg-gray-100 rounded" />
+          <div className="h-10 w-1/2 bg-gray-100 rounded mt-6" />
+          <div className="h-4 w-full bg-gray-100 rounded mt-6" />
+          <div className="h-4 w-5/6 bg-gray-100 rounded" />
+          <div className="h-10 w-40 bg-gray-100 rounded-lg mt-6" />
+          <div className="h-14 w-full bg-gray-100 rounded-xl mt-4" />
+        </div>
+      </div>
+    </div>
   );
 }

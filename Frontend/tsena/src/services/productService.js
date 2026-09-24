@@ -4,8 +4,8 @@ export const productService = {
   /**
    * Récupérer la liste des produits avec filtres optionnels
    */
-  async getProducts(params = {}) {
-    const response = await api.get('/products/produits/', { params });
+  async getProducts(params = {}, { signal } = {}) {
+    const response = await api.get('/products/produits/', { params, signal });
     return response.data;
   },
 

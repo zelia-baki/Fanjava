@@ -1,69 +1,74 @@
 // src/App.jsx - VERSION AVEC ROUTES ADMIN
 
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from '@/context/AuthContext';
 import { CartProvider } from '@/context/CartContext';
+import { ToastProvider } from '@/context/ToastContext';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
+import PageLoader from '@/components/ui/PageLoader';
 
 // Pages informatives
-import Contact from '@/pages/static/Contact';
-import Terms from '@/pages/static/Terms';
-import Privacy from '@/pages/static/Privacy';
-import ShippingReturns from '@/pages/static/ShippingReturns';
-import FAQ from '@/pages/static/FAQ';
+const Contact = lazy(() => import('@/pages/static/Contact'));
+const Terms = lazy(() => import('@/pages/static/Terms'));
+const Privacy = lazy(() => import('@/pages/static/Privacy'));
+const ShippingReturns = lazy(() => import('@/pages/static/ShippingReturns'));
+const FAQ = lazy(() => import('@/pages/static/FAQ'));
 
 // Auth
-import Login from '@/pages/auth/Login';
-import RegisterClient from '@/pages/auth/RegisterClient';
-import RegisterEntreprise from '@/pages/auth/RegisterEntreprise';
-import ForgotPassword from '@/pages/auth/ForgotPassword';
-import ResetPassword from '@/pages/auth/ResetPassword';
-import VerifyEmail from '@/pages/auth/VerifyEmail';
+const Login = lazy(() => import('@/pages/auth/Login'));
+const RegisterClient = lazy(() => import('@/pages/auth/RegisterClient'));
+const RegisterEntreprise = lazy(() => import('@/pages/auth/RegisterEntreprise'));
+const ForgotPassword = lazy(() => import('@/pages/auth/ForgotPassword'));
+const ResetPassword = lazy(() => import('@/pages/auth/ResetPassword'));
+const VerifyEmail = lazy(() => import('@/pages/auth/VerifyEmail'));
 
 // Public - Products
 import ProductList from '@/pages/products/ProductList';
 import ProductDetail from '@/pages/products/ProductDetail';
-import ProfileEdit from '@/pages/client/ProfileEdit';
+const ProfileEdit = lazy(() => import('@/pages/client/ProfileEdit'));
 
 // Cart & Checkout
-import Cart from '@/pages/cart/Cart';
-import Checkout from '@/pages/cart/Checkout';
-import OrderConfirmation from '@/pages/cart/OrderConfirmation';
+const Cart = lazy(() => import('@/pages/cart/Cart'));
+const Checkout = lazy(() => import('@/pages/cart/Checkout'));
+const OrderConfirmation = lazy(() => import('@/pages/cart/OrderConfirmation'));
 
 // Client
-import ClientDashboard from '@/pages/client/ClientDashboard';
-import MyOrders from '@/pages/client/MyOrders';
-import MyReviews from '@/pages/client/MyReviews';
-import ClientOrderDetail from '@/pages/client/ClientOrderDetail';
-import UserDetail from '@/pages/admin/UserDetail';
+const ClientDashboard = lazy(() => import('@/pages/client/ClientDashboard'));
+const MyOrders = lazy(() => import('@/pages/client/MyOrders'));
+const MyReviews = lazy(() => import('@/pages/client/MyReviews'));
+const ClientOrderDetail = lazy(() => import('@/pages/client/ClientOrderDetail'));
+const UserDetail = lazy(() => import('@/pages/admin/UserDetail'));
 
 // Entreprise
-import EntrepriseDashboard from '@/pages/entreprise/EntrepriseDashboard';
-import ProductListEntreprise from '@/pages/entreprise/ProductListEntreprise';
-import ProductCreate from '@/pages/entreprise/ProductCreate';
-import ProductEdit from '@/pages/entreprise/ProductEdit';
-import EntrepriseOrders from '@/pages/entreprise/EntrepriseOrders';
-import OrderDetail from '@/pages/entreprise/OrderDetail';
-import EntrepriseReviews from '@/pages/entreprise/EntrepriseReviews';
+const EntrepriseDashboard = lazy(() => import('@/pages/entreprise/EntrepriseDashboard'));
+const ProductListEntreprise = lazy(() => import('@/pages/entreprise/ProductListEntreprise'));
+const ProductCreate = lazy(() => import('@/pages/entreprise/ProductCreate'));
+const ProductEdit = lazy(() => import('@/pages/entreprise/ProductEdit'));
+const EntrepriseOrders = lazy(() => import('@/pages/entreprise/EntrepriseOrders'));
+const OrderDetail = lazy(() => import('@/pages/entreprise/OrderDetail'));
+const EntrepriseReviews = lazy(() => import('@/pages/entreprise/EntrepriseReviews'));
 
 // Admin
-import AdminDashboard from '@/pages/admin/AdminDashboard';
-import UsersManagement from '@/pages/admin/UsersManagement';
-import ProductsManagement from '@/pages/admin/ProductsManagement';
-import OrdersManagement from '@/pages/admin/OrdersManagement';
-import ReviewsManagement from '@/pages/admin/ReviewsManagement';
-import NotificationsManagement from '@/pages/admin/NotificationsManagement';
-import CategoryManagement from '@/pages/admin/CategoryManagement';
-import NotificationsPage from '@/pages/NotificationsPage';
-import NotificationsSent from './pages/admin/NotificationsSent';
+const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'));
+const UsersManagement = lazy(() => import('@/pages/admin/UsersManagement'));
+const ProductsManagement = lazy(() => import('@/pages/admin/ProductsManagement'));
+const OrdersManagement = lazy(() => import('@/pages/admin/OrdersManagement'));
+const ReviewsManagement = lazy(() => import('@/pages/admin/ReviewsManagement'));
+const NotificationsManagement = lazy(() => import('@/pages/admin/NotificationsManagement'));
+const CategoryManagement = lazy(() => import('@/pages/admin/CategoryManagement'));
+const NotificationsPage = lazy(() => import('@/pages/NotificationsPage'));
+const NotificationsSent = lazy(() => import('./pages/admin/NotificationsSent'));
 
 
 
 function App() {
   return (
     <BrowserRouter>
+      <ToastProvider>
       <AuthProvider>
         <CartProvider>
+          <Suspense fallback={<PageLoader />}>
           <Routes>
             {/* ==================== ROUTES PUBLIQUES ==================== */}
             <Route path="/login" element={<Login />} />
@@ -305,8 +310,10 @@ function App() {
               }
             />
           </Routes>
+          </Suspense>
         </CartProvider>
       </AuthProvider>
+      </ToastProvider>
     </BrowserRouter>
   );
 }
