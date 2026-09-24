@@ -1,468 +1,307 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
-import { 
-  ShoppingCart, 
-  User, 
-  LogOut, 
-  Package, 
-  Shield, 
+import useCategories from '@/hooks/useCategories';
+import {
+  ShoppingCart,
+  User,
+  LogOut,
+  Package,
+  Shield,
   FolderTree,
   Menu,
   X,
-  Sparkles,
-  Zap
+  Search,
+  Truck,
+  ShieldCheck,
+  BadgeCheck,
+  Store,
 } from 'lucide-react';
 import NotificationBell from '@/components/NotificationBell';
+
+function CartLink({ count, onClick }) {
+  return (
+    <Link
+      to="/cart"
+      onClick={onClick}
+      aria-label={`Panier${count ? ` (${count} article${count > 1 ? 's' : ''})` : ''}`}
+      className="relative flex items-center gap-2 text-gray-900 hover:text-emerald-700 transition-colors"
+    >
+      <ShoppingCart className="w-6 h-6" />
+      <span className="hidden xl:inline text-sm font-semibold">Panier</span>
+      {count > 0 && (
+        <span className="absolute -top-2 left-4 bg-orange-500 text-white text-[11px] font-bold min-w-5 h-5 px-1 flex items-center justify-center">
+          {count}
+        </span>
+      )}
+    </Link>
+  );
+}
+
+function SearchForm({ className = '', onDone }) {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [value, setValue] = useState(searchParams.get('search') || '');
+
+  // Reste aligné sur l'URL (effacement des filtres, navigation…)
+  useEffect(() => {
+    setValue(searchParams.get('search') || '');
+  }, [searchParams]);
+
+  const submit = (e) => {
+    e.preventDefault();
+    const params = new URLSearchParams();
+    if (value.trim()) params.set('search', value.trim());
+    navigate(`/${params.toString() ? `?${params}` : ''}`);
+    onDone?.();
+  };
+
+  return (
+    <form onSubmit={submit} role="search" className={`flex ${className}`}>
+      <input
+        type="search"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        placeholder="Rechercher un produit, une marque…"
+        aria-label="Rechercher un produit"
+        className="flex-1 min-w-0 h-11 px-4 text-sm bg-white border-2 border-gray-900 border-r-0 focus:outline-none focus:border-emerald-600 placeholder:text-gray-400"
+      />
+      <button
+        type="submit"
+        aria-label="Lancer la recherche"
+        className="h-11 px-5 bg-gray-900 hover:bg-emerald-600 text-white flex items-center gap-2 text-sm font-semibold transition-colors"
+      >
+        <Search className="w-5 h-5" />
+        <span className="hidden lg:inline">Rechercher</span>
+      </button>
+    </form>
+  );
+}
 
 export default function Header() {
   const { user, logout } = useAuth();
   const { getItemCount } = useCart();
+  const categories = useCategories();
+  const { pathname } = useLocation();
+  const [searchParams] = useSearchParams();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const toggleMobileMenu = () => {
-    setMobileMenuOpen(!mobileMenuOpen);
-  };
+  const closeMobileMenu = () => setMobileMenuOpen(false);
+  const count = getItemCount();
+  const showCart = !user || user.user_type === 'client';
 
-  const closeMobileMenu = () => {
-    setMobileMenuOpen(false);
-  };
+  const onHome = pathname === '/';
+  const categorieActive = onHome ? searchParams.get('categorie') : null;
+  const promoActive = onHome && searchParams.get('en_promotion') === 'true';
+  const toutActif = onHome && !categorieActive && !promoActive;
+
+  const navCategorie = (actif) =>
+    `shrink-0 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+      actif ? 'border-emerald-600 text-emerald-700' : 'border-transparent text-gray-700 hover:text-gray-900 hover:border-gray-300'
+    }`;
+
+  const mobileLink = 'flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50 font-medium border-b border-gray-100';
 
   return (
-    <>
-      {/* Styles d'animation */}
-      <style>{`
-        @keyframes slideDown {
-          from {
-            opacity: 0;
-            transform: translateY(-20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-        
-        @keyframes float {
-          0%, 100% {
-            transform: translateY(0px);
-          }
-          50% {
-            transform: translateY(-10px);
-          }
-        }
-        
-        @keyframes twinkle {
-          0%, 100% {
-            opacity: 0.3;
-            transform: scale(1);
-          }
-          50% {
-            opacity: 1;
-            transform: scale(1.2);
-          }
-        }
-        
-        @keyframes glow {
-          0%, 100% {
-            filter: drop-shadow(0 0 2px rgba(16, 185, 129, 0.5));
-          }
-          50% {
-            filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.8));
-          }
-        }
-        
-        .animate-slideDown {
-          animation: slideDown 0.6s ease-out forwards;
-        }
-        
-        .animate-fadeIn {
-          animation: fadeIn 0.5s ease-out forwards;
-          opacity: 0;
-        }
-        
-        .animate-float {
-          animation: float 3s ease-in-out infinite;
-        }
-        
-        .animate-twinkle {
-          animation: twinkle 2s ease-in-out infinite;
-        }
-        
-        .animate-glow {
-          animation: glow 2s ease-in-out infinite;
-        }
-        
-        @media (prefers-reduced-motion: reduce) {
-          .animate-slideDown,
-          .animate-fadeIn,
-          .animate-float,
-          .animate-twinkle,
-          .animate-glow {
-            animation: none;
-            opacity: 1;
-            transform: none;
-            filter: none;
-          }
-        }
-      `}</style>
-
-      <header className="relative sticky top-0 z-50 shadow-lg animate-slideDown">
-        {/* Icônes décoratives animées */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden z-5">
-          <div className="absolute top-2 left-1/4 animate-float animate-twinkle" style={{ animationDelay: '0s' }}>
-            <Sparkles className="w-4 h-4 text-emerald-400/60" />
-          </div>
-          <div className="absolute top-3 right-1/3 animate-float animate-twinkle" style={{ animationDelay: '0.5s' }}>
-            <Zap className="w-3 h-3 text-orange-500/50" />
-          </div>
-          <div className="absolute top-2 right-1/4 animate-float animate-twinkle" style={{ animationDelay: '1s' }}>
-            <Sparkles className="w-4 h-4 text-emerald-300/60" />
-          </div>
-          <div className="absolute top-4 left-1/3 animate-float animate-twinkle" style={{ animationDelay: '1.5s' }}>
-            <Zap className="w-3 h-3 text-orange-400/50" />
-          </div>
-        </div>
-
-        {/* 🎨 BACKGROUND ANIMÉ */}
-        <div 
-          className="absolute inset-0 z-0"
-          style={{
-            backgroundImage: 'url(/backgrounds/header_wave_animated.svg)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
-        />
-        
-        {/* Overlay léger pour améliorer la lisibilité */}
-        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-0"></div>
-
-        {/* Contenu du header */}
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo texte avec effet hover */}
-          {/* Logo texte avec effet hover */}
-{/* Logo texte avec effet hover */}
-{/* Logo texte discret et raffiné */}
-<Link 
-  to="/" 
-  className="flex items-center space-x-0.5 hover:opacity-80 transition-opacity"
-  onClick={closeMobileMenu}
->
-  <span className="text-xl sm:text-2xl font-medium text-gray-800 tracking-tight">
-    FanJava
-  </span>
-  <span className="text-sm sm:text-base font-normal text-gray-500">
-    .mg
-  </span>
-</Link>
-
-            {/* Navigation Desktop */}
-            <nav className="hidden lg:flex items-center space-x-6">
-              <Link 
-                to="/" 
-                className="text-gray-700 hover:text-emerald-600 transition-all hover:scale-105 font-medium animate-fadeIn"
-                style={{ animationDelay: '0.2s' }}
-              >
-                Produits
-              </Link>
-
-              {user ? (
-                <>
-                  {/* ADMIN */}
-                  {user.user_type === 'admin' && (
-                    <>
-                      <Link 
-                        to="/admin/categories" 
-                        className="text-gray-700 hover:text-emerald-600 flex items-center transition-all hover:scale-105 animate-fadeIn"
-                        style={{ animationDelay: '0.3s' }}
-                      >
-                        <FolderTree className="w-4 h-4 mr-1" />
-                        <span className="hidden xl:inline">Catégories</span>
-                      </Link>
-                      <Link 
-                        to="/admin/dashboard" 
-                        className="text-gray-700 hover:text-emerald-600 flex items-center transition-all hover:scale-105 animate-fadeIn"
-                        style={{ animationDelay: '0.4s' }}
-                      >
-                        <Shield className="w-4 h-4 mr-1" />
-                        <span className="hidden xl:inline">Admin</span>
-                      </Link>
-                    </>
-                  )}
-
-                  {/* ENTREPRISE */}
-                  {user.user_type === 'entreprise' && (
-                    <Link 
-                      to="/dashboard/entreprise" 
-                      className="text-gray-700 hover:text-emerald-600 flex items-center transition-all hover:scale-105 animate-fadeIn"
-                      style={{ animationDelay: '0.3s' }}
-                    >
-                      <Package className="w-4 h-4 mr-1" />
-                      <span className="hidden xl:inline">Dashboard</span>
-                    </Link>
-                  )}
-
-                  {/* CLIENT */}
-                  {user.user_type === 'client' && (
-                    <>
-                      <Link 
-                        to="/cart" 
-                        className="text-gray-700 hover:text-emerald-600 relative transition-all hover:scale-105 animate-fadeIn"
-                        style={{ animationDelay: '0.3s' }}
-                      >
-                        <ShoppingCart className="w-5 h-5" />
-                        {getItemCount() > 0 && (
-                          <span className="absolute -top-2 -right-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold shadow-lg animate-pulse">
-                            {getItemCount()}
-                          </span>
-                        )}
-                      </Link>
-
-                      <Link 
-                        to="/dashboard/client" 
-                        className="text-gray-700 hover:text-emerald-600 flex items-center transition-all hover:scale-105 animate-fadeIn"
-                        style={{ animationDelay: '0.4s' }}
-                      >
-                        <User className="w-4 h-4 mr-1" />
-                        <span className="hidden xl:inline">Mon compte</span>
-                      </Link>
-                    </>
-                  )}
-
-                  {/* Cloche notifications */}
-                  <div className="animate-fadeIn" style={{ animationDelay: '0.5s' }}>
-                    <NotificationBell />
-                  </div>
-
-                  {/* Déconnexion */}
-                  <button
-                    onClick={logout}
-                    className="text-gray-700 hover:text-red-600 flex items-center transition-all hover:scale-105 animate-fadeIn"
-                    style={{ animationDelay: '0.6s' }}
-                  >
-                    <LogOut className="w-4 h-4 mr-1" />
-                    <span className="hidden xl:inline">Déconnexion</span>
-                  </button>
-                </>
-              ) : (
-                <>
-                  {/* Non connecté */}
-                  <Link 
-                    to="/cart" 
-                    className="text-gray-700 hover:text-emerald-600 relative transition-all hover:scale-105 animate-fadeIn"
-                    style={{ animationDelay: '0.3s' }}
-                  >
-                    <ShoppingCart className="w-5 h-5" />
-                    {getItemCount() > 0 && (
-                      <span className="absolute -top-2 -right-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold shadow-lg animate-pulse">
-                        {getItemCount()}
-                      </span>
-                    )}
-                  </Link>
-
-                  <Link 
-                    to="/login" 
-                    className="text-gray-700 hover:text-emerald-600 transition-all hover:scale-105 font-medium animate-fadeIn"
-                    style={{ animationDelay: '0.4s' }}
-                  >
-                    Connexion
-                  </Link>
-                  
-                  <Link 
-                    to="/register/client" 
-                    className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-5 py-2 rounded-lg hover:from-emerald-600 hover:to-emerald-700 transition-all hover:scale-105 hover:shadow-lg shadow-md font-medium animate-fadeIn"
-                    style={{ animationDelay: '0.5s' }}
-                  >
-                    S'inscrire
-                  </Link>
-                </>
-              )}
-            </nav>
-
-            {/* Icônes mobile */}
-            <div className="flex lg:hidden items-center space-x-3 sm:space-x-4">
-              {/* Panier */}
-              {(user?.user_type === 'client' || !user) && (
-                <Link 
-                  to="/cart" 
-                  className="text-gray-700 hover:text-emerald-600 relative transition-all hover:scale-105 animate-fadeIn"
-                  onClick={closeMobileMenu}
-                  style={{ animationDelay: '0.2s' }}
-                >
-                  <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6" />
-                  {getItemCount() > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold shadow-lg">
-                      {getItemCount()}
-                    </span>
-                  )}
-                </Link>
-              )}
-
-              {/* Notifications */}
-              {user && (
-                <div className="animate-fadeIn" style={{ animationDelay: '0.3s' }}>
-                  <NotificationBell />
-                </div>
-              )}
-
-              {/* Menu hamburger */}
-              <button
-                onClick={toggleMobileMenu}
-                className="text-gray-700 hover:text-emerald-600 p-2 -mr-2 hover:scale-105 transition-all animate-fadeIn"
-                aria-label="Menu"
-                style={{ animationDelay: '0.4s' }}
-              >
-                {mobileMenuOpen ? (
-                  <X className="w-6 h-6" />
-                ) : (
-                  <Menu className="w-6 h-6" />
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Menu Mobile */}
-        <div 
-          className={`lg:hidden bg-white/95 backdrop-blur-md border-t border-gray-200 shadow-xl transition-all duration-300 ease-in-out ${
-            mobileMenuOpen 
-              ? 'max-h-screen opacity-100' 
-              : 'max-h-0 opacity-0 overflow-hidden'
-          }`}
-        >
-          <nav className="px-4 py-4 space-y-2">
-            <Link 
-              to="/" 
-              className="block text-gray-700 hover:text-emerald-600 hover:bg-emerald-50 px-3 py-2.5 rounded-lg transition font-medium"
-              onClick={closeMobileMenu}
-            >
-              Produits
+    <header className="relative lg:sticky top-0 z-50 bg-white">
+      {/* Bandeau d'arguments */}
+      <div className="bg-gray-950 text-gray-200 text-xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-9 flex items-center justify-center sm:justify-between gap-6">
+          <p className="flex items-center gap-2">
+            <Truck className="w-3.5 h-3.5 text-emerald-400" />
+            Livraison partout à Madagascar
+          </p>
+          <p className="hidden sm:flex items-center gap-2">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+            Paiement sécurisé
+          </p>
+          <p className="hidden md:flex items-center gap-2">
+            <BadgeCheck className="w-3.5 h-3.5 text-emerald-400" />
+            Vendeurs vérifiés
+          </p>
+          {!user && (
+            <Link to="/register/entreprise" className="hidden lg:flex items-center gap-2 text-orange-300 hover:text-orange-200 font-semibold">
+              <Store className="w-3.5 h-3.5" />
+              Vendre sur FanJava
             </Link>
+          )}
+        </div>
+      </div>
 
+      {/* Barre principale */}
+      <div className="border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 lg:h-20 flex items-center gap-4 lg:gap-8">
+          <Link to="/" onClick={closeMobileMenu} className="shrink-0 flex items-baseline font-display" aria-label="FanJava.mg, accueil">
+            <span className="text-2xl lg:text-3xl font-extrabold tracking-tight text-gray-950">FANJAVA</span>
+            <span className="text-base lg:text-lg font-bold text-emerald-600">.mg</span>
+          </Link>
+
+          <SearchForm className="hidden md:flex flex-1 max-w-2xl" />
+
+          {/* Actions desktop */}
+          <nav className="hidden lg:flex items-center gap-6 ml-auto" aria-label="Compte">
             {user ? (
               <>
-                {/* Menu ADMIN */}
                 {user.user_type === 'admin' && (
                   <>
-                    <Link 
-                      to="/admin/dashboard" 
-                      className="flex items-center text-gray-700 hover:text-emerald-600 hover:bg-emerald-50 px-3 py-2.5 rounded-lg transition"
-                      onClick={closeMobileMenu}
-                    >
-                      <Shield className="w-5 h-5 mr-3 flex-shrink-0" />
-                      <span>Dashboard Admin</span>
+                    <Link to="/admin/categories" className="flex items-center gap-1.5 text-sm font-medium text-gray-700 hover:text-emerald-700">
+                      <FolderTree className="w-4 h-4" />
+                      <span className="hidden xl:inline">Catégories</span>
                     </Link>
-                    <Link 
-                      to="/admin/users" 
-                      className="flex items-center text-gray-700 hover:text-emerald-600 hover:bg-emerald-50 px-3 py-2.5 rounded-lg transition"
-                      onClick={closeMobileMenu}
-                    >
-                      <User className="w-5 h-5 mr-3 flex-shrink-0" />
-                      <span>Gestion Utilisateurs</span>
-                    </Link>
-                    <Link 
-                      to="/admin/categories" 
-                      className="flex items-center text-gray-700 hover:text-emerald-600 hover:bg-emerald-50 px-3 py-2.5 rounded-lg transition"
-                      onClick={closeMobileMenu}
-                    >
-                      <FolderTree className="w-5 h-5 mr-3 flex-shrink-0" />
-                      <span>Catégories</span>
+                    <Link to="/admin/dashboard" className="flex items-center gap-1.5 text-sm font-medium text-gray-700 hover:text-emerald-700">
+                      <Shield className="w-4 h-4" />
+                      <span className="hidden xl:inline">Admin</span>
                     </Link>
                   </>
                 )}
-
-                {/* Menu ENTREPRISE */}
                 {user.user_type === 'entreprise' && (
-                  <Link 
-                    to="/dashboard/entreprise" 
-                    className="flex items-center text-gray-700 hover:text-emerald-600 hover:bg-emerald-50 px-3 py-2.5 rounded-lg transition"
-                    onClick={closeMobileMenu}
-                  >
-                    <Package className="w-5 h-5 mr-3 flex-shrink-0" />
-                    <span>Dashboard</span>
+                  <Link to="/dashboard/entreprise" className="flex items-center gap-1.5 text-sm font-medium text-gray-700 hover:text-emerald-700">
+                    <Package className="w-4 h-4" />
+                    <span className="hidden xl:inline">Ma boutique</span>
                   </Link>
                 )}
-
-                {/* Menu CLIENT */}
                 {user.user_type === 'client' && (
-                  <Link 
-                    to="/dashboard/client" 
-                    className="flex items-center text-gray-700 hover:text-emerald-600 hover:bg-emerald-50 px-3 py-2.5 rounded-lg transition"
-                    onClick={closeMobileMenu}
-                  >
-                    <User className="w-5 h-5 mr-3 flex-shrink-0" />
-                    <span>Mon Compte</span>
+                  <Link to="/dashboard/client" className="flex items-center gap-2 text-gray-900 hover:text-emerald-700">
+                    <User className="w-6 h-6" />
+                    <span className="hidden xl:flex flex-col leading-tight">
+                      <span className="text-[11px] text-gray-500">Bonjour {user.username}</span>
+                      <span className="text-sm font-semibold">Mon compte</span>
+                    </span>
                   </Link>
                 )}
-
-                {/* Séparateur */}
-                <div className="border-t border-gray-200 my-3"></div>
-
-                {/* Info utilisateur */}
-                <div className="px-3 py-3 bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-lg border border-emerald-200">
-                  <p className="text-xs text-gray-600 mb-1">Connecté en tant que</p>
-                  <p className="text-sm font-semibold text-emerald-700">
-                    {user.username}
-                  </p>
-                  <p className="text-xs text-emerald-600 capitalize mt-0.5">
-                    {user.user_type === 'admin' && '🛡️ Administrateur'}
-                    {user.user_type === 'entreprise' && '🏢 Entreprise'}
-                    {user.user_type === 'client' && '👤 Client'}
-                  </p>
-                </div>
-
-                {/* Déconnexion */}
+                <NotificationBell />
+                {showCart && <CartLink count={count} />}
                 <button
-                  onClick={() => {
-                    logout();
-                    closeMobileMenu();
-                  }}
-                  className="w-full flex items-center text-red-600 hover:bg-red-50 px-3 py-2.5 rounded-lg transition font-medium"
+                  type="button"
+                  onClick={logout}
+                  className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-red-600"
+                  aria-label="Déconnexion"
                 >
-                  <LogOut className="w-5 h-5 mr-3 flex-shrink-0" />
-                  <span>Déconnexion</span>
+                  <LogOut className="w-4 h-4" />
                 </button>
               </>
             ) : (
               <>
-                {/* Menu non connecté */}
-                <Link 
-                  to="/login" 
-                  className="block text-gray-700 hover:text-emerald-600 hover:bg-emerald-50 px-3 py-2.5 rounded-lg transition font-medium"
-                  onClick={closeMobileMenu}
-                >
-                  Connexion
+                <Link to="/login" className="flex items-center gap-2 text-gray-900 hover:text-emerald-700">
+                  <User className="w-6 h-6" />
+                  <span className="flex flex-col leading-tight">
+                    <span className="text-[11px] text-gray-500">Bienvenue</span>
+                    <span className="text-sm font-semibold">Se connecter</span>
+                  </span>
                 </Link>
-                <Link 
-                  to="/register/client" 
-                  className="block bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-center px-3 py-2.5 rounded-lg hover:from-emerald-600 hover:to-emerald-700 transition font-semibold shadow-md"
-                  onClick={closeMobileMenu}
+                <CartLink count={count} />
+                <Link
+                  to="/register/client"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-5 h-11 flex items-center transition-colors"
                 >
-                  Créer un compte client
-                </Link>
-                <Link 
-                  to="/register/entreprise" 
-                  className="block bg-gradient-to-r from-orange-500 to-orange-600 text-white text-center px-3 py-2.5 rounded-lg hover:from-orange-600 hover:to-orange-700 transition font-semibold shadow-md"
-                  onClick={closeMobileMenu}
-                >
-                  Devenir vendeur
+                  Créer un compte
                 </Link>
               </>
             )}
           </nav>
+
+          {/* Actions mobile */}
+          <div className="flex lg:hidden items-center gap-4 ml-auto">
+            {user && <NotificationBell />}
+            {showCart && <CartLink count={count} onClick={closeMobileMenu} />}
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen((open) => !open)}
+              className="p-2 -mr-2 text-gray-900"
+              aria-label={mobileMenuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
+              aria-expanded={mobileMenuOpen}
+            >
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
-      </header>
-    </>
+
+        {/* Recherche mobile */}
+        <div className="md:hidden px-4 pb-3">
+          <SearchForm onDone={closeMobileMenu} />
+        </div>
+      </div>
+
+      {/* Barre de catégories */}
+      <nav className="border-b border-gray-200 bg-white" aria-label="Catégories">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 flex overflow-x-auto no-scrollbar">
+          <Link to="/" className={navCategorie(toutActif)}>
+            Tous les produits
+          </Link>
+          <Link to="/?en_promotion=true" className={`${navCategorie(promoActive)} ${promoActive ? '' : 'text-orange-600'}`}>
+            Promotions
+          </Link>
+          {categories
+            .filter((cat) => !cat.parent)
+            .map((cat) => (
+              <Link key={cat.id} to={`/?categorie=${cat.id}`} className={navCategorie(categorieActive === String(cat.id))}>
+                {cat.nom}
+              </Link>
+            ))}
+        </div>
+      </nav>
+
+      {/* Menu mobile */}
+      {mobileMenuOpen && (
+        <div className="lg:hidden absolute inset-x-0 top-full bg-white border-b border-gray-200 shadow-xl max-h-[70vh] overflow-y-auto">
+          <nav aria-label="Menu mobile">
+            {user ? (
+              <>
+                <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
+                  <p className="text-xs text-gray-500">Connecté en tant que</p>
+                  <p className="text-sm font-semibold text-gray-900">{user.username}</p>
+                </div>
+                {user.user_type === 'admin' && (
+                  <>
+                    <Link to="/admin/dashboard" className={mobileLink} onClick={closeMobileMenu}>
+                      <Shield className="w-5 h-5" /> Tableau de bord admin
+                    </Link>
+                    <Link to="/admin/users" className={mobileLink} onClick={closeMobileMenu}>
+                      <User className="w-5 h-5" /> Utilisateurs
+                    </Link>
+                    <Link to="/admin/categories" className={mobileLink} onClick={closeMobileMenu}>
+                      <FolderTree className="w-5 h-5" /> Catégories
+                    </Link>
+                  </>
+                )}
+                {user.user_type === 'entreprise' && (
+                  <Link to="/dashboard/entreprise" className={mobileLink} onClick={closeMobileMenu}>
+                    <Package className="w-5 h-5" /> Ma boutique
+                  </Link>
+                )}
+                {user.user_type === 'client' && (
+                  <Link to="/dashboard/client" className={mobileLink} onClick={closeMobileMenu}>
+                    <User className="w-5 h-5" /> Mon compte
+                  </Link>
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    logout();
+                    closeMobileMenu();
+                  }}
+                  className={`${mobileLink} w-full text-red-600`}
+                >
+                  <LogOut className="w-5 h-5" /> Déconnexion
+                </button>
+              </>
+            ) : (
+              <div className="p-4 grid gap-2">
+                <Link to="/login" onClick={closeMobileMenu} className="h-12 flex items-center justify-center border-2 border-gray-900 font-semibold text-gray-900">
+                  Se connecter
+                </Link>
+                <Link to="/register/client" onClick={closeMobileMenu} className="h-12 flex items-center justify-center bg-emerald-600 text-white font-semibold">
+                  Créer un compte client
+                </Link>
+                <Link to="/register/entreprise" onClick={closeMobileMenu} className="h-12 flex items-center justify-center bg-orange-500 text-white font-semibold">
+                  Devenir vendeur
+                </Link>
+              </div>
+            )}
+          </nav>
+        </div>
+      )}
+    </header>
   );
 }

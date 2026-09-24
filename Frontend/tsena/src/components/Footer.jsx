@@ -17,20 +17,7 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="relative mt-auto overflow-hidden">
-      {/* 🎨 BACKGROUND ANIMÉ TECH */}
-      <div 
-        className="absolute inset-0 z-0"
-        style={{
-          backgroundImage: 'url(/backgrounds/footer_tech_animated.svg)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
-      />
-      
-      {/* Overlay pour meilleure lisibilité - Tons chauds */}
-      <div className="absolute inset-0 bg-gradient-to-b from-gray-900/95 via-emerald-950/20 to-gray-950/98 backdrop-blur-sm z-0"></div>
-
+    <footer className="relative mt-auto overflow-hidden bg-gray-950 border-t-4 border-emerald-600">
       {/* Contenu du footer */}
       <div className="relative z-10">
         {/* Section principale */}

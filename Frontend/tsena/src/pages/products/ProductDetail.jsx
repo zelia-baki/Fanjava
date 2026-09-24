@@ -8,6 +8,7 @@ import ReviewSection from '@/components/reviews/ReviewSection';
 import BlobImage from '@/components/ui/BlobImage';
 import { imageService } from '@/services/imageService';
 import { SITE_URL, useSeo } from '@/utils/seo';
+import { formatPrix } from '@/utils/format';
 import {
   ShoppingCart,
   Star,
@@ -181,19 +182,19 @@ export default function ProductDetail() {
               {/* Badges minimalistes */}
               <div className="flex gap-2 mb-4">
                 {enPromo && (
-                  <span className="bg-red-500 text-white text-xs font-semibold px-3 py-1 rounded-full">
+                  <span className="bg-orange-500 text-white text-xs font-bold px-3 py-1">
                     -{Math.round(((prixOriginal - prix) / prixOriginal) * 100)}%
                   </span>
                 )}
                 {product.en_vedette && (
-                  <span className="bg-yellow-400 text-gray-900 text-xs font-semibold px-3 py-1 rounded-full">
-                    ⭐ Vedette
+                  <span className="bg-gray-950 text-white text-xs font-semibold uppercase tracking-wider px-3 py-1">
+                    Coup de cœur
                   </span>
                 )}
               </div>
 
               {/* Titre */}
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">{product.nom}</h1>
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-3">{product.nom}</h1>
 
               {/* Vendeur */}
               <p className="text-sm text-gray-600 mb-4">
@@ -201,7 +202,7 @@ export default function ProductDetail() {
               </p>
 
               {/* Note */}
-              {product.note_moyenne && parseFloat(product.note_moyenne) > 0 && (
+              {parseFloat(product.note_moyenne) > 0 && (
                 <div className="flex items-center gap-2 mb-6">
                   <div className="flex">
                     {[...Array(5)].map((_, i) => (
@@ -224,10 +225,10 @@ export default function ProductDetail() {
               {/* Prix - Grand et visible */}
               <div className="mb-6 pb-6 border-b border-gray-200">
                 <div className="flex items-baseline gap-3">
-                  <p className="text-3xl sm:text-4xl font-bold text-gray-900">{prix.toLocaleString('fr-FR')} Ar</p>
+                  <p className={`font-display text-3xl sm:text-4xl font-extrabold ${enPromo ? 'text-orange-600' : 'text-gray-950'}`}>{formatPrix(prix)}</p>
                   {enPromo && (
                     <p className="text-xl text-gray-400 line-through">
-                      {prixOriginal.toLocaleString('fr-FR')} Ar
+                      {formatPrix(prixOriginal)}
                     </p>
                   )}
                 </div>
@@ -285,7 +286,7 @@ export default function ProductDetail() {
               <button
                 onClick={handleAddToCart}
                 disabled={adding || product.stock === 0}
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-xl disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-lg font-semibold shadow-lg hover:shadow-xl transition-all active:scale-[0.98] mb-4"
+                className="w-full bg-orange-500 hover:bg-gray-950 text-white h-14 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-base font-semibold transition-colors active:scale-[0.99] mb-4"
               >
                 {adding ? (
                   <>
@@ -297,7 +298,7 @@ export default function ProductDetail() {
                 ) : (
                   <>
                     <ShoppingCart className="w-5 h-5" />
-                    Ajouter au panier · {(prix * quantity).toLocaleString('fr-FR')} Ar
+                    Ajouter au panier · {formatPrix(prix * quantity)}
                   </>
                 )}
               </button>
@@ -421,7 +422,7 @@ function productSeo(product) {
   };
 
   return {
-    title: `${product.nom} – ${prix.toLocaleString('fr-FR')} Ar`,
+    title: `${product.nom} – ${formatPrix(prix)}`,
     description,
     path,
     image: images[0],
