@@ -102,8 +102,14 @@ export const orderService = {
   /**
    * Récupérer toutes les commandes de l'utilisateur
    */
-  async getOrders() {
-    const response = await api.get('/orders/commandes/');
+  async getOrders(params = {}) {
+    const response = await api.get('/orders/commandes/', { params });
+    return response.data;
+  },
+
+  /** Annuler une commande (client, tant qu'elle n'est pas en préparation) */
+  async cancelOrder(id) {
+    const response = await api.post(`/orders/commandes/${id}/cancel/`);
     return response.data;
   },
 

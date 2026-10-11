@@ -1,285 +1,270 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import MainLayout from '@/layouts/MainLayout';
+import PageLoader from '@/components/ui/PageLoader';
+import BlobImage from '@/components/ui/BlobImage';
+import { FormAlert } from '@/components/ui/Form';
+import { DashboardHeader, StatCard, ActionTile, Panel } from '@/components/dashboard/DashboardUI';
+import { OrderStatusBadge, OrderProgress, STATUTS_EN_COURS, formatDateCommande } from '@/components/orders/OrderStatus';
 import { orderService } from '@/services/orderService';
 import { useAuth } from '@/context/AuthContext';
-import { 
-  Package, 
-  ShoppingBag, 
-  TrendingUp, 
-  Clock,
-  Loader2,
+import { useCart } from '@/context/CartContext';
+import { formatPrix } from '@/utils/format';
+import {
+  ArrowRight,
   ChevronRight,
+  Clock,
+  Mail,
+  MapPin,
+  Package,
+  PackageCheck,
+  ShoppingBag,
+  ShoppingCart,
+  Star,
   User,
-  Mail
+  Wallet,
 } from 'lucide-react';
+
+const NON_DEPENSE = ['cancelled', 'refunded'];
 
 export default function ClientDashboard() {
   const { user } = useAuth();
+  const { getItemCount } = useCart();
   const [orders, setOrders] = useState([]);
-  const [stats, setStats] = useState({
-    total: 0,
-    pending: 0,
-    delivered: 0,
-    totalSpent: 0
-  });
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchData();
-  }, []);
+  const [error, setError] = useState(null);
 
   const fetchData = async () => {
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
       const data = await orderService.getOrders();
-      const ordersList = data.results || data;
-      setOrders(ordersList.slice(0, 5));
-
-      const stats = {
-        total: ordersList.length,
-        pending: ordersList.filter(o => o.status === 'pending' || o.status === 'confirmed' || o.status === 'processing').length,
-        delivered: ordersList.filter(o => o.status === 'delivered').length,
-        totalSpent: ordersList.reduce((sum, o) => sum + parseFloat(o.montant_final), 0)
-      };
-      setStats(stats);
-    } catch (err) {
-      console.error('Erreur chargement données:', err);
+      const liste = data.results || data;
+      setOrders(liste);
+      setTotal(data.count ?? liste.length);
+    } catch {
+      setError('Impossible de charger vos commandes.');
     } finally {
       setLoading(false);
     }
   };
 
-  const getStatusBadge = (status) => {
-    const styles = {
-      pending: 'bg-yellow-100 text-yellow-700',
-      confirmed: 'bg-emerald-100 text-emerald-700',
-      processing: 'bg-blue-100 text-blue-700',
-      shipped: 'bg-indigo-100 text-indigo-700',
-      delivered: 'bg-green-100 text-green-700',
-      cancelled: 'bg-red-100 text-red-700',
-    };
-    return styles[status] || 'bg-gray-100 text-gray-700';
-  };
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   if (loading) {
     return (
       <MainLayout>
-        <div className="min-h-screen bg-white flex justify-center items-center">
-          <div className="flex items-center gap-3">
-            <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
-            <span className="text-gray-600">Chargement...</span>
-          </div>
-        </div>
+        <PageLoader />
       </MainLayout>
     );
   }
 
+  const enCours = orders.filter((o) => STATUTS_EN_COURS.includes(o.status));
+  const livrees = orders.filter((o) => o.status === 'delivered').length;
+  const depense = orders
+    .filter((o) => !NON_DEPENSE.includes(o.status))
+    .reduce((sum, o) => sum + parseFloat(o.montant_final || 0), 0);
+  const aSuivre = enCours[0]; // la plus récente (l'API trie du plus récent au plus ancien)
+  const recentes = orders.slice(0, 5);
+  const nbPanier = getItemCount();
+  const adresseIncomplete = !user?.client?.adresse_livraison || !user?.phone;
+  const nom = [user?.first_name, user?.last_name].filter(Boolean).join(' ') || user?.username;
+
   return (
     <MainLayout>
-      <div className="min-h-screen bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* En-tête */}
-          <div className="mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-              Bienvenue, {user?.first_name || user?.username}
-            </h1>
-            <p className="text-gray-600 mt-2 text-sm sm:text-base">Voici un aperçu de votre compte</p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+        <DashboardHeader
+          kicker="Mon compte"
+          title={`Bonjour ${user?.first_name || user?.username || ''}`}
+          subtitle="Vos commandes, votre panier et votre profil au même endroit."
+          action={
+            nbPanier > 0 && (
+              <Link
+                to="/cart"
+                className="inline-flex items-center justify-center gap-2 h-12 px-5 bg-orange-500 hover:bg-orange-400 text-gray-950 font-semibold transition-colors"
+              >
+                <ShoppingCart className="w-5 h-5" aria-hidden="true" />
+                Finaliser mon panier ({nbPanier})
+              </Link>
+            )
+          }
+        />
+
+        {error && (
+          <div className="mb-6">
+            <FormAlert title={error}>
+              <button type="button" onClick={fetchData} className="font-semibold underline underline-offset-2 cursor-pointer">
+                Réessayer
+              </button>
+            </FormAlert>
           </div>
+        )}
 
-          {/* Statistiques */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
-            {/* Total commandes */}
-            <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs sm:text-sm text-gray-600 mb-1">Total</p>
-                  <p className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.total}</p>
-                </div>
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600" />
-                </div>
+        {/* Commande à suivre */}
+        {aSuivre && (
+          <section className="mb-6 bg-gray-950 text-white p-5 sm:p-6" aria-labelledby="suivi-title">
+            <div className="flex flex-wrap items-start justify-between gap-3 mb-5">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">Commande en cours</p>
+                <h2 id="suivi-title" className="mt-1 font-display text-xl sm:text-2xl font-extrabold">
+                  {aSuivre.numero_commande}
+                </h2>
+                <p className="text-sm text-gray-400">
+                  {formatDateCommande(aSuivre.created_at)}
+                  {aSuivre.entreprise_nom && <> · {aSuivre.entreprise_nom}</>} · {formatPrix(aSuivre.montant_final)}
+                </p>
               </div>
+              <Link
+                to={`/profile/orders/${aSuivre.id}`}
+                className="inline-flex items-center gap-2 h-11 px-4 bg-white text-gray-950 text-sm font-semibold hover:bg-emerald-400 transition-colors"
+              >
+                Suivre
+                <ArrowRight className="w-4 h-4" aria-hidden="true" />
+              </Link>
             </div>
+            <OrderProgress status={aSuivre.status} dark />
+            {enCours.length > 1 && (
+              <p className="mt-4 text-sm text-gray-400">
+                + {enCours.length - 1} autre{enCours.length > 2 ? 's' : ''} commande{enCours.length > 2 ? 's' : ''} en cours ·{' '}
+                <Link to="/profile/orders" className="text-white underline underline-offset-2">
+                  tout voir
+                </Link>
+              </p>
+            )}
+          </section>
+        )}
 
-            {/* En cours */}
-            <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs sm:text-sm text-gray-600 mb-1">En cours</p>
-                  <p className="text-2xl sm:text-3xl font-bold text-orange-600">{stats.pending}</p>
-                </div>
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
-                </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <StatCard label="Commandes" value={total} icon={ShoppingBag} />
+          <StatCard label="En cours" value={enCours.length} icon={Clock} tone={enCours.length > 0 ? 'orange' : 'neutral'} />
+          <StatCard label="Livrées" value={livrees} icon={PackageCheck} tone="emerald" />
+          <StatCard label="Total dépensé" value={formatPrix(depense)} icon={Wallet} />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Panel
+            title="Commandes récentes"
+            className="lg:col-span-2"
+            action={
+              orders.length > 0 && (
+                <Link to="/profile/orders" className="inline-flex items-center gap-1 min-h-11 text-sm font-semibold text-gray-950 hover:underline underline-offset-4">
+                  Tout voir
+                  <ChevronRight className="w-4 h-4" aria-hidden="true" />
+                </Link>
+              )
+            }
+          >
+            {recentes.length === 0 ? (
+              <div className="py-10 text-center">
+                <Package className="mx-auto w-10 h-10 text-gray-300" aria-hidden="true" />
+                <p className="mt-3 font-semibold text-gray-950">Aucune commande pour l'instant</p>
+                <p className="text-sm text-gray-600">Vos achats et leur suivi apparaîtront ici.</p>
+                <Link
+                  to="/"
+                  className="mt-6 inline-flex items-center justify-center h-11 px-5 bg-gray-950 hover:bg-emerald-700 text-white text-sm font-semibold transition-colors"
+                >
+                  Découvrir les produits
+                </Link>
               </div>
-            </div>
-
-            {/* Livrées */}
-            <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs sm:text-sm text-gray-600 mb-1">Livrées</p>
-                  <p className="text-2xl sm:text-3xl font-bold text-green-600">{stats.delivered}</p>
-                </div>
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Package className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
-                </div>
-              </div>
-            </div>
-
-            {/* Total dépensé */}
-            <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 col-span-2 lg:col-span-1">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs sm:text-sm text-gray-600 mb-1">Dépensé</p>
-                  <p className="text-xl sm:text-2xl font-bold text-gray-900">
-                    {stats.totalSpent.toLocaleString()} Ar
-                  </p>
-                </div>
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Grille 2 colonnes */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Commandes récentes */}
-            <div className="lg:col-span-2">
-              <div className="bg-white rounded-lg border border-gray-200">
-                <div className="px-4 sm:px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-                  <h2 className="text-lg sm:text-xl font-bold text-gray-900">Commandes récentes</h2>
-                  <Link 
-                    to="/profile/orders"
-                    className="text-emerald-600 hover:text-emerald-700 text-sm font-medium flex items-center"
-                  >
-                    <span className="hidden sm:inline">Voir tout</span>
-                    <ChevronRight className="w-4 h-4 sm:ml-1" />
-                  </Link>
-                </div>
-
-                <div className="divide-y divide-gray-200">
-                  {orders.length === 0 ? (
-                    <div className="px-6 py-12 text-center">
-                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Package className="h-8 w-8 text-gray-400" />
-                      </div>
-                      <p className="text-gray-600 mb-4">Aucune commande</p>
+            ) : (
+              <ul className="-my-3 divide-y divide-gray-100">
+                {recentes.map((order) => {
+                  const premiere = order.lignes?.[0];
+                  const nbLignes = order.lignes?.length || 0;
+                  return (
+                    <li key={order.id}>
                       <Link
-                        to="/"
-                        className="inline-block text-emerald-600 hover:text-emerald-700 font-medium"
+                        to={`/profile/orders/${order.id}`}
+                        className="group flex items-center gap-3 sm:gap-4 py-3 -mx-2 px-2 hover:bg-gray-50 transition-colors"
                       >
-                        Commencer vos achats →
-                      </Link>
-                    </div>
-                  ) : (
-                    orders.map((order) => (
-                      <div key={order.id} className="px-4 sm:px-6 py-4 hover:bg-gray-50 transition-colors">
-                        <div className="flex items-start sm:items-center justify-between gap-3 mb-3">
-                          <div className="flex items-start sm:items-center gap-3 flex-1 min-w-0">
-                            <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                              <Package className="w-5 h-5 text-emerald-600" />
+                        <div className="w-12 h-12 shrink-0 bg-gray-100 overflow-hidden">
+                          {premiere?.image_principale_id ? (
+                            <BlobImage imageId={premiere.image_principale_id} alt="" lazy className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Package className="w-5 h-5 text-gray-300" aria-hidden="true" />
                             </div>
-                            <div className="min-w-0 flex-1">
-                              <p className="font-semibold text-gray-900 text-sm sm:text-base truncate">
-                                #{order.numero_commande}
-                              </p>
-                              <p className="text-xs sm:text-sm text-gray-600">
-                                {new Date(order.created_at).toLocaleDateString('fr-FR')}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="text-right flex-shrink-0">
-                            <p className="font-bold text-gray-900 text-sm sm:text-base">
-                              {parseFloat(order.montant_final).toLocaleString()} Ar
-                            </p>
-                            <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium mt-1 ${getStatusBadge(order.status)}`}>
-                              {order.status === 'pending' && 'En attente'}
-                              {order.status === 'confirmed' && 'Confirmée'}
-                              {order.status === 'processing' && 'En préparation'}
-                              {order.status === 'shipped' && 'Expédiée'}
-                              {order.status === 'delivered' && 'Livrée'}
-                              {order.status === 'cancelled' && 'Annulée'}
-                            </span>
-                          </div>
+                          )}
                         </div>
-                        <Link
-                          to={`/profile/orders/${order.id}`}
-                          className="text-emerald-600 hover:text-emerald-700 text-sm font-medium flex items-center"
-                        >
-                          Voir les détails
-                          <ChevronRight className="w-4 h-4 ml-1" />
-                        </Link>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-gray-950 truncate">
+                            {premiere?.nom_produit || order.numero_commande}
+                            {nbLignes > 1 && <span className="font-normal text-gray-600"> + {nbLignes - 1}</span>}
+                          </p>
+                          <p className="text-xs text-gray-600">
+                            {order.numero_commande} · {formatDateCommande(order.created_at)}
+                          </p>
+                        </div>
+                        <div className="hidden sm:block">
+                          <OrderStatusBadge status={order.status} />
+                        </div>
+                        <p className="text-sm font-bold text-gray-950 whitespace-nowrap">{formatPrix(order.montant_final)}</p>
+                        <ChevronRight className="w-4 h-4 shrink-0 text-gray-400 group-hover:text-gray-950" aria-hidden="true" />
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </Panel>
 
-            {/* Sidebar */}
-            <div className="space-y-6">
-              {/* Profil */}
-              <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-bold text-gray-900 text-sm sm:text-base">Mon profil</h3>
-                  <Link to="/profile/edit" className="text-emerald-600 hover:text-emerald-700 text-sm">
-                    Modifier
-                  </Link>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <User className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                    <div className="min-w-0">
-                      <p className="text-xs text-gray-600">Nom</p>
-                      <p className="font-medium text-gray-900 text-sm truncate">
-                        {[user?.first_name, user?.last_name].filter(Boolean).join(' ') || user?.username}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Mail className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                    <div className="min-w-0">
-                      <p className="text-xs text-gray-600">Email</p>
-                      <p className="font-medium text-gray-900 text-sm truncate">{user?.email}</p>
-                    </div>
+          <div className="space-y-6">
+            <Panel
+              title="Mon profil"
+              action={
+                <Link to="/profile/edit" className="inline-flex items-center min-h-11 text-sm font-semibold text-gray-950 hover:underline underline-offset-4">
+                  Modifier
+                </Link>
+              }
+            >
+              <dl className="space-y-3 text-sm">
+                <div className="flex items-start gap-3">
+                  <User className="w-4 h-4 mt-0.5 shrink-0 text-gray-500" aria-hidden="true" />
+                  <div className="min-w-0">
+                    <dt className="sr-only">Nom</dt>
+                    <dd className="font-medium text-gray-950 truncate">{nom}</dd>
                   </div>
                 </div>
-              </div>
-
-              {/* Actions rapides */}
-              <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
-                <h3 className="font-bold text-gray-900 mb-4 text-sm sm:text-base">Actions rapides</h3>
-                <div className="space-y-3">
-                  <Link
-                    to="/"
-                    className="block w-full bg-emerald-700 hover:bg-emerald-800 text-white text-center py-2.5 rounded-lg transition-colors font-medium text-sm"
-                  >
-                    Parcourir les produits
-                  </Link>
-                  <Link
-                    to="/cart"
-                    className="block w-full bg-white border border-gray-300 text-gray-700 text-center py-2.5 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm"
-                  >
-                    Voir mon panier
-                  </Link>
-                  <Link
-                    to="/profile/orders"
-                    className="block w-full bg-white border border-gray-300 text-gray-700 text-center py-2.5 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm"
-                  >
-                    Mes commandes
-                  </Link>
-                  <Link 
-                    to="/myreviews" 
-                    className="block w-full bg-white border border-gray-300 text-gray-700 text-center py-2.5 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm"
-                  >
-                    Mes Avis
-                  </Link>
+                <div className="flex items-start gap-3">
+                  <Mail className="w-4 h-4 mt-0.5 shrink-0 text-gray-500" aria-hidden="true" />
+                  <div className="min-w-0">
+                    <dt className="sr-only">E-mail</dt>
+                    <dd className="text-gray-700 truncate">{user?.email}</dd>
+                  </div>
                 </div>
+                <div className="flex items-start gap-3">
+                  <MapPin className="w-4 h-4 mt-0.5 shrink-0 text-gray-500" aria-hidden="true" />
+                  <div className="min-w-0">
+                    <dt className="sr-only">Adresse de livraison</dt>
+                    <dd className="text-gray-700">
+                      {user?.client?.adresse_livraison
+                        ? [user.client.adresse_livraison, user.client.ville].filter(Boolean).join(', ')
+                        : 'Aucune adresse enregistrée'}
+                    </dd>
+                  </div>
+                </div>
+              </dl>
+              {adresseIncomplete && (
+                <Link
+                  to="/profile/edit"
+                  className="mt-4 flex items-start gap-3 p-3 border-l-4 border-orange-500 bg-orange-50 text-sm text-gray-800 hover:bg-orange-100 transition-colors"
+                >
+                  <ArrowRight className="w-4 h-4 mt-0.5 shrink-0" aria-hidden="true" />
+                  Ajoutez votre adresse et votre téléphone : ils seront préremplis à chaque commande.
+                </Link>
+              )}
+            </Panel>
+
+            <Panel title="Raccourcis">
+              <div className="space-y-3">
+                <ActionTile to="/profile/orders" icon={Package} title="Mes commandes" text="Suivi et historique" />
+                <ActionTile to="/myreviews" icon={Star} title="Mes avis" text="Avis sur vos achats" />
+                <ActionTile to="/cart" icon={ShoppingCart} title="Mon panier" text={nbPanier ? `${nbPanier} article${nbPanier > 1 ? 's' : ''}` : 'Vide pour le moment'} />
               </div>
-            </div>
+            </Panel>
           </div>
         </div>
       </div>

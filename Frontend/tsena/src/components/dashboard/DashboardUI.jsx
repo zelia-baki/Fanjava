@@ -47,10 +47,10 @@ export function StatCard({ label, value, icon: Icon, tone = 'neutral', children,
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="text-sm font-medium text-gray-600">{label}</p>
-          <p className="mt-1 font-display text-2xl sm:text-3xl font-extrabold text-gray-950 tabular-nums break-words">{value}</p>
+          <p className="mt-1 font-display text-lg min-[400px]:text-xl sm:text-3xl font-extrabold text-gray-950 tabular-nums whitespace-nowrap">{value}</p>
         </div>
         {Icon && (
-          <span className={`w-11 h-11 shrink-0 flex items-center justify-center ${TONS[tone]}`} aria-hidden="true">
+          <span className={`hidden sm:flex w-11 h-11 shrink-0 items-center justify-center ${TONS[tone]}`} aria-hidden="true">
             <Icon className="w-5 h-5" />
           </span>
         )}
@@ -90,7 +90,7 @@ export function Panel({ title, action, children, className = '' }) {
       {(title || action) && (
         <div className="flex items-center justify-between gap-4 px-5 sm:px-6 py-4 border-b border-gray-200">
           <h2 className="font-display text-lg font-bold text-gray-950">{title}</h2>
-          {action}
+          {action && <div className="shrink-0 whitespace-nowrap">{action}</div>}
         </div>
       )}
       <div className="p-5 sm:p-6">{children}</div>

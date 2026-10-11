@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import MainLayout from '@/layouts/MainLayout';
 import { productService } from '@/services/productService';
 import { useCart } from '@/context/CartContext';
@@ -33,6 +33,15 @@ export default function ProductDetail() {
   const [quantity, setQuantity] = useState(1);
   const [adding, setAdding] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
+
+  const { hash } = useLocation();
+
+  // Lien « Laisser un avis » (/products/slug#avis) : défile jusqu'aux avis une fois le produit affiché
+  useEffect(() => {
+    if (product && hash === '#avis') {
+      document.getElementById('avis')?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [product, hash]);
 
   useEffect(() => {
     fetchProduct();
@@ -342,8 +351,8 @@ export default function ProductDetail() {
             </div>
           )}
 
-          {/* Section Avis */}
-          <div className="mt-12">
+          {/* Section Avis (ancre #avis depuis « Mes commandes ») */}
+          <div id="avis" className="mt-12 scroll-mt-28">
             <ReviewSection 
               produitId={product.id}
               noteMoyenne={product.note_moyenne}
