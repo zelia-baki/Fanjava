@@ -82,7 +82,7 @@ export default function ChangePasswordForm() {
         <button
           type="submit"
           disabled={loading}
-          className="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg flex items-center font-medium disabled:bg-gray-300 transition-colors"
+          className="px-6 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg flex items-center font-medium disabled:bg-gray-300 transition-colors"
         >
           {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           Modifier le mot de passe

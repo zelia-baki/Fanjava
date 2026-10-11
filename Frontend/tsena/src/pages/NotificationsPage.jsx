@@ -5,6 +5,7 @@ import { Bell, Check, Trash2, Filter } from 'lucide-react';
 import MainLayout from '@/layouts/MainLayout';
 import notificationService from '@/services/notificationService';
 
+import NotificationTypeIcon from '@/components/ui/NotificationTypeIcon';
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState([]);
   const [filter, setFilter] = useState('all'); // all, unread, read
@@ -60,18 +61,6 @@ export default function NotificationsPage() {
 
   const unreadCount = notifications.filter(n => !n.lue).length;
 
-  const getNotificationIcon = (type) => {
-    const icons = {
-      order: '🛒',
-      order_status: '📦',
-      stock: '⚠️',
-      payment: '💳',
-      review: '⭐',
-      account: '👤',
-      general: '📢'
-    };
-    return icons[type] || '📢';
-  };
 
   if (loading) {
     return (
@@ -178,8 +167,8 @@ export default function NotificationsPage() {
                   <div className="p-6">
                     <div className="flex items-start">
                       {/* Icône */}
-                      <div className="text-3xl mr-4 flex-shrink-0">
-                        {getNotificationIcon(notif.type_notification)}
+                      <div className="mr-4">
+                        <NotificationTypeIcon type={notif.type_notification} size="lg" />
                       </div>
 
                       {/* Contenu */}

@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { Star, Loader2, Send } from 'lucide-react';
 import api from '@/services/api';
 
+import { useToast } from '@/context/ToastContext';
 export default function ReviewForm({ produitId, onSuccess, onCancel }) {
+  const toast = useToast();
   const [formData, setFormData] = useState({
     note: 5,
     titre: '',
@@ -31,17 +33,17 @@ export default function ReviewForm({ produitId, onSuccess, onCancel }) {
         commentaire: formData.commentaire
       };
       
-      console.log('📤 Données envoyées:', dataToSend);
+      console.log('Données envoyées:', dataToSend);
 
       const response = await api.post('/products/avis/', dataToSend);
       
-      console.log('✅ Réponse:', response.data);
+      console.log('Réponse:', response.data);
 
-      alert('Votre avis a été soumis avec succès !');
+      toast.success('Votre avis a été soumis avec succès !');
       if (onSuccess) onSuccess();
     } catch (err) {
-      console.error('❌ Erreur complète:', err);
-      console.error('❌ Réponse serveur:', err.response?.data);
+      console.error('Erreur complète:', err);
+      console.error('Réponse serveur:', err.response?.data);
       setError(
         err.response?.data?.error || 
         err.response?.data?.detail ||
@@ -153,7 +155,7 @@ export default function ReviewForm({ produitId, onSuccess, onCancel }) {
           <button
             type="submit"
             disabled={submitting}
-            className="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center font-medium transition-colors"
+            className="px-6 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center font-medium transition-colors"
           >
             {submitting ? (
               <>

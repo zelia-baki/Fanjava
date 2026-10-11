@@ -67,7 +67,7 @@ function Hero({ vitrine }) {
           <div className="flex flex-wrap gap-3">
             <Link
               to="/?en_promotion=true"
-              className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold px-7 h-13 transition-colors"
+              className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-400 text-gray-950 font-semibold px-7 h-13 transition-colors"
             >
               Voir les promotions
               <ArrowRight className="w-5 h-5" />
@@ -429,7 +429,7 @@ export default function ProductList() {
 
             <label
               className={`h-10 px-4 flex items-center gap-2 border text-sm cursor-pointer transition-colors focus-within:ring-2 focus-within:ring-emerald-500 ${
-                enPromo ? 'bg-orange-500 border-orange-500 text-white' : 'bg-white border-gray-300 text-gray-700 hover:border-gray-900'
+                enPromo ? 'bg-orange-500 border-orange-500 text-gray-950' : 'bg-white border-gray-300 text-gray-700 hover:border-gray-900'
               }`}
             >
               <input type="checkbox" name="en_promotion" checked={enPromo} onChange={handleToggle} className="sr-only" />

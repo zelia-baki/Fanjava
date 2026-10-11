@@ -15,7 +15,9 @@ import {
 } from 'lucide-react';
 import api from '@/services/api';
 
+import { useToast } from '@/context/ToastContext';
 export default function OrderDetail() {
+  const toast = useToast();
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -42,7 +44,7 @@ export default function OrderDetail() {
       setFraisLivraison(response.data.frais_livraison ?? '');
     } catch (err) {
       console.error('Erreur chargement commande:', err);
-      alert('Erreur lors du chargement de la commande');
+      toast.error('Erreur lors du chargement de la commande');
       navigate(ordersPath);
     } finally {
       setLoading(false);
@@ -57,7 +59,7 @@ export default function OrderDetail() {
         payload.frais_livraison = fraisLivraison;
       }
       await api.patch(`/orders/commandes/${id}/`, payload);
-      alert('Commande mise à jour avec succès !');
+      toast.success('Commande mise à jour avec succès !');
       fetchOrder();
     } catch (err) {
       console.error('Erreur mise à jour:', err);
@@ -65,7 +67,7 @@ export default function OrderDetail() {
       const details = data && typeof data === 'object'
         ? Object.values(data).flat().filter((v) => typeof v === 'string').join(' ')
         : '';
-      alert(details || 'Erreur lors de la mise à jour');
+      toast.error(details || 'Erreur lors de la mise à jour');
     } finally {
       setUpdating(false);
     }
@@ -331,7 +333,7 @@ export default function OrderDetail() {
                   <button
                     onClick={handleUpdateStatus}
                     disabled={updating || (newStatus === order.status && numeroSuivi === (order.numero_suivi || '') && String(fraisLivraison) === String(order.frais_livraison))}
-                    className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2.5 rounded-lg disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center font-medium transition-colors"
+                    className="w-full bg-orange-500 hover:bg-orange-400 text-gray-950 py-2.5 rounded-lg disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center font-medium transition-colors"
                   >
                     {updating ? (
                       <>

@@ -4,7 +4,11 @@ import MainLayout from '@/layouts/MainLayout';
 import { Star, Loader2, CheckCircle, XCircle, Eye, Filter } from 'lucide-react';
 import api from '@/services/api';
 
+import { useToast } from '@/context/ToastContext';
+import { useConfirm } from '@/context/ConfirmContext';
 export default function EntrepriseReviews() {
+  const toast = useToast();
+  const confirm = useConfirm();
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState('all');
@@ -30,16 +34,16 @@ export default function EntrepriseReviews() {
       await api.patch(`/products/avis/${avisId}/`, {
         approuve: true
       });
-      alert('Avis approuvé !');
+      toast.success('Avis approuvé !');
       fetchReviews();
     } catch (err) {
       console.error('Erreur approbation:', err);
-      alert('Erreur lors de l\'approbation');
+      toast.error('Erreur lors de l\'approbation');
     }
   };
 
   const handleReject = async (avisId) => {
-    if (!window.confirm('Rejeter cet avis ? (Il ne sera plus visible)')) {
+    if (!await confirm('Rejeter cet avis ? (Il ne sera plus visible)', { danger: true, confirmLabel: 'Rejeter' })) {
       return;
     }
 
@@ -47,11 +51,11 @@ export default function EntrepriseReviews() {
       await api.patch(`/products/avis/${avisId}/`, {
         approuve: false
       });
-      alert('Avis rejeté !');
+      toast.success('Avis rejeté !');
       fetchReviews();
     } catch (err) {
       console.error('Erreur rejet:', err);
-      alert('Erreur lors du rejet');
+      toast.error('Erreur lors du rejet');
     }
   };
 

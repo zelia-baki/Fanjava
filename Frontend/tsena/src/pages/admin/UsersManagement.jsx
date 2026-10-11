@@ -176,7 +176,7 @@ export default function UsersManagement() {
               onClick={() => setFilterStatus('active')}
               className={`px-4 py-2 rounded-lg text-sm font-medium ${
                 filterStatus === 'active'
-                  ? 'bg-green-600 text-white'
+                  ? 'bg-emerald-700 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >

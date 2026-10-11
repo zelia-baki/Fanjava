@@ -106,7 +106,7 @@ export default function ProductDetail() {
           <p className="text-gray-600 mb-6">Le produit que vous recherchez n'existe pas.</p>
           <button
             onClick={() => navigate('/')}
-            className="bg-emerald-500 text-white px-6 py-3 rounded-lg hover:bg-emerald-600 transition-colors"
+            className="bg-emerald-700 text-white px-6 py-3 rounded-lg hover:bg-emerald-800 transition-colors"
           >
             Retour à l'accueil
           </button>
@@ -182,7 +182,7 @@ export default function ProductDetail() {
               {/* Badges minimalistes */}
               <div className="flex gap-2 mb-4">
                 {enPromo && (
-                  <span className="bg-orange-500 text-white text-xs font-bold px-3 py-1">
+                  <span className="bg-orange-500 text-gray-950 text-xs font-bold px-3 py-1">
                     -{Math.round(((prixOriginal - prix) / prixOriginal) * 100)}%
                   </span>
                 )}
@@ -286,7 +286,7 @@ export default function ProductDetail() {
               <button
                 onClick={handleAddToCart}
                 disabled={adding || product.stock === 0}
-                className="w-full bg-orange-500 hover:bg-gray-950 text-white h-14 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-base font-semibold transition-colors active:scale-[0.99] mb-4"
+                className="w-full bg-orange-500 hover:bg-gray-950 text-gray-950 h-14 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-base font-semibold transition-colors active:scale-[0.99] mb-4"
               >
                 {adding ? (
                   <>

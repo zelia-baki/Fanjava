@@ -31,7 +31,11 @@ import {
 import BlobImage from '@/components/ui/BlobImage';
 import { imageService } from '@/services/imageService';
 
+import { useToast } from '@/context/ToastContext';
+import { useConfirm } from '@/context/ConfirmContext';
 export default function UserDetail() {
+  const toast = useToast();
+  const confirm = useConfirm();
   const { id } = useParams();
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
@@ -154,23 +158,23 @@ export default function UserDetail() {
   // ✅ NOUVEAU : Gestion des actions sur l'entreprise
   const handleEntrepriseAction = async (action) => {
     const labels = { approve: 'approuver', reject: 'rejeter', suspend: 'suspendre' };
-    if (!window.confirm(`Voulez-vous vraiment ${labels[action]} cette entreprise ?`)) return;
+    if (!await confirm(`Voulez-vous vraiment ${labels[action]} cette entreprise ?`)) return;
 
     try {
       setActionLoading(true);
       await api.post(`/users/admin/entreprises/${user.entreprise.id}/${action}/`);
       await fetchUserDetails();
-      alert(`Entreprise ${action === 'approve' ? 'approuvée' : action === 'reject' ? 'rejetée' : 'suspendue'} avec succès`);
+      toast.success(`Entreprise ${action === 'approve' ? 'approuvée' : action === 'reject' ? 'rejetée' : 'suspendue'} avec succès`);
     } catch (err) {
       console.error(`Erreur action ${action}:`, err);
-      alert('Erreur lors de l\'action');
+      toast.error('Erreur lors de l\'action');
     } finally {
       setActionLoading(false);
     }
   };
 
   const handleToggleActive = async () => {
-    if (!window.confirm(`Voulez-vous vraiment ${user.is_active ? 'désactiver' : 'activer'} ce compte ?`)) {
+    if (!await confirm(`Voulez-vous vraiment ${user.is_active ? 'désactiver' : 'activer'} ce compte ?`)) {
       return;
     }
 
@@ -182,10 +186,10 @@ export default function UserDetail() {
 
       await fetchUserDetails();
 
-      alert(`Compte ${user.is_active ? 'désactivé' : 'activé'} avec succès`);
+      toast.success(`Compte ${user.is_active ? 'désactivé' : 'activé'} avec succès`);
     } catch (err) {
       console.error('Erreur toggle active:', err);
-      alert('Erreur lors de la modification du statut');
+      toast.error('Erreur lors de la modification du statut');
     } finally {
       setActionLoading(false);
     }
@@ -275,7 +279,7 @@ export default function UserDetail() {
               disabled={actionLoading}
               className={`px-4 py-2 rounded-lg font-medium flex items-center space-x-2 ${user.is_active
                   ? 'bg-red-600 text-white hover:bg-red-700'
-                  : 'bg-green-600 text-white hover:bg-green-700'
+                  : 'bg-emerald-700 text-white hover:bg-emerald-800'
                 } ${actionLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {actionLoading ? (
@@ -484,7 +488,7 @@ export default function UserDetail() {
                 <button
                   onClick={() => handleEntrepriseAction('approve')}
                   disabled={actionLoading || user.entreprise.status === 'approved'}
-                  className={`px-4 py-2 rounded-lg font-medium flex items-center space-x-2 bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed`}
+                  className={`px-4 py-2 rounded-lg font-medium flex items-center space-x-2 bg-emerald-700 text-white hover:bg-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
                   {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
                   <span>Approuver</span>
@@ -502,7 +506,7 @@ export default function UserDetail() {
                 <button
                   onClick={() => handleEntrepriseAction('suspend')}
                   disabled={actionLoading || user.entreprise.status === 'suspended'}
-                  className={`px-4 py-2 rounded-lg font-medium flex items-center space-x-2 bg-orange-500 text-white hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed`}
+                  className={`px-4 py-2 rounded-lg font-medium flex items-center space-x-2 bg-orange-500 text-gray-950 hover:bg-orange-400 disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
                   {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <PauseCircle className="w-4 h-4" />}
                   <span>Suspendre</span>
@@ -539,12 +543,12 @@ export default function UserDetail() {
                       {user.entreprise.nom_entreprise}
                     </h3>
                     {user.entreprise.siret && (
-                      <p className="text-sm text-gray-600">SIRET: {user.entreprise.siret}</p>
+                      <p className="text-sm text-gray-600">NIF / STAT : {user.entreprise.siret}</p>
                     )}
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <span className="text-2xl">⭐</span>
+                  <Star className="w-6 h-6 text-amber-500 fill-amber-500" aria-hidden="true" />
                   <span className="text-2xl font-bold text-gray-900">
                     {user.entreprise.note_moyenne || '0.00'}
                   </span>

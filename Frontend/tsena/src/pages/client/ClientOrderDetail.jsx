@@ -16,7 +16,11 @@ import {
 } from 'lucide-react';
 import api from '@/services/api';
 
+import { useToast } from '@/context/ToastContext';
+import { useConfirm } from '@/context/ConfirmContext';
 export default function ClientOrderDetail() {
+  const toast = useToast();
+  const confirm = useConfirm();
   const { id } = useParams();
   const navigate = useNavigate();
   const [order, setOrder] = useState(null);
@@ -34,7 +38,7 @@ export default function ClientOrderDetail() {
       setOrder(response.data);
     } catch (err) {
       console.error('Erreur chargement commande:', err);
-      alert('Erreur lors du chargement de la commande');
+      toast.error('Erreur lors du chargement de la commande');
       navigate('/profile/orders');
     } finally {
       setLoading(false);
@@ -42,13 +46,13 @@ export default function ClientOrderDetail() {
   };
 
   const handleCancel = async () => {
-    if (!window.confirm('Annuler cette commande ?')) return;
+    if (!await confirm('Annuler cette commande ?', { danger: true, confirmLabel: 'Oui, annuler' })) return;
     try {
       setCancelling(true);
       const response = await api.post(`/orders/commandes/${id}/cancel/`);
       setOrder(response.data);
     } catch (err) {
-      alert(err.response?.data?.error || "Impossible d'annuler la commande");
+      toast.error(err.response?.data?.error || "Impossible d'annuler la commande");
     } finally {
       setCancelling(false);
     }

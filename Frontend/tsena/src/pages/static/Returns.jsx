@@ -1,17 +1,13 @@
 import MainLayout from '@/layouts/MainLayout';
+import PageWrapper from '@/components/PageWrapper';
 import InfoSection from '@/components/ui/InfoSection';
 import { RotateCcw, CreditCard, AlertCircle } from 'lucide-react';
 
 export default function Return() {
   return (
     <MainLayout>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-        <div className="max-w-5xl mx-auto px-4 py-12">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">
-            Retours & Remboursements
-          </h1>
-
-          <div className="grid gap-6">
+      <PageWrapper title="Retours & Remboursements" intro="Vos droits et la marche à suivre pour retourner un article.">
+        <div className="grid gap-8">
             <InfoSection icon={RotateCcw} title="Conditions de retour">
               <p>
                 Les retours sont acceptés sous 14 jours après réception du
@@ -31,9 +27,8 @@ export default function Return() {
                 Certains produits ne sont pas éligibles au retour.
               </p>
             </InfoSection>
-          </div>
         </div>
-      </div>
+      </PageWrapper>
     </MainLayout>
   );
 }

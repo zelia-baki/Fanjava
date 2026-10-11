@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import api from '@/services/api';
 
+import NotificationTypeIcon from '@/components/ui/NotificationTypeIcon';
 export default function NotificationsSent() {
   const [loading, setLoading] = useState(true);
   const [notifications, setNotifications] = useState([]);
@@ -77,18 +78,6 @@ export default function NotificationsSent() {
     return labels[type] || type;
   };
 
-  const getTypeIcon = (type) => {
-    const icons = {
-      order: '🛒',
-      order_status: '📦',
-      stock: '⚠️',
-      payment: '💳',
-      review: '⭐',
-      account: '👤',
-      general: '📢'
-    };
-    return icons[type] || '📢';
-  };
 
   if (loading) {
     return (
@@ -158,7 +147,7 @@ export default function NotificationsSent() {
                   <div className="p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-start space-x-3 flex-1">
-                        <span className="text-2xl">{getTypeIcon(notification.type_notification)}</span>
+                        <NotificationTypeIcon type={notification.type_notification} />
                         <div className="flex-1">
                           <div className="flex items-center space-x-2 mb-1">
                             <h3 className="font-semibold text-lg text-gray-900">

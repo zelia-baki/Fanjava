@@ -126,7 +126,7 @@ export default function ReviewSection({ produitId, noteMoyenne, nombreAvis }) {
         <div className="mb-6">
           <button
             onClick={() => setShowForm(true)}
-            className="w-full sm:w-auto px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg flex items-center justify-center font-medium transition-colors"
+            className="w-full sm:w-auto px-6 py-3 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg flex items-center justify-center font-medium transition-colors"
           >
             <Star className="w-5 h-5 mr-2" />
             Laisser un avis

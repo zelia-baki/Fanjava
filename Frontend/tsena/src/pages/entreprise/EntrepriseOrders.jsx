@@ -306,7 +306,7 @@ export default function EntrepriseOrders() {
 
                     <Link
                       to={`/entreprise/orders/${order.id}`}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition-colors text-sm"
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-400 text-gray-950 rounded-lg font-medium transition-colors text-sm"
                     >
                       <Eye className="w-4 h-4" />
                       Voir les détails

@@ -2,6 +2,27 @@
 
 import api from './api';
 
+/** Mois relatif à aujourd'hui : 0 = mois en cours, -1 = mois précédent. */
+const estDuMois = (date, decalage = 0) => {
+  const d = new Date(date);
+  const ref = new Date();
+  ref.setDate(1);
+  ref.setMonth(ref.getMonth() + decalage);
+  return d.getMonth() === ref.getMonth() && d.getFullYear() === ref.getFullYear();
+};
+
+/**
+ * Évolution en % du mois en cours par rapport au mois précédent.
+ * null si le mois précédent est vide (pas de base de comparaison).
+ */
+const evolution = (items, valeur = () => 1) => {
+  const total = (decalage) =>
+    items.filter((i) => estDuMois(i.created_at, decalage)).reduce((sum, i) => sum + valeur(i), 0);
+  const precedent = total(-1);
+  if (!precedent) return null;
+  return Math.round(((total(0) - precedent) / precedent) * 1000) / 10;
+};
+
 export const statsService = {
   /**
    * Récupérer les statistiques globales du site
@@ -82,10 +103,10 @@ export const statsService = {
           ? (reviewsData.reduce((sum, r) => sum + r.note, 0) / reviewsData.length).toFixed(1)
           : 0,
 
-        // Croissance (simulée - à remplacer par de vraies données)
-        usersGrowth: 15.3,
-        revenueGrowth: 23.5,
-        ordersGrowth: 18.7
+        // Évolution réelle sur un mois (null = pas de données le mois précédent)
+        usersGrowth: evolution(usersData),
+        revenueGrowth: evolution(ordersData, (o) => parseFloat(o.montant_final || 0)),
+        ordersGrowth: evolution(ordersData)
       };
 
       return stats;
@@ -111,9 +132,9 @@ export const statsService = {
         totalReviews: 0,
         pendingReviews: 0,
         averageRating: 0,
-        usersGrowth: 0,
-        revenueGrowth: 0,
-        ordersGrowth: 0
+        usersGrowth: null,
+        revenueGrowth: null,
+        ordersGrowth: null
       };
     }
   },

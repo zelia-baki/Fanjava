@@ -327,7 +327,7 @@ export default function ProfileEdit() {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg flex items-center justify-center font-medium disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                                className="px-6 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg flex items-center justify-center font-medium disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
                             >
                                 {loading ? (
                                     <>

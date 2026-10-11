@@ -5,7 +5,11 @@ import { Plus, Edit, Trash2, Loader2, Search, Tag, AlertCircle, Package } from '
 import api from '@/services/api';
 import BlobImage from '@/components/ui/BlobImage';
 
+import { useToast } from '@/context/ToastContext';
+import { useConfirm } from '@/context/ConfirmContext';
 export default function CategoryManagement() {
+  const toast = useToast();
+  const confirm = useConfirm();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -82,10 +86,10 @@ export default function CategoryManagement() {
       
       if (editingCategory) {
         await api.put(`/products/categories/${editingCategory.slug}/`, formData);
-        alert('Catégorie mise à jour !');
+        toast.success('Catégorie mise à jour !');
       } else {
         await api.post('/products/categories/', formData);
-        alert('Catégorie créée !');
+        toast.success('Catégorie créée !');
       }
 
       setShowCreateModal(false);
@@ -95,7 +99,7 @@ export default function CategoryManagement() {
       if (err.response?.data) {
         setErrors(err.response.data);
       } else {
-        alert('Erreur lors de la sauvegarde');
+        toast.error('Erreur lors de la sauvegarde');
       }
     } finally {
       setSaving(false);
@@ -115,7 +119,7 @@ export default function CategoryManagement() {
       });
     } catch (err) {
       console.error('Erreur chargement produits:', err);
-      alert('Erreur lors du chargement des produits');
+      toast.error('Erreur lors du chargement des produits');
       setShowProductsModal(false);
     } finally {
       setLoadingProducts(false);
@@ -123,13 +127,13 @@ export default function CategoryManagement() {
   };
 
   const handleDelete = async (category) => {
-    if (!window.confirm(`Supprimer la catégorie "${category.nom}" ?`)) {
+    if (!await confirm(`Supprimer la catégorie "${category.nom}" ?`, { danger: true, confirmLabel: 'Supprimer' })) {
       return;
     }
 
     try {
       await api.delete(`/products/categories/${category.slug}/`);
-      alert('Catégorie supprimée !');
+      toast.success('Catégorie supprimée !');
       fetchCategories();
     } catch (err) {
       console.error('Erreur suppression:', err);
@@ -139,16 +143,15 @@ export default function CategoryManagement() {
         const nombreProduits = err.response.data.nombre_produits;
         
         // Afficher une alerte personnalisée
-        if (window.confirm(
-          `❌ Impossible de supprimer cette catégorie!\n\n` +
-          `Elle contient ${nombreProduits} produit(s).\n\n` +
-          `Voulez-vous voir la liste des produits?`
+        if (await confirm(
+          `Elle contient ${nombreProduits} produit(s). Déplacez-les ou supprimez-les d'abord. Voir la liste des produits ?`,
+          { title: 'Impossible de supprimer cette catégorie', confirmLabel: 'Voir les produits' }
         )) {
           // Ouvrir le modal avec les produits
           handleViewProducts(category);
         }
       } else {
-        alert('Erreur lors de la suppression');
+        toast.error('Erreur lors de la suppression');
       }
     }
   };
@@ -205,7 +208,7 @@ export default function CategoryManagement() {
           <div className="flex items-start space-x-3">
             <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
             <div className="text-sm text-blue-800">
-              <p className="font-semibold mb-1">💡 Information importante</p>
+              <p className="font-semibold mb-1">Information importante</p>
               <p>Vous ne pouvez pas supprimer une catégorie qui contient des produits. Déplacez d'abord les produits vers une autre catégorie.</p>
             </div>
           </div>

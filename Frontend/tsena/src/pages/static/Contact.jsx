@@ -1,18 +1,16 @@
 import MainLayout from '@/layouts/MainLayout';
-import BackgroundWrapper from '@/components/BackgroundWrapper';
 import PageWrapper from '@/components/PageWrapper';
 import { Mail, Phone, MapPin, MessageCircle } from 'lucide-react';
 
 export default function Contact() {
   return (
     <MainLayout>
-      <BackgroundWrapper>
-        <PageWrapper title="Contactez-nous" icon={MessageCircle}>
-
-          <p className="text-lg text-gray-800">
-            Une question ou un besoin d’assistance ?  
-            Notre équipe FanJava est là pour vous aider.
-          </p>
+        <PageWrapper
+          title="Contactez-nous"
+          icon={MessageCircle}
+          kicker="Service client"
+          intro="Une question ou un besoin d’assistance ? Notre équipe FanJava est là pour vous aider."
+        >
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             
@@ -38,7 +36,6 @@ export default function Contact() {
           </div>
 
         </PageWrapper>
-      </BackgroundWrapper>
     </MainLayout>
   );
 }
@@ -49,14 +46,16 @@ function InfoCard({ icon: Icon, title, value, href, full }) {
   return (
     <Wrapper
       href={href}
-      className={`flex items-start gap-4 p-6 rounded-xl border border-gray-200 bg-white/80 hover:border-blue-500 hover:shadow-lg transition ${
-        full ? 'sm:col-span-2' : ''
-      }`}
+      className={`flex items-start gap-4 p-6 border-2 border-gray-200 transition-colors ${
+        href ? 'hover:border-gray-950' : ''
+      } ${full ? 'sm:col-span-2' : ''}`}
     >
-      <Icon className="w-6 h-6 text-blue-600 mt-1" />
+      <span className="w-11 h-11 shrink-0 flex items-center justify-center bg-emerald-50 text-emerald-700">
+        <Icon className="w-5 h-5" aria-hidden="true" />
+      </span>
       <div>
-        <p className="font-semibold text-gray-900">{title}</p>
-        <p className="text-gray-700">{value}</p>
+        <p className="text-sm font-semibold uppercase tracking-wide text-gray-500">{title}</p>
+        <p className="mt-0.5 text-lg font-semibold text-gray-950">{value}</p>
       </div>
     </Wrapper>
   );

@@ -1,17 +1,13 @@
 import MainLayout from '@/layouts/MainLayout';
+import PageWrapper from '@/components/PageWrapper';
 import InfoSection from '@/components/ui/InfoSection';
 import { ShieldCheck, Database, Lock } from 'lucide-react';
 
 export default function Privacy() {
   return (
     <MainLayout>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-        <div className="max-w-5xl mx-auto px-4 py-12">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">
-            Politique de confidentialité
-          </h1>
-
-          <div className="grid gap-6">
+      <PageWrapper title="Politique de confidentialité" intro="Comment nous collectons, utilisons et protégeons vos données.">
+        <div className="grid gap-8">
             <InfoSection icon={ShieldCheck} title="Protection des données">
               <p>
                 Nous respectons votre vie privée et protégeons vos données
@@ -32,9 +28,8 @@ export default function Privacy() {
                 partagées sans votre consentement.
               </p>
             </InfoSection>
-          </div>
         </div>
-      </div>
+      </PageWrapper>
     </MainLayout>
   );
 }

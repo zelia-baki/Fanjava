@@ -5,11 +5,13 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from '@/context/AuthContext';
 import { CartProvider } from '@/context/CartContext';
 import { ToastProvider } from '@/context/ToastContext';
+import { ConfirmProvider } from '@/context/ConfirmContext';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import PageLoader from '@/components/ui/PageLoader';
 import { applyRouteSeo } from '@/utils/seo';
 
 // Pages informatives
+const NotFound = lazy(() => import('@/pages/NotFound'));
 const Contact = lazy(() => import('@/pages/static/Contact'));
 const Terms = lazy(() => import('@/pages/static/Terms'));
 const Privacy = lazy(() => import('@/pages/static/Privacy'));
@@ -77,6 +79,7 @@ function App() {
   return (
     <BrowserRouter>
       <ToastProvider>
+      <ConfirmProvider>
       <AuthProvider>
         <CartProvider>
           <RouteSeo />
@@ -312,19 +315,13 @@ function App() {
             {/* ==================== ROUTE 404 ==================== */}
             <Route
               path="*"
-              element={
-                <div className="min-h-screen flex items-center justify-center">
-                  <div className="text-center">
-                    <h1 className="text-4xl font-bold text-gray-800 mb-4">404</h1>
-                    <p className="text-gray-600">Page non trouvée</p>
-                  </div>
-                </div>
-              }
+              element={<NotFound />}
             />
           </Routes>
           </Suspense>
         </CartProvider>
       </AuthProvider>
+      </ConfirmProvider>
       </ToastProvider>
     </BrowserRouter>
   );

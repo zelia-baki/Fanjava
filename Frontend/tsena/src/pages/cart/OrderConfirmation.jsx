@@ -159,7 +159,7 @@ export default function OrderConfirmation() {
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               to="/"
-              className="flex items-center justify-center px-8 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold transition-colors shadow-sm"
+              className="flex items-center justify-center px-8 py-3 bg-orange-500 hover:bg-orange-400 text-gray-950 rounded-lg font-semibold transition-colors shadow-sm"
             >
               Continuer mes achats
               <ArrowRight className="w-5 h-5 ml-2" />

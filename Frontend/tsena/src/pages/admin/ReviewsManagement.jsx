@@ -16,7 +16,11 @@ import {
 } from 'lucide-react';
 import api from '@/services/api';
 
+import { useToast } from '@/context/ToastContext';
+import { useConfirm } from '@/context/ConfirmContext';
 export default function ReviewsManagement() {
+  const toast = useToast();
+  const confirm = useConfirm();
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -44,23 +48,23 @@ export default function ReviewsManagement() {
       setReviews(reviews.map(r => 
         r.id === reviewId ? { ...r, approuve: true } : r
       ));
-      alert('Avis approuvé avec succès');
+      toast.success('Avis approuvé avec succès');
     } catch (err) {
       console.error('Erreur approbation avis:', err);
-      alert('Erreur lors de l\'approbation de l\'avis');
+      toast.error('Erreur lors de l\'approbation de l\'avis');
     }
   };
 
   const handleReject = async (reviewId) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cet avis ?')) return;
+    if (!await confirm('Êtes-vous sûr de vouloir supprimer cet avis ?', { danger: true, confirmLabel: 'Supprimer' })) return;
 
     try {
       await api.delete(`/products/avis/${reviewId}/`);
       setReviews(reviews.filter(r => r.id !== reviewId));
-      alert('Avis supprimé avec succès');
+      toast.success('Avis supprimé avec succès');
     } catch (err) {
       console.error('Erreur suppression avis:', err);
-      alert('Erreur lors de la suppression de l\'avis');
+      toast.error('Erreur lors de la suppression de l\'avis');
     }
   };
 
@@ -283,7 +287,7 @@ export default function ReviewsManagement() {
                   {!review.approuve && (
                     <button
                       onClick={() => handleApprove(review.id)}
-                      className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                      className="inline-flex items-center px-4 py-2 bg-emerald-700 text-white rounded-lg hover:bg-emerald-800 transition-colors"
                     >
                       <Check className="w-4 h-4 mr-2" />
                       Approuver

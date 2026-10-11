@@ -5,15 +5,19 @@ import { useAuth } from '@/context/AuthContext';
 import {
   Package,
   ShoppingBag,
-  DollarSign,
+  Wallet,
   TrendingUp,
-  Loader2,
+  Percent,
   Plus,
   AlertCircle,
   Eye
 } from 'lucide-react';
 import api from '@/services/api';
 import BlobImage from '@/components/ui/BlobImage';
+import PageLoader from '@/components/ui/PageLoader';
+import { FormAlert } from '@/components/ui/Form';
+import { formatPrix } from '@/utils/format';
+import { DashboardHeader, StatCard, Badge } from '@/components/dashboard/DashboardUI';
 
 export default function EntrepriseDashboard() {
   const { user } = useAuth();
@@ -155,12 +159,7 @@ export default function EntrepriseDashboard() {
   if (loading) {
     return (
       <MainLayout>
-        <div className="min-h-screen bg-white flex justify-center items-center">
-          <div className="flex items-center gap-3">
-            <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
-            <span className="text-gray-600">Chargement...</span>
-          </div>
-        </div>
+        <PageLoader />
       </MainLayout>
     );
   }
@@ -168,155 +167,63 @@ export default function EntrepriseDashboard() {
   if (error) {
     return (
       <MainLayout>
-        <div className="min-h-screen bg-white flex items-center justify-center px-4">
-          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg max-w-md text-center">
-            {error}
-          </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <FormAlert title={error}>
+            <button type="button" onClick={fetchDashboardData} className="font-semibold underline underline-offset-2 cursor-pointer">
+              Réessayer
+            </button>
+          </FormAlert>
         </div>
       </MainLayout>
     );
   }
 
+  const conversion = stats.totalViews > 0 ? ((stats.totalSales / stats.totalViews) * 100).toFixed(1) : '0.0';
+
   return (
     <MainLayout>
       <div className="min-h-screen bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* En-tête */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                Dashboard Entreprise 🏢
-              </h1>
-              <p className="text-gray-600 mt-2 text-sm sm:text-base">
-                Bienvenue, {user?.entreprise?.nom_entreprise || user?.username}
-              </p>
-            </div>
-            <Link
-              to="/entreprise/products/create"
-              className="inline-flex items-center justify-center px-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition-colors"
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+          <DashboardHeader
+            kicker="Espace vendeur"
+            title="Tableau de bord"
+            subtitle={`Bienvenue, ${user?.entreprise?.nom_entreprise || user?.username || ''}`}
+            action={
+              <Link
+                to="/entreprise/products/create"
+                className="inline-flex items-center justify-center gap-2 h-12 px-5 bg-gray-950 hover:bg-emerald-700 text-white font-semibold transition-colors"
+              >
+                <Plus className="w-5 h-5" aria-hidden="true" />
+                Ajouter un produit
+              </Link>
+            }
+          />
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+            <StatCard label="Produits" value={stats.totalProducts} icon={Package}>
+              <Badge tone="emerald">{stats.activeProducts} actifs</Badge>
+              {stats.draftProducts > 0 && <Badge>{stats.draftProducts} brouillons</Badge>}
+            </StatCard>
+            <StatCard label="Commandes" value={stats.totalOrders} icon={ShoppingBag}>
+              {stats.pendingOrders > 0 && <Badge tone="orange">{stats.pendingOrders} à traiter</Badge>}
+            </StatCard>
+            <StatCard label="Chiffre d'affaires" value={formatPrix(stats.totalRevenue)} icon={Wallet} tone="emerald">
+              {stats.totalSales > 0 && <Badge>{stats.totalSales} ventes</Badge>}
+            </StatCard>
+            <StatCard
+              label="Alertes stock"
+              value={lowStockProducts.length}
+              icon={AlertCircle}
+              tone={lowStockProducts.length > 0 || stats.outOfStockProducts > 0 ? 'red' : 'neutral'}
             >
-              <Plus className="w-5 h-5 mr-2" />
-              Ajouter un produit
-            </Link>
+              {stats.outOfStockProducts > 0 && <Badge tone="red">{stats.outOfStockProducts} en rupture</Badge>}
+            </StatCard>
           </div>
 
-          {/* Statistiques Principales */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
-            {/* Total produits */}
-            <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
-              <div className="flex items-center justify-between">
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs sm:text-sm text-gray-600 mb-1">Produits</p>
-                  <p className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.totalProducts}</p>
-                  <div className="flex flex-wrap items-center gap-1 sm:gap-2 mt-2">
-                    <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-                      {stats.activeProducts} actifs
-                    </span>
-                    {stats.draftProducts > 0 && (
-                      <span className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full">
-                        {stats.draftProducts} brouillons
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Package className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
-                </div>
-              </div>
-            </div>
-
-            {/* Commandes */}
-            <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs sm:text-sm text-gray-600 mb-1">Commandes</p>
-                  <p className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.totalOrders}</p>
-                  {stats.pendingOrders > 0 && (
-                    <p className="text-xs sm:text-sm text-orange-600 mt-2 font-semibold">
-                      {stats.pendingOrders} en attente
-                    </p>
-                  )}
-                </div>
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600" />
-                </div>
-              </div>
-            </div>
-
-            {/* Revenu */}
-            <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 col-span-2 lg:col-span-1">
-              <div className="flex items-center justify-between">
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs sm:text-sm text-gray-600 mb-1">Revenu</p>
-                  <p className="text-xl sm:text-2xl font-bold text-gray-900">
-                    {stats.totalRevenue.toLocaleString()} Ar
-                  </p>
-                  {stats.totalSales > 0 && (
-                    <p className="text-xs text-gray-500 mt-2">
-                      {stats.totalSales} ventes
-                    </p>
-                  )}
-                </div>
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
-                </div>
-              </div>
-            </div>
-
-            {/* Stock faible */}
-            <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 col-span-2 lg:col-span-1">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs sm:text-sm text-gray-600 mb-1">Alertes</p>
-                  <p className="text-2xl sm:text-3xl font-bold text-red-600">
-                    {lowStockProducts.length}
-                  </p>
-                  {stats.outOfStockProducts > 0 && (
-                    <p className="text-xs sm:text-sm text-red-600 mt-2 font-semibold">
-                      {stats.outOfStockProducts} rupture
-                    </p>
-                  )}
-                </div>
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6 text-red-600" />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Stats Secondaires */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8">
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200 p-4 sm:p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs sm:text-sm text-blue-800 mb-1 font-medium">Vues Totales</p>
-                  <p className="text-2xl sm:text-3xl font-bold text-blue-900">{stats.totalViews}</p>
-                </div>
-                <Eye className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200 p-4 sm:p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs sm:text-sm text-green-800 mb-1 font-medium">Ventes</p>
-                  <p className="text-2xl sm:text-3xl font-bold text-green-900">{stats.totalSales}</p>
-                </div>
-                <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" />
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border border-purple-200 p-4 sm:p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs sm:text-sm text-purple-800 mb-1 font-medium">Conversion</p>
-                  <p className="text-2xl sm:text-3xl font-bold text-purple-900">
-                    {stats.totalViews > 0 ? ((stats.totalSales / stats.totalViews) * 100).toFixed(1) : '0.0'}%
-                  </p>
-                </div>
-                <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-purple-600" />
-              </div>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            <StatCard label="Vues des produits" value={stats.totalViews} icon={Eye} />
+            <StatCard label="Articles vendus" value={stats.totalSales} icon={TrendingUp} />
+            <StatCard label="Taux de conversion" value={`${conversion} %`} icon={Percent} />
           </div>
 
           {/* Grille 3 colonnes */}
@@ -379,7 +286,7 @@ export default function EntrepriseDashboard() {
             {/* Stock faible */}
             <div className="bg-white rounded-lg border border-gray-200">
               <div className="px-4 sm:px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-                <h2 className="text-base sm:text-lg font-bold text-gray-900">Stock Faible ⚠️</h2>
+                <h2 className="text-base sm:text-lg font-bold text-gray-900">Stock faible</h2>
                 <Link
                   to="/entreprise/products"
                   className="text-orange-600 hover:text-orange-700 text-sm font-medium"
@@ -444,7 +351,7 @@ export default function EntrepriseDashboard() {
           {topProducts.length > 0 && (
             <div className="bg-white rounded-lg border border-gray-200 mb-6">
               <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900">Top Produits 🏆</h2>
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900">Meilleures ventes</h2>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-5 divide-y sm:divide-y-0 sm:divide-x divide-gray-200">
                 {topProducts.map((product, index) => (

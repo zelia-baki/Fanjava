@@ -4,7 +4,9 @@ import MainLayout from '@/layouts/MainLayout';
 import { ArrowLeft, Upload, X, Loader2, Save } from 'lucide-react';
 import api from '@/services/api';
 
+import { useToast } from '@/context/ToastContext';
 export default function ProductCreate() {
+  const toast = useToast();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
@@ -117,7 +119,7 @@ export default function ProductCreate() {
         }
       });
 
-      alert('Produit créé avec succès !');
+      toast.success('Produit créé avec succès !');
       navigate('/entreprise/products');
     } catch (err) {
       console.error('Erreur création produit:', err);
@@ -128,9 +130,9 @@ export default function ProductCreate() {
           .filter(([cle]) => cle.startsWith('image_'))
           .map(([, valeur]) => [].concat(valeur).join(' '))
           .join('\n');
-        if (message) alert(message);
+        if (message) toast.error(message);
       } else {
-        alert('Erreur lors de la création du produit');
+        toast.error('Erreur lors de la création du produit');
       }
     } finally {
       setLoading(false);
@@ -386,7 +388,7 @@ export default function ProductCreate() {
                         <X className="w-4 h-4" />
                       </button>
                       {index === 0 && (
-                        <div className="absolute bottom-2 left-2 bg-orange-500 text-white text-xs px-2 py-1 rounded">
+                        <div className="absolute bottom-2 left-2 bg-orange-500 text-gray-950 text-xs px-2 py-1 rounded">
                           Principale
                         </div>
                       )}
@@ -455,7 +457,7 @@ export default function ProductCreate() {
               <button
                 type="submit"
                 disabled={loading}
-                className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center font-medium transition-colors"
+                className="px-6 py-2.5 bg-orange-500 hover:bg-orange-400 text-gray-950 rounded-lg disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center font-medium transition-colors"
               >
                 {loading ? (
                   <>

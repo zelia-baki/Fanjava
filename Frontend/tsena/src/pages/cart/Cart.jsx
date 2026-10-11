@@ -34,7 +34,7 @@ export default function Cart() {
             <p className="text-gray-600 mb-8">Découvrez nos produits et commencez vos achats</p>
             <Link
               to="/"
-              className="inline-block bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-3 rounded-lg font-medium transition-colors"
+              className="inline-block bg-emerald-700 hover:bg-emerald-800 text-white px-8 py-3 rounded-lg font-medium transition-colors"
             >
               Voir les produits
             </Link>
@@ -183,7 +183,7 @@ export default function Cart() {
                 {user && user.user_type === 'client' ? (
                   <Link
                     to="/checkout"
-                    className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3.5 rounded-lg flex items-center justify-center font-semibold transition-colors shadow-sm hover:shadow-md"
+                    className="w-full bg-orange-500 hover:bg-orange-400 text-gray-950 py-3.5 rounded-lg flex items-center justify-center font-semibold transition-colors shadow-sm hover:shadow-md"
                   >
                     Passer la commande
                     <ArrowRight className="w-5 h-5 ml-2" />
@@ -195,7 +195,8 @@ export default function Cart() {
                     </p>
                     <Link
                       to="/login"
-                      className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-lg flex items-center justify-center font-semibold transition-colors"
+                      state={{ from: { pathname: '/checkout' } }}
+                      className="w-full bg-emerald-700 hover:bg-emerald-800 text-white py-3 rounded-lg flex items-center justify-center font-semibold transition-colors"
                     >
                       Se connecter
                     </Link>

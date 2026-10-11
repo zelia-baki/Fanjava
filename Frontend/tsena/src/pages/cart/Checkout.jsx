@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { orderService } from '@/services/orderService';
@@ -29,14 +29,12 @@ export default function Checkout() {
 
   // Rediriger si panier vide
   if (cart.length === 0) {
-    navigate('/cart');
-    return null;
+    return <Navigate to="/cart" replace />;
   }
 
   // Rediriger si pas client
   if (user?.user_type !== 'client') {
-    navigate('/login');
-    return null;
+    return <Navigate to="/login" replace state={{ from: { pathname: '/checkout' } }} />;
   }
 
   const handleChange = (e) => {
@@ -277,7 +275,7 @@ export default function Checkout() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3.5 rounded-lg disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center font-semibold text-base transition-colors shadow-sm hover:shadow-md"
+                    className="w-full bg-orange-500 hover:bg-orange-400 text-gray-950 py-3.5 rounded-lg disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center font-semibold text-base transition-colors shadow-sm hover:shadow-md"
                   >
                     {loading ? (
                       <>

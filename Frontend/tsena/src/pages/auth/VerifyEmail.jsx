@@ -1,7 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { authService } from '@/services/authService';
-import { Loader2, CheckCircle, XCircle } from 'lucide-react';
+import { Loader2, ArrowRight } from 'lucide-react';
+import AuthLayout, { AuthHeading } from '@/components/auth/AuthLayout';
+import { FormAlert } from '@/components/ui/Form';
+
+const bouton =
+  'w-full h-12 flex items-center justify-center gap-2 bg-gray-950 hover:bg-emerald-700 text-white font-semibold transition-colors';
 
 export default function VerifyEmail() {
   const { uid, token } = useParams();
@@ -19,43 +24,37 @@ export default function VerifyEmail() {
   }, [uid, token]);
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center px-4 py-8">
-      <div className="max-w-md w-full text-center space-y-6">
-        {state === 'loading' && (
-          <>
-            <Loader2 className="w-12 h-12 text-emerald-500 animate-spin mx-auto" />
-            <p className="text-gray-600">Vérification de votre adresse e-mail...</p>
-          </>
-        )}
-        {state === 'success' && (
-          <>
-            <CheckCircle className="w-14 h-14 text-emerald-500 mx-auto" />
-            <h1 className="text-2xl font-bold text-gray-900">Adresse e-mail confirmée</h1>
-            <p className="text-gray-600">Merci ! Votre adresse e-mail est maintenant vérifiée.</p>
-            <Link
-              to="/"
-              className="inline-block bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2.5 rounded-lg font-medium transition-colors"
-            >
-              Retour à l'accueil
-            </Link>
-          </>
-        )}
-        {state === 'error' && (
-          <>
-            <XCircle className="w-14 h-14 text-red-500 mx-auto" />
-            <h1 className="text-2xl font-bold text-gray-900">Lien invalide ou expiré</h1>
-            <p className="text-gray-600">
-              Connectez-vous puis demandez un nouvel e-mail de confirmation depuis « Modifier mon profil ».
-            </p>
-            <Link
-              to="/login"
-              className="inline-block bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2.5 rounded-lg font-medium transition-colors"
-            >
-              Se connecter
-            </Link>
-          </>
-        )}
-      </div>
-    </div>
+    <AuthLayout>
+      <AuthHeading title="Confirmation de l'e-mail" />
+
+      {state === 'loading' && (
+        <p className="flex items-center gap-3 text-gray-700" role="status">
+          <Loader2 className="w-5 h-5 text-emerald-600 animate-spin" aria-hidden="true" />
+          Vérification de votre adresse e-mail…
+        </p>
+      )}
+      {state === 'success' && (
+        <div className="space-y-6">
+          <FormAlert tone="success" title="Adresse e-mail confirmée">
+            Merci ! Votre adresse e-mail est maintenant vérifiée.
+          </FormAlert>
+          <Link to="/" className={bouton}>
+            Continuer mes achats
+            <ArrowRight className="w-5 h-5" aria-hidden="true" />
+          </Link>
+        </div>
+      )}
+      {state === 'error' && (
+        <div className="space-y-6">
+          <FormAlert title="Lien invalide ou expiré">
+            Connectez-vous puis demandez un nouvel e-mail de confirmation depuis « Modifier mon profil ».
+          </FormAlert>
+          <Link to="/login" className={bouton}>
+            Se connecter
+            <ArrowRight className="w-5 h-5" aria-hidden="true" />
+          </Link>
+        </div>
+      )}
+    </AuthLayout>
   );
 }

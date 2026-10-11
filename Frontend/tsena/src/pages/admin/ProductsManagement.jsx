@@ -18,7 +18,11 @@ import {
 import api from '@/services/api';
 import BlobImage from '@/components/ui/BlobImage';
 
+import { useToast } from '@/context/ToastContext';
+import { useConfirm } from '@/context/ConfirmContext';
 export default function ProductsManagement() {
+  const toast = useToast();
+  const confirm = useConfirm();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -48,15 +52,15 @@ export default function ProductsManagement() {
   };
 
   const handleDeleteProduct = async (slug) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) return;
+    if (!await confirm('Êtes-vous sûr de vouloir supprimer ce produit ?', { danger: true, confirmLabel: 'Supprimer' })) return;
 
     try {
       await api.delete(`/products/produits/${slug}/`);
       setProducts(products.filter(p => p.slug !== slug));
-      alert('Produit supprimé avec succès');
+      toast.success('Produit supprimé avec succès');
     } catch (err) {
       console.error('Erreur suppression produit:', err);
-      alert('Erreur lors de la suppression du produit');
+      toast.error('Erreur lors de la suppression du produit');
     }
   };
 

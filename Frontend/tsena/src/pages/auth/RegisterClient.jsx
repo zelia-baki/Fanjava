@@ -1,7 +1,11 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { UserPlus, User, Mail, Lock, Phone, MapPin, Loader2, Eye, EyeOff, Check } from 'lucide-react';
+import { useToast } from '@/context/ToastContext';
+import { User, Mail, Lock, Phone, ArrowRight } from 'lucide-react';
+import AuthLayout, { AuthHeading } from '@/components/auth/AuthLayout';
+import { Input, PasswordInput, Textarea, FormAlert, FormSection, SubmitButton } from '@/components/ui/Form';
+import { fieldError } from '@/utils/formErrors';
 
 export default function RegisterClient() {
   const [formData, setFormData] = useState({
@@ -21,317 +25,183 @@ export default function RegisterClient() {
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showPassword2, setShowPassword2] = useState(false);
   const { register } = useAuth();
+  const toast = useToast();
   const navigate = useNavigate();
+
+  const set = (field) => (e) => setFormData({ ...formData, [field]: e.target.value });
+  const setClient = (field, value) => setFormData({ ...formData, client: { ...formData.client, [field]: value } });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrors({});
 
     if (formData.password !== formData.password2) {
-      setErrors({ password2: ['Les mots de passe ne correspondent pas'] });
+      setErrors({ password2: ['Les mots de passe ne correspondent pas.'] });
       return;
     }
 
     setLoading(true);
-
     try {
       await register(formData);
-      alert('✅ Inscription réussie ! Vous pouvez maintenant vous connecter.');
-      navigate('/login');
+      toast.success('Compte créé ! Connectez-vous pour commencer vos achats.');
+      navigate('/login', { state: { username: formData.username } });
     } catch (err) {
-      setErrors(err.response?.data || { general: ['Erreur lors de l\'inscription'] });
+      setErrors(
+        err.response?.data && typeof err.response.data === 'object'
+          ? err.response.data
+          : { general: ["Erreur lors de l'inscription. Réessayez."] }
+      );
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
       setLoading(false);
     }
   };
 
-  const updateClient = (field, value) => {
-    setFormData({
-      ...formData,
-      client: { ...formData.client, [field]: value },
-    });
-  };
+  const general = fieldError(errors, 'general') || fieldError(errors, 'non_field_errors') || fieldError(errors, 'detail');
+  const hasErrors = Object.keys(errors).length > 0;
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center px-4 py-8 sm:py-12">
-      <div className="max-w-2xl w-full">
-        
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-emerald-100 rounded-2xl mb-4">
-            <UserPlus className="w-8 h-8 text-emerald-600" />
+    <AuthLayout wide>
+      <AuthHeading title="Créer un compte client">
+        Déjà inscrit ?{' '}
+        <Link to="/login" className="whitespace-nowrap font-semibold text-gray-950 underline underline-offset-4 decoration-emerald-500 decoration-2 hover:decoration-gray-950">
+          Connectez-vous
+        </Link>
+      </AuthHeading>
+
+      <form className="space-y-10" onSubmit={handleSubmit}>
+        {hasErrors && (
+          <FormAlert title="Certaines informations sont à corriger.">{general}</FormAlert>
+        )}
+
+        <FormSection step="01" title="Votre compte">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <Input
+              id="username"
+              label="Nom d'utilisateur"
+              icon={User}
+              required
+              autoComplete="username"
+              autoCapitalize="none"
+              spellCheck={false}
+              error={fieldError(errors, 'username')}
+              value={formData.username}
+              onChange={set('username')}
+            />
+            <Input
+              id="email"
+              type="email"
+              label="E-mail"
+              icon={Mail}
+              required
+              autoComplete="email"
+              placeholder="vous@exemple.com"
+              error={fieldError(errors, 'email')}
+              value={formData.email}
+              onChange={set('email')}
+            />
           </div>
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-            Inscription Client
-          </h2>
-          <p className="text-sm sm:text-base text-gray-600">
-            Créez votre compte et commencez vos achats
+          <Input
+            id="phone"
+            type="tel"
+            label="Téléphone"
+            icon={Phone}
+            autoComplete="tel"
+            inputMode="tel"
+            placeholder="+261 34 00 000 00"
+            error={fieldError(errors, 'phone')}
+            value={formData.phone}
+            onChange={set('phone')}
+          />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <PasswordInput
+              id="password"
+              label="Mot de passe"
+              icon={Lock}
+              required
+              minLength={8}
+              autoComplete="new-password"
+              hint="8 caractères minimum."
+              error={fieldError(errors, 'password')}
+              value={formData.password}
+              onChange={set('password')}
+            />
+            <PasswordInput
+              id="password2"
+              label="Confirmer le mot de passe"
+              icon={Lock}
+              required
+              autoComplete="new-password"
+              error={fieldError(errors, 'password2')}
+              value={formData.password2}
+              onChange={set('password2')}
+            />
+          </div>
+        </FormSection>
+
+        <FormSection
+          step="02"
+          title="Adresse de livraison"
+          description="Facultatif : vous pourrez aussi la saisir au moment de commander."
+        >
+          <Textarea
+            id="adresse_livraison"
+            label="Adresse"
+            rows={2}
+            autoComplete="street-address"
+            placeholder="Lot, rue, quartier…"
+            error={fieldError(errors, 'client', 'adresse_livraison')}
+            value={formData.client.adresse_livraison}
+            onChange={(e) => setClient('adresse_livraison', e.target.value)}
+          />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <Input
+              id="ville"
+              label="Ville"
+              autoComplete="address-level2"
+              placeholder="Antananarivo"
+              error={fieldError(errors, 'client', 'ville')}
+              value={formData.client.ville}
+              onChange={(e) => setClient('ville', e.target.value)}
+            />
+            <Input
+              id="code_postal"
+              label="Code postal"
+              autoComplete="postal-code"
+              inputMode="numeric"
+              placeholder="101"
+              error={fieldError(errors, 'client', 'code_postal')}
+              value={formData.client.code_postal}
+              onChange={(e) => setClient('code_postal', e.target.value)}
+            />
+          </div>
+          <label htmlFor="newsletter" className="flex items-start gap-3 p-4 border-2 border-gray-200 hover:border-gray-300 cursor-pointer transition-colors">
+            <input
+              id="newsletter"
+              type="checkbox"
+              checked={formData.client.newsletter}
+              onChange={(e) => setClient('newsletter', e.target.checked)}
+              className="mt-0.5 w-5 h-5 shrink-0 accent-emerald-600 cursor-pointer"
+            />
+            <span className="text-sm">
+              <span className="block font-semibold text-gray-950">Recevoir la newsletter</span>
+              <span className="block text-gray-600">Offres exclusives et nouveautés, sans spam.</span>
+            </span>
+          </label>
+        </FormSection>
+
+        <div className="space-y-4">
+          <SubmitButton loading={loading} loadingText="Création du compte…" icon={ArrowRight}>
+            Créer mon compte
+          </SubmitButton>
+          <p className="text-sm text-gray-500">
+            En créant un compte, vous acceptez nos{' '}
+            <Link to="/terms" className="underline underline-offset-2 hover:text-gray-950">CGU</Link> et notre{' '}
+            <Link to="/privacy" className="underline underline-offset-2 hover:text-gray-950">politique de confidentialité</Link>.
           </p>
         </div>
-
-        {/* Card formulaire */}
-        <div className="bg-white border border-gray-200 rounded-xl p-6 sm:p-8 space-y-6">
-          
-          {/* Formulaire */}
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            
-            {/* Erreur générale */}
-            {errors.general && (
-              <div className="bg-red-50 border border-red-200 text-red-600 p-4 rounded-lg text-sm">
-                {errors.general.join(', ')}
-              </div>
-            )}
-
-            {/* Section Compte */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-7 h-7 bg-emerald-100 rounded-lg flex items-center justify-center">
-                  <User className="w-4 h-4 text-emerald-600" />
-                </div>
-                <h3 className="font-semibold text-gray-900 text-sm sm:text-base">Informations du compte</h3>
-              </div>
-
-              {/* Username & Email */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nom d'utilisateur <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <User className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                      type="text"
-                      required
-                      value={formData.username}
-                      onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                      className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-                      placeholder="johndoe"
-                    />
-                  </div>
-                  {errors.username && (
-                    <p className="text-red-500 text-xs mt-1.5">{errors.username.join(', ')}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Mail className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                      type="email"
-                      required
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-                      placeholder="john@example.com"
-                    />
-                  </div>
-                  {errors.email && (
-                    <p className="text-red-500 text-xs mt-1.5">{errors.email.join(', ')}</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Phone */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Téléphone
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Phone className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-                    placeholder="+261 34 00 000 00"
-                  />
-                </div>
-                {errors.phone && (
-                  <p className="text-red-500 text-xs mt-1.5">{errors.phone.join(', ')}</p>
-                )}
-              </div>
-
-              {/* Passwords */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Mot de passe <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Lock className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      required
-                      minLength="8"
-                      value={formData.password}
-                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      className="block w-full pl-10 pr-12 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-                      placeholder="Min. 8 caractères"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-                    >
-                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                    </button>
-                  </div>
-                  {errors.password && (
-                    <p className="text-red-500 text-xs mt-1.5">{errors.password.join(', ')}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Confirmer <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Lock className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                      type={showPassword2 ? 'text' : 'password'}
-                      required
-                      value={formData.password2}
-                      onChange={(e) => setFormData({ ...formData, password2: e.target.value })}
-                      className="block w-full pl-10 pr-12 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-                      placeholder="Même mot de passe"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword2(!showPassword2)}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-                    >
-                      {showPassword2 ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                    </button>
-                  </div>
-                  {errors.password2 && (
-                    <p className="text-red-500 text-xs mt-1.5">{errors.password2.join(', ')}</p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Section Adresse */}
-            <div className="space-y-4 pt-4 border-t border-gray-200">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-7 h-7 bg-emerald-100 rounded-lg flex items-center justify-center">
-                  <MapPin className="w-4 h-4 text-emerald-600" />
-                </div>
-                <h3 className="font-semibold text-gray-900 text-sm sm:text-base">Adresse de livraison (optionnelle)</h3>
-              </div>
-
-              {/* Adresse */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Adresse complète
-                </label>
-                <textarea
-                  value={formData.client.adresse_livraison}
-                  onChange={(e) => updateClient('adresse_livraison', e.target.value)}
-                  rows="2"
-                  className="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors resize-none"
-                  placeholder="Lot, rue, quartier..."
-                />
-              </div>
-
-              {/* Ville & Code postal */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Ville
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.client.ville}
-                    onChange={(e) => updateClient('ville', e.target.value)}
-                    className="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-                    placeholder="Antananarivo"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Code postal
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.client.code_postal}
-                    onChange={(e) => updateClient('code_postal', e.target.value)}
-                    className="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-                    placeholder="101"
-                  />
-                </div>
-              </div>
-
-              {/* Newsletter */}
-              <div className="flex items-start gap-3 p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
-                <input
-                  type="checkbox"
-                  checked={formData.client.newsletter}
-                  onChange={(e) => updateClient('newsletter', e.target.checked)}
-                  className="h-5 w-5 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded mt-0.5 flex-shrink-0"
-                />
-                <div className="text-sm">
-                  <p className="font-medium text-gray-900">Recevoir la newsletter</p>
-                  <p className="text-xs text-gray-600 mt-0.5">Offres exclusives et nouveautés</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Submit button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full flex justify-center items-center gap-2 py-3 px-4 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-lg disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors shadow-sm"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  <span>Inscription en cours...</span>
-                </>
-              ) : (
-                <>
-                  <Check className="w-5 h-5" />
-                  <span>Créer mon compte</span>
-                </>
-              )}
-            </button>
-          </form>
-
-          {/* Login link */}
-          <div className="text-center pt-4 border-t border-gray-200">
-            <p className="text-sm text-gray-600">
-              Vous avez déjà un compte ?{' '}
-              <Link to="/login" className="text-emerald-600 hover:text-emerald-700 font-semibold">
-                Se connecter
-              </Link>
-            </p>
-          </div>
-        </div>
-
-        {/* Footer text */}
-        <p className="mt-6 text-center text-xs sm:text-sm text-gray-600 px-4">
-          En créant un compte, vous acceptez nos{' '}
-          <Link to="/terms" className="text-emerald-600 hover:text-emerald-700 underline">
-            CGU
-          </Link>
-        </p>
-      </div>
-    </div>
+      </form>
+    </AuthLayout>
   );
 }

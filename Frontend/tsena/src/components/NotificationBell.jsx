@@ -5,6 +5,7 @@ import { Bell, X, Check, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import notificationService from '@/services/notificationService';
 
+import NotificationTypeIcon from '@/components/ui/NotificationTypeIcon';
 export default function NotificationBell() {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -61,18 +62,6 @@ export default function NotificationBell() {
     }
   };
 
-  const getNotificationIcon = (type) => {
-    const icons = {
-      order: '🛒',
-      order_status: '📦',
-      stock: '⚠️',
-      payment: '💳',
-      review: '⭐',
-      account: '👤',
-      general: '📢'
-    };
-    return icons[type] || '📢';
-  };
 
   return (
     <div className="relative">
@@ -140,8 +129,8 @@ export default function NotificationBell() {
                     >
                       <div className="flex items-start">
                         {/* Icône */}
-                        <div className="text-2xl mr-3 flex-shrink-0">
-                          {getNotificationIcon(notif.type_notification)}
+                        <div className="mr-3">
+                          <NotificationTypeIcon type={notif.type_notification} />
                         </div>
 
                         {/* Contenu */}

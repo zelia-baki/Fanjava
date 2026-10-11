@@ -30,8 +30,12 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    // Un 401 sur la connexion = mauvais identifiants : la page doit afficher l'erreur,
+    // pas tenter un refresh puis recharger /login.
+    const isLoginRequest = originalRequest?.url?.includes('/users/login/');
+    const hasRefreshToken = Boolean(localStorage.getItem('refresh_token'));
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 401 && !originalRequest._retry && !isLoginRequest && hasRefreshToken) {
       originalRequest._retry = true;
 
       try {

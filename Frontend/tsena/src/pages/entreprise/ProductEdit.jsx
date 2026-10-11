@@ -5,7 +5,11 @@ import { ArrowLeft, Upload, X, Loader2, Save } from 'lucide-react';
 import api from '@/services/api';
 import BlobImage from '@/components/ui/BlobImage';
 
+import { useToast } from '@/context/ToastContext';
+import { useConfirm } from '@/context/ConfirmContext';
 export default function ProductEdit() {
+  const toast = useToast();
+  const confirm = useConfirm();
   const { slug } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -64,7 +68,7 @@ export default function ProductEdit() {
       setCategories(categoriesRes.data.results || categoriesRes.data);
     } catch (err) {
       console.error('Erreur chargement produit:', err);
-      alert('Erreur lors du chargement du produit');
+      toast.error('Erreur lors du chargement du produit');
       navigate('/entreprise/products');
     } finally {
       setLoading(false);
@@ -101,17 +105,17 @@ export default function ProductEdit() {
   };
 
   const removeExistingImage = async (imageId) => {
-    if (!window.confirm('Supprimer cette image ?')) return;
+    if (!await confirm('Supprimer cette image ?', { danger: true, confirmLabel: 'Supprimer' })) return;
 
     try {
       await api.delete(`/products/produits/${slug}/supprimer_image/`, {
         data: { image_id: imageId }
       });
       setExistingImages(prev => prev.filter(img => img.id !== imageId));
-      alert('Image supprimée');
+      toast.success('Image supprimée');
     } catch (err) {
       console.error('Erreur suppression image:', err);
-      alert('Erreur lors de la suppression');
+      toast.error('Erreur lors de la suppression');
     }
   };
 
@@ -163,7 +167,7 @@ export default function ProductEdit() {
         }
       });
 
-      alert('Produit mis à jour avec succès !');
+      toast.success('Produit mis à jour avec succès !');
       navigate('/entreprise/products');
     } catch (err) {
       console.error('Erreur mise à jour produit:', err);
@@ -174,9 +178,9 @@ export default function ProductEdit() {
           .filter(([cle]) => cle.startsWith('image_'))
           .map(([, valeur]) => [].concat(valeur).join(' '))
           .join('\n');
-        if (message) alert(message);
+        if (message) toast.error(message);
       } else {
-        alert('Erreur lors de la mise à jour du produit');
+        toast.error('Erreur lors de la mise à jour du produit');
       }
     } finally {
       setSaving(false);
@@ -417,7 +421,7 @@ export default function ProductEdit() {
                         <X className="w-4 h-4" />
                       </button>
                       {index === 0 && (
-                        <div className="absolute bottom-2 left-2 bg-orange-500 text-white text-xs px-2 py-1 rounded">
+                        <div className="absolute bottom-2 left-2 bg-orange-500 text-gray-950 text-xs px-2 py-1 rounded">
                           Principale
                         </div>
                       )}
@@ -464,7 +468,7 @@ export default function ProductEdit() {
                       >
                         <X className="w-4 h-4" />
                       </button>
-                      <div className="absolute bottom-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded">
+                      <div className="absolute bottom-2 left-2 bg-emerald-700 text-white text-xs px-2 py-1 rounded">
                         Nouvelle
                       </div>
                     </div>
@@ -526,7 +530,7 @@ export default function ProductEdit() {
               <button
                 type="submit"
                 disabled={saving}
-                className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center font-medium transition-colors"
+                className="px-6 py-2.5 bg-orange-500 hover:bg-orange-400 text-gray-950 rounded-lg disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center font-medium transition-colors"
               >
                 {saving ? (
                   <>

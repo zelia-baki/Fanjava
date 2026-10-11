@@ -4,7 +4,11 @@ import MainLayout from '@/layouts/MainLayout';
 import { Star, Loader2, MessageSquare, Trash2 } from 'lucide-react';
 import api from '@/services/api';
 
+import { useToast } from '@/context/ToastContext';
+import { useConfirm } from '@/context/ConfirmContext';
 export default function MyReviews() {
+  const toast = useToast();
+  const confirm = useConfirm();
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -25,17 +29,17 @@ export default function MyReviews() {
   };
 
   const handleDelete = async (avisId) => {
-    if (!window.confirm('Supprimer cet avis ?')) {
+    if (!await confirm('Supprimer cet avis ?', { danger: true, confirmLabel: 'Supprimer' })) {
       return;
     }
 
     try {
       await api.delete(`/products/avis/${avisId}/`);
-      alert('Avis supprimé !');
+      toast.success('Avis supprimé !');
       fetchMyReviews();
     } catch (err) {
       console.error('Erreur suppression:', err);
-      alert('Erreur lors de la suppression');
+      toast.error('Erreur lors de la suppression');
     }
   };
 
@@ -130,7 +134,7 @@ export default function MyReviews() {
               </p>
               <Link
                 to="/"
-                className="inline-block px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg font-medium transition-colors"
+                className="inline-block px-6 py-3 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg font-medium transition-colors"
               >
                 Découvrir des produits
               </Link>

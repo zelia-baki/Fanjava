@@ -82,7 +82,7 @@ export default function ClientDashboard() {
           {/* En-tête */}
           <div className="mb-8">
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-              Bienvenue, {user?.first_name || user?.username} 👋
+              Bienvenue, {user?.first_name || user?.username}
             </h1>
             <p className="text-gray-600 mt-2 text-sm sm:text-base">Voici un aperçu de votre compte</p>
           </div>
@@ -235,7 +235,7 @@ export default function ClientDashboard() {
                     <div className="min-w-0">
                       <p className="text-xs text-gray-600">Nom</p>
                       <p className="font-medium text-gray-900 text-sm truncate">
-                        {user?.first_name} {user?.last_name}
+                        {[user?.first_name, user?.last_name].filter(Boolean).join(' ') || user?.username}
                       </p>
                     </div>
                   </div>
@@ -255,7 +255,7 @@ export default function ClientDashboard() {
                 <div className="space-y-3">
                   <Link
                     to="/"
-                    className="block w-full bg-emerald-500 hover:bg-emerald-600 text-white text-center py-2.5 rounded-lg transition-colors font-medium text-sm"
+                    className="block w-full bg-emerald-700 hover:bg-emerald-800 text-white text-center py-2.5 rounded-lg transition-colors font-medium text-sm"
                   >
                     Parcourir les produits
                   </Link>

@@ -83,7 +83,7 @@ export default function MyOrders() {
               <p className="text-gray-600 mb-8">Vous n'avez pas encore passé de commande</p>
               <Link
                 to="/"
-                className="inline-block bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-3 rounded-lg font-medium transition-colors"
+                className="inline-block bg-emerald-700 hover:bg-emerald-800 text-white px-8 py-3 rounded-lg font-medium transition-colors"
               >
                 Découvrir nos produits
               </Link>
@@ -161,7 +161,7 @@ export default function MyOrders() {
                     <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200">
                       <Link
                         to={`/profile/orders/${order.id}`}
-                        className="flex items-center justify-center px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg font-medium transition-colors text-sm"
+                        className="flex items-center justify-center px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg font-medium transition-colors text-sm"
                       >
                         Voir les détails
                         <ChevronRight className="w-4 h-4 ml-1" />

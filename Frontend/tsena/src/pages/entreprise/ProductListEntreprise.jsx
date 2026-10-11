@@ -14,7 +14,11 @@ import {
 import api from '@/services/api';
 import BlobImage from '@/components/ui/BlobImage';
 
+import { useToast } from '@/context/ToastContext';
+import { useConfirm } from '@/context/ConfirmContext';
 export default function ProductListEntreprise() {
+  const toast = useToast();
+  const confirm = useConfirm();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -40,7 +44,7 @@ export default function ProductListEntreprise() {
   };
 
   const handleDelete = async (productSlug, productName) => {
-    if (!window.confirm(`Êtes-vous sûr de vouloir supprimer "${productName}" ?`)) {
+    if (!await confirm(`Êtes-vous sûr de vouloir supprimer "${productName}" ?`, { danger: true, confirmLabel: 'Supprimer' })) {
       return;
     }
 
@@ -48,10 +52,10 @@ export default function ProductListEntreprise() {
       setDeleteLoading(productSlug);
       await api.delete(`/products/produits/${productSlug}/`);
       setProducts(products.filter(p => p.slug !== productSlug));
-      alert('Produit supprimé avec succès !');
+      toast.success('Produit supprimé avec succès !');
     } catch (err) {
       console.error('Erreur suppression:', err);
-      alert('Erreur lors de la suppression du produit');
+      toast.error('Erreur lors de la suppression du produit');
     } finally {
       setDeleteLoading(null);
     }
@@ -104,7 +108,7 @@ export default function ProductListEntreprise() {
             </div>
             <Link
               to="/entreprise/products/create"
-              className="inline-flex items-center justify-center px-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition-colors"
+              className="inline-flex items-center justify-center px-4 py-2.5 bg-orange-500 hover:bg-orange-400 text-gray-950 rounded-lg font-medium transition-colors"
             >
               <Plus className="w-5 h-5 mr-2" />
               Nouveau produit
@@ -155,7 +159,7 @@ export default function ProductListEntreprise() {
               {!searchQuery && filterStatus === 'all' && (
                 <Link
                   to="/entreprise/products/create"
-                  className="inline-flex items-center px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition-colors"
+                  className="inline-flex items-center px-6 py-3 bg-orange-500 hover:bg-orange-400 text-gray-950 rounded-lg font-medium transition-colors"
                 >
                   <Plus className="w-5 h-5 mr-2" />
                   Créer un produit
@@ -370,7 +374,7 @@ export default function ProductListEntreprise() {
                         </Link>
                         <Link
                           to={`/entreprise/products/${product.slug}/edit`}
-                          className="flex items-center justify-center gap-1 px-3 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-xs font-medium transition-colors"
+                          className="flex items-center justify-center gap-1 px-3 py-2 bg-orange-500 hover:bg-orange-400 text-gray-950 rounded-lg text-xs font-medium transition-colors"
                         >
                           <Edit className="w-4 h-4" />
                           Modifier

@@ -16,7 +16,9 @@ import {
 } from 'lucide-react';
 import api from '@/services/api';
 
+import { useToast } from '@/context/ToastContext';
 export default function OrdersManagement() {
+  const toast = useToast();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -45,11 +47,11 @@ export default function OrdersManagement() {
       const response = await api.get(`/orders/commandes/${orderId}/`);
       setOrders(orders.map(order => (order.id === orderId ? response.data : order)));
       
-      alert('Statut mis à jour avec succès');
+      toast.success('Statut mis à jour avec succès');
     } catch (err) {
       console.error('Erreur mise à jour statut:', err);
       const detail = err.response?.data?.status || err.response?.data?.error;
-      alert(detail ? [].concat(detail).join(' ') : 'Erreur lors de la mise à jour du statut');
+      toast.error(detail ? [].concat(detail).join(' ') : 'Erreur lors de la mise à jour du statut');
       fetchOrders();
     }
   };

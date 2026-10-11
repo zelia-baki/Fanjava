@@ -55,7 +55,7 @@ export default function ProductCard({ product }) {
 
           <div className="absolute top-0 left-0 flex flex-col items-start">
             {enPromo && (
-              <span className="bg-orange-500 text-white text-xs font-bold px-2.5 py-1">
+              <span className="bg-orange-500 text-gray-950 text-xs font-bold px-2.5 py-1">
                 -{Math.round(((prixOriginal - prix) / prixOriginal) * 100)}%
               </span>
             )}

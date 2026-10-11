@@ -1,20 +1,20 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
+import PageLoader from '@/components/ui/PageLoader';
 
 export const ProtectedRoute = ({ children, userType }) => {
   const { user, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
-    return <div className="flex items-center justify-center min-h-screen">Chargement...</div>;
+    return <PageLoader />;
   }
 
   if (!user) {
-    return <Navigate to="/login" />;
+    // Mémorise la page demandée : la connexion y ramène ensuite
+    return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
-  // if (userType && user.user_type !== userType) {
-  //   return <Navigate to="/" />;
-  // }
   if (userType) {
     if (userType === 'client' && !user.is_client) {
       return <Navigate to="/" replace />;

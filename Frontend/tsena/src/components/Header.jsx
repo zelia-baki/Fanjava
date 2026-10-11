@@ -31,7 +31,7 @@ function CartLink({ count, onClick }) {
       <ShoppingCart className="w-6 h-6" />
       <span className="hidden xl:inline text-sm font-semibold">Panier</span>
       {count > 0 && (
-        <span className="absolute -top-2 left-4 bg-orange-500 text-white text-[11px] font-bold min-w-5 h-5 px-1 flex items-center justify-center">
+        <span className="absolute -top-2 left-4 bg-orange-500 text-gray-950 text-[11px] font-bold min-w-5 h-5 px-1 flex items-center justify-center">
           {count}
         </span>
       )}
@@ -193,7 +193,7 @@ export default function Header() {
                 <CartLink count={count} />
                 <Link
                   to="/register/client"
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-5 h-11 flex items-center transition-colors"
+                  className="bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-semibold px-5 h-11 flex items-center transition-colors"
                 >
                   Créer un compte
                 </Link>
@@ -291,10 +291,10 @@ export default function Header() {
                 <Link to="/login" onClick={closeMobileMenu} className="h-12 flex items-center justify-center border-2 border-gray-900 font-semibold text-gray-900">
                   Se connecter
                 </Link>
-                <Link to="/register/client" onClick={closeMobileMenu} className="h-12 flex items-center justify-center bg-emerald-600 text-white font-semibold">
+                <Link to="/register/client" onClick={closeMobileMenu} className="h-12 flex items-center justify-center bg-emerald-700 text-white font-semibold">
                   Créer un compte client
                 </Link>
-                <Link to="/register/entreprise" onClick={closeMobileMenu} className="h-12 flex items-center justify-center bg-orange-500 text-white font-semibold">
+                <Link to="/register/entreprise" onClick={closeMobileMenu} className="h-12 flex items-center justify-center bg-orange-500 text-gray-950 font-semibold">
                   Devenir vendeur
                 </Link>
               </div>
