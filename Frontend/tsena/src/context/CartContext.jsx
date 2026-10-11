@@ -4,33 +4,74 @@ import { useAuth } from './AuthContext';
 
 const CartContext = createContext(null);
 
+const PANIER_VIDE = { items: [], total: '0.00', nombre_items: 0 };
+
+function lirePanierLocal() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem('cart') || 'null');
+    if (!parsed) return PANIER_VIDE;
+    return { items: parsed.items || [], total: parsed.total || '0.00', nombre_items: parsed.nombre_items || 0 };
+  } catch {
+    return PANIER_VIDE;
+  }
+}
+
 export const CartProvider = ({ children }) => {
-  const [cart, setCart] = useState({ items: [], total: '0.00', nombre_items: 0 });
+  const [cart, setCart] = useState(PANIER_VIDE);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const { user, isAuthenticated } = useAuth();
+  // false tant que le panier initial n'est pas chargé : évite d'afficher « panier vide » trop tôt
+  const [ready, setReady] = useState(false);
+  const { user, loading: authLoading } = useAuth();
 
-  // Charger le panier depuis l'API au montage du composant
+  // Le panier serveur (/orders/panier/) est réservé aux comptes client ; la commande
+  // est créée à partir de lui. Les visiteurs (et autres comptes) gardent un panier local.
+  const isAuthenticated = Boolean(user?.is_client || user?.user_type === 'client');
+
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchCart();
-    } else {
-      // Si non connecté, utiliser le localStorage
-      const savedCart = localStorage.getItem('cart');
-      if (savedCart) {
-        try {
-          const parsed = JSON.parse(savedCart);
-          setCart({
-            items: parsed.items || [],
-            total: parsed.total || '0.00',
-            nombre_items: parsed.nombre_items || 0,
-          });
-        } catch (err) {
-          console.error('Erreur parsing localStorage cart:', err);
+    if (authLoading) return undefined;
+    let annule = false;
+
+    const charger = async () => {
+      if (!isAuthenticated) {
+        setCart(lirePanierLocal());
+        setReady(true);
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+      try {
+        // Transfère vers le serveur les articles ajoutés avant la connexion
+        const local = lirePanierLocal();
+        for (const item of local.items) {
+          try {
+            await orderService.addToCart(item.produit.id, item.quantite);
+          } catch (err) {
+            console.warn('Article non transféré :', item.produit?.nom, err.response?.data?.error);
+          }
+        }
+        if (local.items.length) localStorage.removeItem('cart');
+
+        const data = await orderService.getCart();
+        if (!annule) setCart(data);
+      } catch (err) {
+        console.error('Erreur chargement panier:', err);
+        if (!annule) setError(err.response?.data?.error || 'Erreur lors du chargement du panier');
+      } finally {
+        if (!annule) {
+          setLoading(false);
+          setReady(true);
         }
       }
-    }
-  }, [isAuthenticated]);
+    };
+
+    setReady(false);
+    charger();
+    return () => {
+      annule = true;
+    };
+  }, [isAuthenticated, authLoading]);
 
   // OPTIMISATION - Mémorisation des calculs
   const total = useMemo(() => {
@@ -236,38 +277,13 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  /**
-   * Synchroniser le panier localStorage avec l'API après connexion
-   */
-  const syncCartAfterLogin = async () => {
-    const savedCart = localStorage.getItem('cart');
-    if (!savedCart) {
-      await fetchCart();
-      return;
-    }
-
-    try {
-      const localCart = JSON.parse(savedCart);
-      if (localCart.items && localCart.items.length > 0) {
-        // Ajouter les items du localStorage à l'API
-        for (const item of localCart.items) {
-          await orderService.addToCart(item.produit.id, item.quantite);
-        }
-        localStorage.removeItem('cart');
-      }
-      await fetchCart();
-    } catch (err) {
-      console.error('Erreur sync panier:', err);
-      await fetchCart();
-    }
-  };
-
   return (
     <CartContext.Provider
       value={{
         cart: cart.items || [],
         cartData: cart,
         loading,
+        ready,
         error,
         addToCart,
         removeFromCart,
@@ -276,7 +292,6 @@ export const CartProvider = ({ children }) => {
         getTotal: () => total,
         getItemCount: () => itemCount,
         fetchCart,
-        syncCartAfterLogin,
       }}
     >
       {children}
